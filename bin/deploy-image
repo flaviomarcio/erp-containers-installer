@@ -1,31 +1,16 @@
 #!/bin/bash
 
-function log()
-{
-  FLG_1=${1}
-  FLG_2=${2}
-  if [[ ${FLG_1} == "-l" || ${FLG_1} == "-lv" || ${FLG_1} == "-lvs" ]]; then
-    if [[ ${FLG_2} != "" ]]; then
-      if [[ ${FLG_1} == "-l" && ${STACK_LOG} == 1 ]]; then
-        echo "  ${FLG_2}"
-      elif [[ ${FLG_1} == "-lv" && ${STACK_LOG_VERBOSE} == 1 ]]; then
-        echo "    ${FLG_2}"
-      elif [[ ${FLG_1} == "-lvs" && ${STACK_LOG_VERBOSE_SUPPER} == 1 ]]; then
-        echo "      ${FLG_2}"
-      fi
-    fi
-  elif [[ ${FLG_1} != "" ]]; then
-    echo ${FLG_1}
-  fi
-}
+. ${INSTALLER_DIR}/lib/util.sh
+. ${INSTALLER_DIR}/lib/util-prepare.sh
 
 function prepare()
 {
+  utilPrepareStack
   RUN_FILE="${STACK_BIN_DIR}/prepare-${APPLICATION_STACK}.env"
 
   if [[ -f ${RUN_FILE} ]]; then
-    log -lv "source ${RUN_FILE}"
-    source ${RUN_FILE};
+    log -lv "runSource ${RUN_FILE}"
+    runSource ${RUN_FILE}
   fi
 
   rm -rf ${BUILD_DIR}
@@ -33,7 +18,7 @@ function prepare()
   mkdir -p ${BUILD_APP_DIR}
   
   export APPLICATION_FILTER=app*.jar
-  export DOCKER_FILE_SRC=${STACK_APPLICATION_DOCKEFILE_DIR}/${DOCKER_FILE_NAME}
+  export DOCKER_FILE_SRC=${STACK_DOCKER_FILE_DIR}/${DOCKER_FILE_NAME}
   export DOCKER_FILE_DST=${BUILD_DIR}/Dockerfile
 }
 

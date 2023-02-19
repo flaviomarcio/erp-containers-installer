@@ -1,23 +1,6 @@
 #!/bin/bash
 
-function log()
-{
-  FLG_1=${1}
-  FLG_2=${2}
-  if [[ ${FLG_1} == "-l" || ${FLG_1} == "-lv" || ${FLG_1} == "-lvs" ]]; then
-    if [[ ${FLG_2} != "" ]]; then
-      if [[ ${FLG_1} == "-l" && ${STACK_LOG} == 1 ]]; then
-        echo "  ${FLG_2}"
-      elif [[ ${FLG_1} == "-lv" && ${STACK_LOG_VERBOSE} == 1 ]]; then
-        echo "    ${FLG_2}"
-      elif [[ ${FLG_1} == "-lvs" && ${STACK_LOG_VERBOSE_SUPPER} == 1 ]]; then
-        echo "      ${FLG_2}"
-      fi
-    fi
-  elif [[ ${FLG_1} != "" ]]; then
-    echo ${FLG_1}
-  fi
-}
+. ${INSTALLER_DIR}/lib/util.sh
 
 function run()
 {
@@ -27,8 +10,8 @@ function run()
       return 0;
   fi
   RUN_FILE=${DIR}/${STACK_ACTION}
-  log -lv "source ${RUN_FILE}"
-  source ${RUN_FILE} ${DIR}
+  log -lv "call ${RUN_FILE}"
+  ${RUN_FILE} ${DIR}
 }
 
 function select_data()
@@ -41,10 +24,10 @@ function select_data()
   select opt in "${options[@]}"
   do
     if [[ ${opt} == "back" ]]; then
-      return;
+      return 0;
     fi
     run
-    return;
+    return 0;
   done
 }
 

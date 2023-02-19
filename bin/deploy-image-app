@@ -1,31 +1,15 @@
 #!/bin/bash
 
-function log()
-{
-  FLG_1=${1}
-  FLG_2=${2}
-  if [[ ${FLG_1} == "-l" || ${FLG_1} == "-lv" || ${FLG_1} == "-lvs" ]]; then
-    if [[ ${FLG_2} != "" ]]; then
-      if [[ ${FLG_1} == "-l" && ${STACK_LOG} == 1 ]]; then
-        echo "  ${FLG_2}"
-      elif [[ ${FLG_1} == "-lv" && ${STACK_LOG_VERBOSE} == 1 ]]; then
-        echo "    ${FLG_2}"
-      elif [[ ${FLG_1} == "-lvs" && ${STACK_LOG_VERBOSE_SUPPER} == 1 ]]; then
-        echo "      ${FLG_2}"
-      fi
-    fi
-  elif [[ ${FLG_1} != "" ]]; then
-    echo ${FLG_1}
-  fi
-}
+. ${INSTALLER_DIR}/lib/util.sh
+. ${INSTALLER_DIR}/lib/util-build.sh
 
 function main()
 {
   ACTION_LIST=(deploy-image deploy-app)
   for ACTION in "${ACTION_LIST[@]}"
   do
-    log -lv "source ${STACK_RUN} ${ACTION} ${STACK_PROJECT}"
-    source ${STACK_RUN} ${ACTION} ${STACK_PROJECT}
+    log -lv "call buildPrepareProject ${ACTION} ${STACK_PROJECT}"
+    buildPrepareProject ${ACTION} ${STACK_PROJECT}
   done
 }
 

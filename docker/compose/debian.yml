@@ -1,0 +1,27 @@
+version: '3.9'
+   
+networks:
+  stack-inbound:
+    name: ${STACK_NETWORK_INBOUND}
+    external: true
+    
+services:
+  debian:
+    image: ${BUILD_IMAGE_DNS}
+    hostname: ${BUILD_DEPLOY_HOSTNAME}
+    environment:
+      - SERVER_CONTEXT_PATH=${BUILD_APP_CONTEXT_PATH}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${HOME}:/home-host
+      - ${STACK_APPLICATION_CONFIG_DIR}/debian/run:/opt/run
+    deploy:
+      mode: global
+      placement:
+        constraints:
+          - node.role==manager
+      restart_policy:
+        condition: on-failure
+    entrypoint: sh /opt/run
+    networks:
+      - stack-inbound

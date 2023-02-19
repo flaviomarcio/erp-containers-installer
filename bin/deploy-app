@@ -1,23 +1,6 @@
 #!/bin/bash
 
-function log()
-{
-  FLG_1=${1}
-  FLG_2=${2}
-  if [[ ${FLG_1} == "-l" || ${FLG_1} == "-lv" || ${FLG_1} == "-lvs" ]]; then
-    if [[ ${FLG_2} != "" ]]; then
-      if [[ ${FLG_1} == "-l" && ${STACK_LOG} == 1 ]]; then
-        echo "  ${FLG_2}"
-      elif [[ ${FLG_1} == "-lv" && ${STACK_LOG_VERBOSE} == 1 ]]; then
-        echo "    ${FLG_2}"
-      elif [[ ${FLG_1} == "-lvs" && ${STACK_LOG_VERBOSE_SUPPER} == 1 ]]; then
-        echo "      ${FLG_2}"
-      fi
-    fi
-  elif [[ ${FLG_1} != "" ]]; then
-    echo ${FLG_1}
-  fi
-}
+. ${INSTALLER_DIR}/lib/util.sh
 
 function prepare()
 {
@@ -29,11 +12,11 @@ function run()
 {
   RUN_FILE=${STACK_BIN_DIR}/prepare-${APPLICATION_STACK}.env
   if [[ -f ${RUN_FILE} ]]; then
-    source ${RUN_FILE};
+    runSource ${RUN_FILE}
   fi
 
-  RUN_FILE=${STACK_APPLICATION_BIN_DIR}/run-deploy-yml
-  source ${RUN_FILE}
+  RUN_FILE=${STACK_LIB_DIR}/run-deploy-compose
+  runSource ${RUN_FILE}
 }
 
 function main()

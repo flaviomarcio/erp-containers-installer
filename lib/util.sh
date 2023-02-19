@@ -24,32 +24,25 @@ function runSource()
 {
   RUN_FILE=$1
   if [[ ${RUN_FILE} == "" ]]; then
-    return;
-  fi
-  
-  if ! [[ -f ${RUN_FILE} ]]; then
-    #log -lv ">>>> source[${RUN_FILE}] invalid"
-    return;
-  fi
-
-  log -l "run: "$(basename ${RUN_FILE})
-  if ! [[ -f ${RUN_FILE} ]]; then
-    log -lv ">>>> source[${RUN_FILE}] ignored"
-    return;
-  fi
-  log -l ">>>> source ${RUN_FILE}"
-  chmod +x ${RUN_FILE}
-  if [[ ${STACK_LOG_VERBOSE_SUPER} == 1 ]]; then
-    source ${RUN_FILE}
+    log -lv ">>>> empty ${RUN_FILE}"
+  elif ! [[ -f ${RUN_FILE} ]]; then
+    log -lv ">>>> source[${RUN_FILE}] invalid"
   else
-    #echo $(source ${RUN_FILE})&>/dev/null
-    source ${RUN_FILE}
+    log -lv ">>>> source ${RUN_FILE}"
+    chmod +x ${RUN_FILE}
+    if [[ ${STACK_LOG_VERBOSE_SUPER} == 1 ]]; then
+      source ${RUN_FILE}
+    else
+      echo $(source ${RUN_FILE})&>/dev/null
+    fi
   fi
 }
 
 function makeDir()
 {
-  MAKE_DIR=$1
+  MAKE_DIR=${1}
+  MAKE_PARAM=${2}
+
   log -l "Making dir [${MAKE_DIR}]"
   if [[ ${MAKE_DIR} == "" ]]; then
     log -lvs ">>>> dir is empty"
@@ -59,10 +52,14 @@ function makeDir()
     log -lvs ">>>> dir exists [${MAKE_DIR}]"
     return;
   fi
+  
   log -lvs ">>>> mkdir -p ${MAKE_DIR}"
-  log -lvs ">>>> chmod 777 ${MAKE_DIR}"
   echo $(mkdir -p ${MAKE_DIR})&>/dev/null
-  echo $(chmod 777 ${MAKE_DIR})&>/dev/null
+
+  if [[ ${MAKE_PARAM} != "" ]]; then
+    log -lvs ">>>> chmod ${MAKE_PARAM} ${MAKE_DIR}"
+    echo $(chmod ${MAKE_PARAM} ${MAKE_DIR})&>/dev/null
+  fi
 }
 
 function copyFile(){
@@ -71,16 +68,13 @@ function copyFile(){
 
   log -lv "Copying ${SRC} to ${DST}"
   if [[ -f ${SRC} ]]; then
-    log -lvs ">>>> sources does not exists [${SRC}]"
-    return;
-  fi
-
-  if [[ -f ${DST} ]]; then
+    log -lvs ">>>> sources does not exists [${SRC}]" 
+  elif [[ -f ${DST} ]]; then
     log -lvs ">>>> [${DST}] override"
+  else
+    log -lvs "cp -r ${SRC} ${DST}"
+    cp -r ${SRC} ${DST}
   fi
-
-  log -lvs "cp -r ${SRC} ${DST}"
-  cp -r ${SRC} ${DST}
 }
 
 function copyFileIfNotExists(){
@@ -90,27 +84,16 @@ function copyFileIfNotExists(){
   log -lv "Copying ${SRC} to ${DST}"
   if ! [[ -f ${SRC} ]]; then
     log -lvs ">>>> sources does not exists [${SRC}]"
-    return;
-  fi
-
-  if [[ -f ${DST} ]]; then
+  elif [[ -f ${DST} ]]; then
     log -lvs ">>>> destine exists [${DST}]"
-    return;
+  else
+    log -lvs ">>>> cp -r ${SRC} ${DST}"
+    cp -r ${SRC} ${DST}
   fi
-
-  log -lvs ">>>> cp -r ${SRC} ${DST}"
-  cp -r ${SRC} ${DST}
 }
-
 
 function utilInitialize()
 {
-
-    export ROOT_DIR=${PWD}
-    export STACK_RUN=${ROOT_DIR}/run
-    export STACK_RUN_BIN=${ROOT_DIR}/bin
-    export STACK_RUN_LIB=${ROOT_DIR}/lib
-
   for PARAM in "$@" 
   do
     if [[ $PARAM == "-l" ]]; then
@@ -132,48 +115,47 @@ function utilInitialize()
   elif [[ ${STACK_LOG} == 1 ]]; then
     echo "Log enabled"
   fi
-
-  export PATH=${PATH}:${STACK_RUN_BIN}
 }
 
 function envsParserFile()
 {
   FILE=$1
   if ! [[ -f ${FILE} ]]; then
-    return;
-  fi;
+    return 0;
+  else
+    ENVSLIST=()
+    ENVSLIST+=($(printenv | grep STACK_ENVIRONMENT ))
+    ENVSLIST+=($(printenv | grep STACK_DOMAIN ))
+    ENVSLIST+=($(printenv | grep STACK_PROTOCOL ))
+    ENVSLIST+=($(printenv | grep STACK_SERVICE ))
+    ENVSLIST+=($(printenv | grep STACK_SERVICE_DNS ))
+    ENVSLIST+=($(printenv | grep STACK_RESOURCE ))
+    ENVSLIST+=($(printenv | grep STACK_NETWORK ))
+    ENVSLIST+=($(printenv | grep STACK_PROXY ))
+    ENVSLIST+=($(printenv | grep STACK_LOG ))
 
-  ENVSLIST=()
-  ENVSLIST+=($(printenv | grep STACK_ENVIRONMENT ))
-  ENVSLIST+=($(printenv | grep STACK_DOMAIN ))
-  ENVSLIST+=($(printenv | grep STACK_PROTOCOL ))
-  ENVSLIST+=($(printenv | grep STACK_SERVICE ))
-  ENVSLIST+=($(printenv | grep STACK_SERVICE_DNS ))
-  ENVSLIST+=($(printenv | grep STACK_RESOURCE ))
-  ENVSLIST+=($(printenv | grep STACK_NETWORK ))
-  ENVSLIST+=($(printenv | grep STACK_PROXY ))
-  ENVSLIST+=($(printenv | grep STACK_LOG ))
+    log -lvs "replace envs in ${FILE}"
+    for ENV in "${ENVSLIST[@]}"
+    do
+      if [[ ${STACK_LOG_VERBOSE_SUPER} == 1 ]]; then
+        log -lvs "ENV=${ENV}"
+      fi
+      ENV=(${ENV//=/ })
+      replace="\${${ENV[0]}}"
+      replacewith=${ENV[1]}
+      if [[ ${replace} == "" || ${replace} == "_" || ${replacewith} == ""  ]]; then
+        continue;
+      fi
 
-  log -lvs "replace envs in ${FILE}"
-  for ENV in "${ENVSLIST[@]}"
-  do
-    if [[ ${STACK_LOG_VERBOSE_SUPER} == 1 ]]; then
-      log -lvs "ENV=${ENV}"
-    fi
-    ENV=(${ENV//=/ })
-    replace="\${${ENV[0]}}"
-    replacewith=${ENV[1]}
-    if [[ ${replace} == "" || ${replace} == "_" || ${replacewith} == ""  ]]; then
-      continue;
-    fi
-
-    log -lvs "s/${replace}/${replacewith}/"
-    FILE_BACK=${FILE}-sed.bak
-    rm -rf ${FILE_BACK}
-    cp -r ${FILE} ${FILE_BACK}
-    echo $(sed -i "s/${replace}/${replacewith}/g" ${FILE})&>/dev/null
-  done
-  #cat $FILE;
+      log -lvs "s/${replace}/${replacewith}/"
+      FILE_BACK=${FILE}-sed.bak
+      rm -rf ${FILE_BACK}
+      cp -r ${FILE} ${FILE_BACK}
+      echo $(sed -i "s/${replace}/${replacewith}/g" ${FILE})&>/dev/null
+    done
+    #cat $FILE;
+    return 1;
+  fi
 }
 
 
@@ -183,11 +165,11 @@ function envsParserDir()
   export EXT=$2
 
   if [[ ${DIR} == "" || ${EXT} == "" ]]; then
-    return;
+    return 0;
   fi
 
   if ! [[ -d ${DIR} ]]; then
-    return;
+    return 0;
   fi
 
   log -lv "parser dir: ${DIR}"
@@ -199,4 +181,5 @@ function envsParserDir()
     fi
     envsParserFile ${FILE}
   done
+  return 1;
 }

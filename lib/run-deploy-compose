@@ -1,0 +1,46 @@
+#!/bin/bash
+
+. ${INSTALLER_DIR}/lib/util.sh
+
+function prepare()
+{
+  log -lv "mkdir -p ${BUILD_DIR}"
+  echo $(mkdir -p ${BUILD_DIR})>/dev/null
+
+  log -lv "mkdir -p ${BUILD_APP_DIR}"
+  echo $(mkdir -p ${BUILD_APP_DIR})>/dev/null
+}
+
+function run()
+{
+  echo $'\n'"Deploying stack:[${STACK_PROJECT}], image:[${BUILD_IMAGE_NAME}]"
+  echo "  DNS Service: ${BUILD_DEPLOY_HOSTNAME}"
+
+  CHECK=$(docker stack ls | grep ${DOCKER_STACK_NAME_FINAL})
+  if [[ ${CHECK} != "" ]]; then
+    log -lv "docker stack rm ${DOCKER_STACK_NAME_FINAL}"
+    if [[ ${STACK_LOG_VERBOSE} == 1 ]]; then
+      docker stack rm ${DOCKER_STACK_NAME_FINAL}
+    else
+      echo $(docker stack rm ${DOCKER_STACK_NAME_FINAL})&>/dev/null
+    fi    
+  fi
+
+  RUN_FILE_COMPOSE=${STACK_DOCKER_COMPOSE_DIR}/${DOCKER_STACK_FILE_NAME}
+
+  log -lv "docker stack deploy -c ${RUN_FILE_COMPOSE} ${DOCKER_STACK_NAME_FINAL}"
+  if [[ ${STACK_LOG_VERBOSE} == 1 ]]; then
+    docker stack deploy -c ${RUN_FILE_COMPOSE} ${DOCKER_STACK_NAME_FINAL}
+  else
+    echo $(docker stack deploy -c ${RUN_FILE_COMPOSE} ${DOCKER_STACK_NAME_FINAL})&>/dev/null
+  fi
+}
+
+function main()
+{
+  #cd ${STACK_APPLICATION_STACKS_DIR}
+  prepare
+  run
+}
+
+main

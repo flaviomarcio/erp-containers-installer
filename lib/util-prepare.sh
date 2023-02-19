@@ -1,112 +1,186 @@
 #!/bin/bash
 
-. ${PWD}/lib/util.sh
+. ${INSTALLER_DIR}/lib/util.sh
 
 function prepare()
-{
-    export PUBLIC_APPLICATIONS_DIR=${HOME}/applications
-    export PUBLIC_STORAGE_DIR=${PUBLIC_APPLICATIONS_DIR}/storage
-    export PUBLIC_LIB_DIR=${PUBLIC_APPLICATIONS_DIR}/lib
+{    
+  export PUBLIC_APPLICATIONS_DIR=${HOME}/applications
+  export PUBLIC_STORAGE_DIR=${PUBLIC_APPLICATIONS_DIR}/storage
+  export PUBLIC_LIB_DIR=${PUBLIC_APPLICATIONS_DIR}/lib
+  export PUBLIC_ENVIRONMENT_FILE=${PUBLIC_APPLICATIONS_DIR}/stack_envs
 
-    export STACK_DB_DROP=0
-    export STACK_DOMAIN=portela-professional.com.br
-    export STACK_ENVIRONMENT_FILE=${PUBLIC_APPLICATIONS_DIR}/stack_envs
+  export STACK_APPLICATIONS_DIR=${ROOT_DIR}/applications
+  export STACK_DB_DROP=0
+  export STACK_DOMAIN=portela-professional.com.br
 }
 
 function prepareEnvsPublic()
 {
-    if ! [[ -f ${STACK_ENVIRONMENT_FILE} ]]; then
-        log "Invalid public env: ${STACK_ENVIRONMENT_FILE}"
-        return;
-    fi
-    source ${STACK_ENVIRONMENT_FILE}
+  if ! [[ -f ${PUBLIC_ENVIRONMENT_FILE} ]]; then
+    log "Invalid public env: ${PUBLIC_ENVIRONMENT_FILE}"
+  else
+    runSource ${PUBLIC_ENVIRONMENT_FILE}
+  fi
 }
 
 function prepareEnvsDefault()
 {
+  if [[ ${QT_VERSION} == "" ]]; then
+      export QT_VERSION=6.4.2
+  fi
+  if [[ ${STACK_CPU_DEFAULT} == "" ]]; then
+      export STACK_CPU_DEFAULT=1
+  fi
+  if [[ ${STACK_MEMORY_DEFAULT} == "" ]]; then
+      export STACK_MEMORY_DEFAULT=1GB
+  fi
+  if [[ ${STACK_DEPLOY_NODE} == "" ]]; then
+      export STACK_DEPLOY_NODE="node.role==manager"
+  fi
+  if [[ ${STACK_DEPLOY_MODE} == "" ]]; then
+      export STACK_DEPLOY_MODE=replicated
+  fi
+  if [[ ${STACK_DEPLOY_REPLICAS} == "" ]]; then
+      export STACK_DEPLOY_REPLICAS=1
+  fi
+  if [[ ${STACK_ENVIRONMENT} == "" ]]; then
+      export STACK_ENVIRONMENT=testing
+  fi
+  if [[ ${STACK_DOMAIN} == "" ]]; then
+      export STACK_DNS=localhost
+  fi
+  if [[ ${STACK_TARGET} == "" ]]; then
+      export STACK_TARGET=company
+  fi
+}
 
-    if [[ ${ROOT_DIR} == "" ]]; then
-        export ROOT_DIR=${PWD}
-    fi
-
-    if [[ ${QT_VERSION} == "" ]]; then
-        export QT_VERSION=6.4.2
-    fi
-
-    if [[ ${STACK_BIN_DIR} == "" ]]; then
-        export STACK_BIN_DIR=${ROOT_DIR}/bin
-    fi
-
-    if [[ ${STACK_APPLICATIONS_DIR} == "" ]]; then
-        export STACK_APPLICATIONS_DIR=${ROOT_DIR}/applications
-    fi
-
-    if [[ ${STACK_CPU_DEFAULT} == "" ]]; then
-        export STACK_CPU_DEFAULT=1
-    fi
-
-    if [[ ${STACK_MEMORY_DEFAULT} == "" ]]; then
-        export STACK_MEMORY_DEFAULT=1GB
-    fi
-
-    if [[ ${STACK_DEPLOY_NODE} == "" ]]; then
-        export STACK_DEPLOY_NODE="node.role==manager"
-    fi
-
-    if [[ ${STACK_DEPLOY_MODE} == "" ]]; then
-        export STACK_DEPLOY_MODE=replicated
-    fi
-
-    if [[ ${STACK_DEPLOY_REPLICAS} == "" ]]; then
-        export STACK_DEPLOY_REPLICAS=1
-    fi
-
-    if [[ ${STACK_DEPLOY_VERSION} == "" ]]; then
-        export STACK_DEPLOY_VERSION=v1
-    fi
-
-    if [[ ${STACK_ENVIRONMENT} == "" ]]; then
-        export STACK_ENVIRONMENT=testing
-    fi
-
-    if [[ ${STACK_DOMAIN} == "" ]]; then
-        export STACK_DNS=localhost
-    fi
-
-    if [[ ${STACK_TARGET} == "" ]]; then
-        export STACK_TARGET=company
-    fi
-
-    if [[ ${STACK_NETWORK_INBOUND} == "" ]]; then
-        export STACK_NETWORK_INBOUND=${STACK_ENVIRONMENT}-${STACK_TARGET}-inbound
-    fi
-
-    export STACK_DEPLOY_NETWORK=${STACK_NETWORK_INBOUND}
-
-    if [[ ${STACK_REGISTRY_DNS} == "" ]]; then
-        export STACK_REGISTRY_DNS=${STACK_ENVIRONMENT}-${STACK_TARGET}-registry.${STACK_DOMAIN}:5000
-    fi
+function prepareEnvsFinal()
+{
+  export STACK_PREFIX=${STACK_ENVIRONMENT}-${STACK_TARGET}
+  export STACK_NETWORK_INBOUND=${STACK_PREFIX}-inbound
+  export STACK_REGISTRY_DNS=${STACK_PREFIX}-registry.${STACK_DOMAIN}:5000
 }
 
 function prepareEnvsDir()
 {
-    export STACK_APPLICATION_PROJECT_DIR=${STACK_APPLICATIONS_DIR}/projects
-    export STACK_APPLICATION_BIN_DIR=${STACK_APPLICATIONS_DIR}/bin
-    export STACK_APPLICATION_DB_DIR=${STACK_APPLICATIONS_DIR}/db
-    export STACK_APPLICATION_DATA_DIR=${STACK_APPLICATIONS_DIR}/data
-    export STACK_APPLICATION_DOCKEFILE_DIR=${STACK_APPLICATION_DATA_DIR}/dockerfiles
-    export STACK_APPLICATION_ENV_DIR=${STACK_APPLICATION_DATA_DIR}/envs
-    export STACK_APPLICATION_CONFIG_DIR=${STACK_APPLICATION_DATA_DIR}/conf
-    export STACK_APPLICATION_SOURCE_DIR=${STACK_APPLICATION_DATA_DIR}/source
-    export STACK_APPLICATION_YML_DIR=${STACK_APPLICATION_DATA_DIR}/yml
-    export STACK_RUN_PREPARE_ENVS=${STACK_APPLICATION_BIN_DIR}/run-prepare.env
+  export STACK_APPLICATION_PROJECT_DIR=${STACK_APPLICATIONS_DIR}/projects
+  export STACK_APPLICATION_DB_DIR=${STACK_APPLICATIONS_DIR}/db
+  export STACK_APPLICATION_DATA_DIR=${STACK_APPLICATIONS_DIR}/data
+  export STACK_APPLICATION_ENV_DIR=${STACK_APPLICATION_DATA_DIR}/envs
+  export STACK_APPLICATION_CONFIG_DIR=${STACK_APPLICATION_DATA_DIR}/conf
+  export STACK_APPLICATION_SOURCE_DIR=${STACK_APPLICATION_DATA_DIR}/source
+  export STACK_BIN_DIR=${INSTALLER_DIR}/bin
+  export STACK_LIB_DIR=${INSTALLER_DIR}/lib
+  export STACK_DOCKER_DIR=${INSTALLER_DIR}/docker
+  export STACK_DOCKER_FILE_DIR=${STACK_DOCKER_DIR}/dockerfiles
+  export STACK_DOCKER_COMPOSE_DIR=${STACK_DOCKER_DIR}/compose
 }
 
 
 function utilPrepareInit()
 {
-    prepare
-    prepareEnvsPublic
-    prepareEnvsDefault
-    prepareEnvsDir
+  prepare
+  prepareEnvsPublic
+  prepareEnvsDefault
+  prepareEnvsFinal
+  prepareEnvsDir
+}
+
+function __privateUtilBuildDefault()
+{
+  if [[ ${APPLICATION_NAME} == "" ]]; then
+    export APPLICATION_NAME=${STACK_PROJECT}
+  fi
+
+  APP_NAME=${STACK_PREFIX}-${APPLICATION_NAME}
+  export BUILD_DIR=${HOME}/build/${APP_NAME}
+  export BUILD_SOURCE_DIR=${BUILD_DIR}/src
+  export BUILD_APP_DIR=${BUILD_DIR}/app
+  export BUILD_APP_JAR=${BUILD_DIR}/app/app.jar
+  export BUILD_IMAGE_NAME=${APP_NAME}
+  export BUILD_IMAGE_DNS=${STACK_REGISTRY_DNS}/${BUILD_IMAGE_NAME}
+  export BUILD_DEPLOY_NETWORK=${STACK_NETWORK_INBOUND}
+  export BUILD_DEPLOY_REPLICAS=${STACK_DEPLOY_REPLICAS}
+  export BUILD_DEPLOY_MODE=${STACK_DEPLOY_MODE}
+  export BUILD_DEPLOY_NODE=${STACK_DEPLOY_NODE}
+  export BUILD_APP_ENV_FILE=${BUILD_DIR}/env_file.env
+  export BUILD_APP_BIN_SRC_DIR=${STACK_APPLICATION_SOURCE_DIR}/${APPLICATION_NAME}
+  export BUILD_DEPLOY_DNS=${${STACK_PREFIX}}-${APPLICATION_NAME}.${STACK_DOMAIN}
+
+  export BUILD_APP_LIB=
+  if [[ ${APPLICATION_STACK} == "qt-api" || ${APPLICATION_STACK} == "qt-srv" ]]; then
+    export BUILD_APP_LIB=${PUBLIC_LIB_DIR}/${QT_VERSION}
+  fi
+
+
+  if [[ ${APPLICATION_IMAGE} != "" ]]; then
+    export BUILD_IMAGE_DNS=${APPLICATION_IMAGE}
+  fi
+  
+  #${STACK_ENVIRONMENT}-${STACK_PROJECT}.${STACK_DOMAIN}
+
+  if [[ ${APPLICATION_DEPLOY_DNS} != "" ]]; then
+    export BUILD_DEPLOY_DNS=${APPLICATION_DEPLOY_DNS}
+  fi
+  
+  if [[ ${APPLICATION_PORT} == "" ]]; then
+    export APPLICATION_PORT=8080
+  fi
+  
+  
+  if [[ ${APPLICATION_DEPLOY_NODE} != "" ]]; then
+    export BUILD_DEPLOY_MODE=${APPLICATION_DEPLOY_NODE}
+  fi
+
+  if [[ ${APPLICATION_DEPLOY_REPLICAS} != "" ]]; then
+    export BUILD_DEPLOY_REPLICAS=${APPLICATION_DEPLOY_REPLICAS}
+  fi
+  
+  if [[ ${APPLICATION_NETWORK} != "" ]]; then
+    export BUILD_DEPLOY_NETWORK=${APPLICATION_NETWORK}
+  fi
+   
+  if [[ ${STACK_TARGET} != "" ]]; then
+    export BUILD_DEPLOY_HOSTNAME=${STACK_PREFIX}-${BUILD_DEPLOY_APP_NAME}
+  else
+    export BUILD_DEPLOY_HOSTNAME=${STACK_ENVIRONMENT}-${BUILD_DEPLOY_APP_NAME}
+  fi
+
+  if [[ ${APPLICATION_DATA_DIR} == "" ]]; then
+    export APPLICATION_DATA_DIR=${STACK_ENVIRONMENT}-${BUILD_DEPLOY_APP_NAME}
+  fi
+
+  export DOCKER_STACK_NAME_FINAL=${STACK_PREFIX}-${STACK_PROJECT}
+  export DOCKER_FILE_NAME=${APPLICATION_STACK}.dockerfile
+  export DOCKER_STACK_FILE_NAME=${APPLICATION_STACK}.yml
+
+  log -lv "mkdir -p ${BUILD_DIR}"
+  mkdir -p ${BUILD_DIR}
+}
+
+function __privateUtilBuildEnvs()
+{
+  ENV_LIST=(default.env ${APPLICATION_ENV_FILE})
+  for ENV_NAME in "${ENV_LIST[@]}"
+  do
+    ENV_FILE=${STACK_APPLICATION_ENV_DIR}/${ENV_NAME}
+    if ! [[ -f ${ENV_FILE} ]]; then
+      log -lvs "runSource ${ENV_FILE} not found"
+      continue;
+    fi  
+    runSource ${ENV_FILE}
+  done
+
+  echo "#join envs: ${APPLICATION_EXPORT_ENVS}" > ${BUILD_APP_ENV_FILE}
+  ENV_LIST=(${APPLICATION_EXPORT_ENVS})
+  for ENV_NAME in "${ENV_LIST[@]}"
+  do
+    env | grep "^${ENV_NAME}">>${BUILD_APP_ENV_FILE}
+  done
+}
+
+function utilPrepareStack()
+{
+    __privateUtilBuildDefault
+    __privateUtilBuildEnvs
 }
