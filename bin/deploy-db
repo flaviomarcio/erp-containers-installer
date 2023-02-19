@@ -1,0 +1,56 @@
+#!/bin/bash
+
+function log()
+{
+  FLG_1=${1}
+  FLG_2=${2}
+  if [[ ${FLG_1} == "-l" || ${FLG_1} == "-lv" || ${FLG_1} == "-lvs" ]]; then
+    if [[ ${FLG_2} != "" ]]; then
+      if [[ ${FLG_1} == "-l" && ${STACK_LOG} == 1 ]]; then
+        echo "  ${FLG_2}"
+      elif [[ ${FLG_1} == "-lv" && ${STACK_LOG_VERBOSE} == 1 ]]; then
+        echo "    ${FLG_2}"
+      elif [[ ${FLG_1} == "-lvs" && ${STACK_LOG_VERBOSE_SUPPER} == 1 ]]; then
+        echo "      ${FLG_2}"
+      fi
+    fi
+  elif [[ ${FLG_1} != "" ]]; then
+    echo ${FLG_1}
+  fi
+}
+
+function run()
+{
+  DIR=${STACK_APPLICATION_SOURCE_DIR}/${STACK_PROJECT}
+  if ! [[ -d ${DIR} ]]; then
+      echo "Invalid db for stack ${STACK_PROJECT}"
+      return 0;
+  fi
+  RUN_FILE=${DIR}/${STACK_ACTION}
+  log -lv "source ${RUN_FILE}"
+  source ${RUN_FILE} ${DIR}
+}
+
+function select_data()
+{
+  echo ""
+  
+  OPTDIR=${STACK_APPLICATION_DB_DIR}
+  options=(back contaner storage)    
+  PS3='Please select a local data: '
+  select opt in "${options[@]}"
+  do
+    if [[ ${opt} == "back" ]]; then
+      return;
+    fi
+    run
+    return;
+  done
+}
+
+function main()
+{
+  run
+}
+
+main

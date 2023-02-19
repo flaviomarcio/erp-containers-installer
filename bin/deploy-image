@@ -1,0 +1,124 @@
+#!/bin/bash
+
+function log()
+{
+  FLG_1=${1}
+  FLG_2=${2}
+  if [[ ${FLG_1} == "-l" || ${FLG_1} == "-lv" || ${FLG_1} == "-lvs" ]]; then
+    if [[ ${FLG_2} != "" ]]; then
+      if [[ ${FLG_1} == "-l" && ${STACK_LOG} == 1 ]]; then
+        echo "  ${FLG_2}"
+      elif [[ ${FLG_1} == "-lv" && ${STACK_LOG_VERBOSE} == 1 ]]; then
+        echo "    ${FLG_2}"
+      elif [[ ${FLG_1} == "-lvs" && ${STACK_LOG_VERBOSE_SUPPER} == 1 ]]; then
+        echo "      ${FLG_2}"
+      fi
+    fi
+  elif [[ ${FLG_1} != "" ]]; then
+    echo ${FLG_1}
+  fi
+}
+
+function prepare()
+{
+  RUN_FILE="${STACK_BIN_DIR}/prepare-${APPLICATION_STACK}.env"
+
+  if [[ -f ${RUN_FILE} ]]; then
+    log -lv "source ${RUN_FILE}"
+    source ${RUN_FILE};
+  fi
+
+  rm -rf ${BUILD_DIR}
+  mkdir -p ${BUILD_DIR}
+  mkdir -p ${BUILD_APP_DIR}
+  
+  export APPLICATION_FILTER=app*.jar
+  export DOCKER_FILE_SRC=${STACK_APPLICATION_DOCKEFILE_DIR}/${DOCKER_FILE_NAME}
+  export DOCKER_FILE_DST=${BUILD_DIR}/Dockerfile
+}
+
+
+function run()
+{ 
+   
+  if [[ -d ${BUILD_APP_BIN_SRC_DIR} ]]; then
+    rm -rf ${BUILD_APP_DIR}
+    cp -r ${BUILD_APP_BIN_SRC_DIR} ${BUILD_APP_DIR}
+  else
+    if [[ ${APPLICATION_GIT} != "" ]]; then
+      echo $'\n'"Cloning repository: [${APPLICATION_GIT}]"
+      rm -rf ${BUILD_SOURCE_DIR};
+      echo $(git clone ${APPLICATION_GIT} src)>/dev/null    
+      if [[ ${STACK_LOG_VERBOSE} == 1 ]]; then
+        git config pull.rebase false
+        git reset --hard
+        git checkout ${APPLICATION_GIT_BRANCH}
+        git pull origin ${APPLICATION_GIT_BRANCH}
+      else
+        echo $(git config pull.rebase false)>/dev/null
+        echo $(git reset --hard)>/dev/null
+        echo $(git checkout ${APPLICATION_GIT_BRANCH})>/dev/null
+        echo $(git pull origin ${APPLICATION_GIT_BRANCH})>/dev/null
+      fi
+
+      echo $'\n'"Building source [${BUILD_IMAGE_NAME}]"        
+      
+      log -lv "mvn clean install -DskipTests"
+      cd ${BUILD_SOURCE_DIR}
+      if [[ ${STACK_LOG_VERBOSE} == 1 ]]; then
+        mvn clean install -DskipTests
+      else
+        echo $(mvn clean install -DskipTests)>/dev/null
+      fi
+
+      cd ${ROOT_DIR}
+      rm -rf ${BUILD_APP_JAR};
+      export APPLICATION_JAR=$(find ${BUILD_APP_JAR} -name 'app*.jar')
+      log -lv "cp -r ${APPLICATION_JAR} ${BUILD_APP_JAR}"      
+      cp -r ${APPLICATION_JAR} ${BUILD_APP_JAR}
+    fi    
+  fi
+  
+  
+  echo $'\n'"Building docker image [${BUILD_IMAGE_NAME}]"
+  echo $(rm -rf ${DOCK+ER_FILE_DST})>/dev/null
+
+  if ! [[ -f ${DOCKER_FILE_SRC} ]]; then
+    echo $'\n'"Docker file not found [${DOCKER_FILE_SRC}]"
+  else
+    cp -r ${DOCKER_FILE_SRC} ${DOCKER_FILE_DST}
+    cd ${BUILD_DIR}
+    log -lv "docker build -t ${BUILD_IMAGE_NAME} ."
+    if [[ ${STACK_LOG_VERBOSE} == 1 ]]; then
+      docker build -t ${BUILD_IMAGE_NAME} . 
+    else
+      echo $(docker build -t ${BUILD_IMAGE_NAME} .)>/dev/null
+    fi
+    cd ${ROOT_DIR}
+
+    TAG_URL=${STACK_REGISTRY_DNS}/${BUILD_IMAGE_NAME}
+    
+    echo $'\n'"Sending docker image [${BUILD_IMAGE_NAME}] to registry"
+
+    if [[ ${STACK_LOG_VERBOSE_SUPER} == 1 ]]; then
+      docker image tag ${BUILD_IMAGE_NAME} ${TAG_URL}
+    else
+      echo $(docker image tag ${BUILD_IMAGE_NAME} ${TAG_URL})&>/dev/null
+    fi
+
+    log -lvs "docker push ${TAG_URL}"
+    if [[ ${STACK_LOG_VERBOSE_SUPER} == 1 ]]; then
+      docker push ${TAG_URL}
+    else
+      echo $(docker push ${TAG_URL})&>/dev/null
+    fi
+  fi  
+}
+
+function main()
+{
+  prepare
+  run
+}
+
+main

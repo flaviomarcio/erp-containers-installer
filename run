@@ -1,0 +1,137 @@
+#!/bin/bash
+
+. ${PWD}/lib/util.sh
+. ${PWD}/lib/util-prepare.sh
+
+function log()
+{
+  FLG_1=${1}
+  FLG_2=${2}
+  if [[ ${FLG_1} == "-l" || ${FLG_1} == "-lv" || ${FLG_1} == "-lvs" ]]; then
+    if [[ ${FLG_2} != "" ]]; then
+      if [[ ${FLG_1} == "-l" && ${STACK_LOG} == 1 ]]; then
+        echo "  ${FLG_2}"
+      elif [[ ${FLG_1} == "-lv" && ${STACK_LOG_VERBOSE} == 1 ]]; then
+        echo "    ${FLG_2}"
+      elif [[ ${FLG_1} == "-lvs" && ${STACK_LOG_VERBOSE_SUPPER} == 1 ]]; then
+        echo "      ${FLG_2}"
+      fi
+    fi
+  elif [[ ${FLG_1} != "" ]]; then
+    echo ${FLG_1}
+  fi
+}
+
+
+function prepare_project()
+{
+  log -l $'\n'"run::prepare_project(${STACK_ACTION},${STACK_PROJECT}):start"
+  export STACK_ACTION=${1}
+  export STACK_PROJECT=${2}
+  export STACK_APPLICATION_FILE=${STACK_APPLICATION_PROJECT_DIR}/${STACK_PROJECT}
+  if ! [[ -f ${STACK_APPLICATION_FILE} ]]; then
+    log -l "warn:project envs not found ${STACK_APPLICATION_FILE}"
+  else
+    log -l "source ${STACK_APPLICATION_FILE}"
+    source ${STACK_APPLICATION_FILE}
+  fi
+
+  log -l "source ${STACK_RUN_PREPARE_ENVS}"
+  source ${STACK_RUN_PREPARE_ENVS}
+
+  RUN_FILE=${STACK_APPLICATION_BIN_DIR}/run-prepare-${APPLICATION_STACK}.env
+  if [[ -f ${RUN_FILE} ]]; then      
+    log -l "source ${RUN_FILE}"
+    source ${RUN_FILE}
+  fi
+
+  log "Running ${STACK_ACTION}"
+  RUN_FILE=${STACK_BIN_DIR}/${STACK_ACTION}
+  chmod +x ${RUN_FILE}
+
+  log -l "source ${RUN_FILE}"
+  source ${RUN_FILE}
+  log -l $'\n'"run::prepare_project(${STACK_ACTION},${STACK_PROJECT}):finished"
+}
+
+function select_project()
+{
+  echo ""
+  
+  if [[ ${STACK_ACTION} == "deploy-db" || ${STACK_ACTION} == "deploy-db-drop"  ]]; then
+    OPTDIR=${STACK_APPLICATION_DB_DIR}
+  else
+    OPTDIR=${STACK_APPLICATION_PROJECT_DIR}
+  fi
+  options=(back $(ls ${OPTDIR}))    
+  PS3='Please select a project: '
+  select opt in "${options[@]}"
+  do
+    if [[ ${opt} == "back" ]]; then
+      return;
+    fi
+    prepare_project ${STACK_ACTION} ${opt}
+    return;
+  done
+}
+
+function select_action()
+{
+  echo ""
+  options=(quit $(ls ${STACK_BIN_DIR}))
+  PS3='Please select a action: '
+  select opt in "${options[@]}"
+  do
+    if [[ ${opt} == "quit" ]]; then
+      exit 0;
+    fi
+    export STACK_ACTION=${opt}
+    select_project
+    return;
+  done
+}
+
+function selectEnviroment()
+{
+  echo $'\n'"Environment menu"$'\n'
+  PS3="Choose a environment: "
+  
+  options=(testing development staging production quit)
+
+  select opt in "${options[@]}"
+  do
+    export STACK_ENVIRONMENT=${opt}
+    case $opt in
+        "development")
+          break
+            ;;
+        "testing")
+          break
+            ;;
+        "stating")
+          break
+            ;;
+        "production")
+          break
+            ;;
+        "quit")
+          break
+            ;;
+        *) echo "invalid option $opt";
+    esac
+  done
+  utilPrepareInit
+}
+
+function main()
+{
+  selectEnviroment
+  while :
+  do
+    prepare
+    select_action    
+  done
+}
+
+utilInitialize "$@"
+main

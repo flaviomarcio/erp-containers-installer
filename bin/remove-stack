@@ -1,0 +1,50 @@
+#!/bin/bash
+
+export ROOT_DIR=${PWD}
+
+function log()
+{
+  FLG_1=${1}
+  FLG_2=${2}
+  if [[ ${FLG_1} == "-l" || ${FLG_1} == "-lv" || ${FLG_1} == "-lvs" ]]; then
+    if [[ ${FLG_2} != "" ]]; then
+      if [[ ${FLG_1} == "-l" && ${STACK_LOG} == 1 ]]; then
+        echo "  ${FLG_2}"
+      elif [[ ${FLG_1} == "-lv" && ${STACK_LOG_VERBOSE} == 1 ]]; then
+        echo "    ${FLG_2}"
+      elif [[ ${FLG_1} == "-lvs" && ${STACK_LOG_VERBOSE_SUPPER} == 1 ]]; then
+        echo "      ${FLG_2}"
+      fi
+    fi
+  elif [[ ${FLG_1} != "" ]]; then
+    echo ${FLG_1}
+  fi
+}
+
+function select_project()
+{
+    echo ""    
+    OPTDIR=${STACK_APPLICATION_PROJECT_DIR}
+    options=(back $(ls ${OPTDIR}))    
+    PS3='Please select a project: '
+    select opt in "${options[@]}"
+    do
+        if [[ ${opt} == "back" ]]; then
+            return;
+        fi
+
+        log -lv "Removing ${DOCKER_STACK_NAME_FINAL}"
+        log -lv "docker stack rm $(docker stack rm $(docker stack ls | grep ${DOCKER_STACK_NAME_FINAL} | awk '{print $1}'))"        
+        echo $(docker stack rm $(docker stack rm $(docker stack ls | grep ${DOCKER_STACK_NAME_FINAL} | awk '{print $1}')))&>/dev/null
+
+
+        return;
+    done
+}
+
+function main()
+{
+    select_project
+}
+
+main

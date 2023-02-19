@@ -1,0 +1,44 @@
+#!/bin/bash
+
+function log()
+{
+  FLG_1=${1}
+  FLG_2=${2}
+  if [[ ${FLG_1} == "-l" || ${FLG_1} == "-lv" || ${FLG_1} == "-lvs" ]]; then
+    if [[ ${FLG_2} != "" ]]; then
+      if [[ ${FLG_1} == "-l" && ${STACK_LOG} == 1 ]]; then
+        echo "  ${FLG_2}"
+      elif [[ ${FLG_1} == "-lv" && ${STACK_LOG_VERBOSE} == 1 ]]; then
+        echo "    ${FLG_2}"
+      elif [[ ${FLG_1} == "-lvs" && ${STACK_LOG_VERBOSE_SUPPER} == 1 ]]; then
+        echo "      ${FLG_2}"
+      fi
+    fi
+  elif [[ ${FLG_1} != "" ]]; then
+    echo ${FLG_1}
+  fi
+}
+
+function run()
+{
+  export STACK_DB_DROP=1
+  log "Running ${STACK_ACTION}"
+  RUN_FILE=${STACK_BIN_DIR}/${STACK_ACTION}
+  chmod +x ${RUN_FILE}
+}
+
+function main()
+{
+  run
+}
+
+#PERIGOSO#PERIGOSO#PERIGOSO
+#PERIGOSO#PERIGOSO#PERIGOSO
+#main
+#PERIGOSO#PERIGOSO#PERIGOSO
+#PERIGOSO#PERIGOSO#PERIGOSO
+
+echo "--Desabilitado--"
+echo "--Desabilitado--"
+echo "--Desabilitado--"
+echo "--Desabilitado--"
