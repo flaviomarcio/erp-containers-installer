@@ -57,14 +57,14 @@ function buildProjectPull()
 
   if [[ ${STACK_LOG_VERBOSE} == 1 ]]; then
     git config pull.rebase false
-    git reset --hard
-    git checkout ${GIT_BRANCH}
-    git pull origin ${GIT_BRANCH}
+    # git reset --hard
+    # git checkout ${GIT_BRANCH}
+    # git pull origin ${GIT_BRANCH}
   else
     echo $(git config pull.rebase false)>/dev/null
-    echo $(git reset --hard)>/dev/null
-    echo $(git checkout ${GIT_BRANCH})>/dev/null
-    echo $(git pull origin ${GIT_BRANCH})>/dev/null
+    # echo $(git reset --hard)>/dev/null
+    # echo $(git checkout ${GIT_BRANCH})>/dev/null
+    # echo $(git pull origin ${GIT_BRANCH})>/dev/null
   fi
 
   if [[ -d ${BUILD_TEMP_SOURCE_DIR} ]]; then
