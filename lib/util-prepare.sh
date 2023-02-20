@@ -76,15 +76,18 @@ function __privateEnvsDir()
 
 function utilPrepareInit()
 {
+  logStart "utilPrepareInit"
   __privateEnvsPrepare
   __privateEnvsPublic
   __privateEnvsDefault
   __privateEnvsFinal
   __privateEnvsDir
+  logFinished "utilPrepareInit"
 }
 
 function __privateBuildDefault()
 {
+  logStart "__privateBuildDefault"
   if [[ ${APPLICATION_NAME} == "" ]]; then
     export APPLICATION_NAME=${STACK_PROJECT}
   fi
@@ -171,10 +174,13 @@ function __privateBuildDefault()
   makeDir ${BUILD_TEMP_DIR} 777
   makeDir ${APPLICATION_DEPLOY_DATA_DIR} 777
   makeDir ${APPLICATION_DEPLOY_BACKUP_DIR} 777
+  logFinished "__privateBuildDefault"
+  export;
 }
 
 function __privateBuildEnvs()
 {
+  logStart "__privateBuildEnvs"
   ENV_LIST=(default.env ${APPLICATION_ENV_FILES})
   for ENV_NAME in "${ENV_LIST[@]}"
   do
@@ -192,10 +198,13 @@ function __privateBuildEnvs()
   do
     env | grep "^${ENV_NAME}">>${BUILD_TEMP_APP_ENV_FILE}
   done
+  logFinished "__privateBuildEnvs"
 }
 
 function utilPrepareStack()
 {
-    __privateBuildDefault
-    __privateBuildEnvs
+  logStart "utilPrepareStack"
+  __privateBuildDefault
+  __privateBuildEnvs
+  logFinished "utilPrepareStack"
 }

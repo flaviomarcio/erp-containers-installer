@@ -1,9 +1,11 @@
 #!/bin/bash
 
 . ${INSTALLER_DIR}/lib/util.sh
+. ${INSTALLER_DIR}/lib/util-prepare.sh
 
 function main()
 {
+  utilPrepareStack
   RUN_FILE=${STACK_INSTALLER_BIN_DIR}/prepare-${APPLICATION_STACK}.env
   if [[ -f ${RUN_FILE} ]]; then
     runSource ${RUN_FILE}
