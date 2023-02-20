@@ -58,13 +58,17 @@ function deployApp()
     fi    
   fi
 
-  RUN_FILE_COMPOSE=${STACK_INSTALLER_DOCKER_COMPOSE_DIR}/${DOCKER_STACK_FILE_NAME}
+  COMPOSE_SRC=${STACK_INSTALLER_DOCKER_COMPOSE_DIR}/${DOCKER_STACK_FILE_NAME}
+  COMPOSE_DST=${BUILD_TEMP_SOURCE_DIR}/${DOCKER_STACK_FILE_NAME}
 
-  echo "docker stack deploy -c ${RUN_FILE_COMPOSE} ${APPLICATION_CONTAINER_NAME}"
+  rm -rf ${COMPOSE_DST}
+  cp -r ${COMPOSE_SRC} ${COMPOSE_DST}
+
+  echo "docker stack deploy -c ${DOCKER_STACK_FILE_NAME} ${APPLICATION_CONTAINER_NAME}"
   if [[ ${STACK_LOG_VERBOSE} == 1 ]]; then
-    docker stack deploy -c ${RUN_FILE_COMPOSE} ${APPLICATION_CONTAINER_NAME}
+    docker stack deploy -c ${COMPOSE_SRC} ${APPLICATION_CONTAINER_NAME}
   else
-    echo $(docker stack deploy -c ${RUN_FILE_COMPOSE} ${APPLICATION_CONTAINER_NAME})&>/dev/null
+    echo $(docker stack deploy -c ${COMPOSE_SRC} ${APPLICATION_CONTAINER_NAME})&>/dev/null
   fi
   logFinished "deployApp"
 }
