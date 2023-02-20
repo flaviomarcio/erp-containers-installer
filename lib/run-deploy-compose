@@ -4,16 +4,16 @@
 
 function prepare()
 {
-  log -lv "mkdir -p ${BUILD_DIR}"
-  echo $(mkdir -p ${BUILD_DIR})>/dev/null
+  log -lv "mkdir -p ${BUILD_TEMP_DIR}"
+  echo $(mkdir -p ${BUILD_TEMP_DIR})>/dev/null
 
-  log -lv "mkdir -p ${BUILD_APP_DIR}"
-  echo $(mkdir -p ${BUILD_APP_DIR})>/dev/null
+  log -lv "mkdir -p ${BUILD_TEMP_APP_DIR}"
+  echo $(mkdir -p ${BUILD_TEMP_APP_DIR})>/dev/null
 }
 
 function run()
 {
-  echo $'\n'"Deploying stack:[${STACK_PROJECT}], image:[${BUILD_IMAGE_NAME}]"
+  echo $'\n'"Deploying stack:[${STACK_PROJECT}], image:[${BUILD_DEPLOY_IMAGE_NAME}]"
   echo "  DNS Service: ${APPLICATION_DEPLOY_HOSTNAME}"
 
   CHECK=$(docker stack ls | grep ${APPLICATION_CONTAINER_NAME})

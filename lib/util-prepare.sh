@@ -33,12 +33,6 @@ function __privateEnvsDefault()
   if [[ ${STACK_MEMORY_DEFAULT} == "" ]]; then
       export STACK_MEMORY_DEFAULT=1GB
   fi
-  if [[ ${STACK_DEPLOY_NODE} == "" ]]; then
-      export STACK_DEPLOY_NODE="node.role==manager"
-  fi
-  if [[ ${STACK_DEPLOY_MODE} == "" ]]; then
-      export STACK_DEPLOY_MODE=replicated
-  fi
   if [[ ${STACK_DEPLOY_REPLICAS} == "" ]]; then
       export STACK_DEPLOY_REPLICAS=1
   fi
@@ -89,39 +83,50 @@ function utilPrepareInit()
   __privateEnvsDir
 }
 
-function __privateBuildApplication()
+function __privateBuildDefault()
 {
   if [[ ${APPLICATION_NAME} == "" ]]; then
     export APPLICATION_NAME=${STACK_PROJECT}
   fi
 
-  if [[ ${APPLICATION_PORT} == "" ]]; then
-    export APPLICATION_PORT=8080
-  fi
-}
+  export BUILD_DEPLOY_APP_NAME=${STACK_PREFIX}-${APPLICATION_NAME}
+  export BUILD_DEPLOY_MODE=replicated
+  export BUILD_DEPLOY_CONTEXT_PATH=/
+  export BUILD_DEPLOY_PORT=8080
+  export BUILD_DEPLOY_CONTAINER_NAME=${BUILD_DEPLOY_APP_NAME}
+  export BUILD_DEPLOY_DNS=${BUILD_DEPLOY_APP_NAME}.${STACK_DOMAIN}
+  export BUILD_DEPLOY_NODE="node.role==manager"
+  export BUILD_DEPLOY_IMAGE_NAME=${BUILD_DEPLOY_APP_NAME}
+  export BUILD_DEPLOY_IMAGE_DNS=${STACK_REGISTRY_DNS}/${BUILD_DEPLOY_IMAGE_NAME}
 
-function __privateBuildDefault()
-{
-  export BUILD_APP_DNS=${APPLICATION_CONTAINER_NAME}.${STACK_DOMAIN}
-  export BUILD_DEPLOY_CONTAINER_NAME=${STACK_PREFIX}-${APPLICATION_NAME}
-  export BUILD_DIR=${HOME}/build/${APPLICATION_CONTAINER_NAME}
-  export BUILD_SOURCE_DIR=${BUILD_DIR}/src
-  export BUILD_APP_DIR=${BUILD_DIR}/app
-  export BUILD_APP_JAR=${BUILD_DIR}/app/app.jar
-  export BUILD_IMAGE_NAME=${APPLICATION_CONTAINER_NAME}
-  export BUILD_IMAGE_DNS=${STACK_REGISTRY_DNS}/${BUILD_IMAGE_NAME}
-  export BUILD_APP_ENV_FILE=${BUILD_DIR}/env_file.env
-  export BUILD_APP_BIN_SRC_DIR=${STACK_APPLICATIONS_SOURCE_DIR}/${BUILD_DEPLOY_CONTAINER_NAME}
+  export BUILD_TEMP_DIR=${HOME}/build/${BUILD_DEPLOY_APP_NAME}
+  export BUILD_TEMP_SOURCE_DIR=${BUILD_TEMP_DIR}/src
+  export BUILD_TEMP_APP_DIR=${BUILD_TEMP_DIR}/app
+  export BUILD_TEMP_APP_JAR=${BUILD_TEMP_DIR}/app/app.jar
+  export BUILD_TEMP_APP_ENV_FILE=${BUILD_TEMP_DIR}/env_file.env
+  export BUILD_TEMP_APP_BIN_SRC_DIR=${STACK_APPLICATIONS_SOURCE_DIR}/${BUILD_DEPLOY_CONTAINER_NAME}
 
   export DOCKER_FILE_NAME=${APPLICATION_STACK}.dockerfile
   export DOCKER_STACK_FILE_NAME=${APPLICATION_STACK}.yml
   
+  if [[ ${APPLICATION_DEPLOY_PORT} == "" ]]; then
+    export APPLICATION_DEPLOY_PORT=${BUILD_DEPLOY_PORT}
+  fi
+
+  if [[ ${APPLICATION_DEPLOY_CONTEXT_PATH} == "" ]]; then
+    export APPLICATION_DEPLOY_CONTEXT_PATH=${BUILD_DEPLOY_CONTEXT_PATH}
+  fi
+
   if [[ ${APPLICATION_DEPLOY_DNS} == "" ]]; then
-    export APPLICATION_DEPLOY_DNS=${BUILD_APP_DNS}
+    export APPLICATION_DEPLOY_DNS=${BUILD_DEPLOY_DNS}
   fi
 
   if [[ ${APPLICATION_DEPLOY_IMAGE} == "" ]]; then
-    export APPLICATION_DEPLOY_IMAGE=${BUILD_IMAGE_DNS}
+    export APPLICATION_DEPLOY_IMAGE=${BUILD_DEPLOY_IMAGE_DNS}
+  fi  
+
+  if [[ ${APPLICATION_DEPLOY_IMAGE} == "" ]]; then
+    export APPLICATION_DEPLOY_IMAGE=${BUILD_TEMP_APP_ENV_FILE}
   fi  
 
   if [[ ${APPLICATION_DEPLOY_HOSTNAME} == "" ]]; then
@@ -133,25 +138,36 @@ function __privateBuildDefault()
   fi
   
   if [[ ${APPLICATION_DEPLOY_NODE} == "" ]]; then
-    export APPLICATION_DEPLOY_NODE=${STACK_DEPLOY_NODE}
+    export APPLICATION_DEPLOY_NODE=${BUILD_DEPLOY_NODE}
   fi
 
   if [[ ${APPLICATION_DEPLOY_REPLICAS} == "" ]]; then
     export APPLICATION_DEPLOY_REPLICAS=${STACK_DEPLOY_REPLICAS}
   fi
+  if [[ ${APPLICATION_DEPLOY_NETWORK_NAME} == "" ]]; then
+    export APPLICATION_DEPLOY_NETWORK_NAME=${STACK_NETWORK_INBOUND}
+  fi  
 
   export BUILD_DEPLOY_DATA_DIR=${STACK_APPLICATIONS_SOURCE_DIR}/${BUILD_DEPLOY_CONTAINER_NAME}
+  export BUILD_DEPLOY_DATA_INFO_DIR=${BUILD_DEPLOY_DATA_DIR}-info
+  export BUILD_DEPLOY_DATA_BACKUP_DIR=${BUILD_DEPLOY_DATA_DIR}-backup
   if [[ ${APPLICATION_DEPLOY_DATA_DIR} == "" ]]; then
-    export APPLICATION_DEPLOY_DATA_DIR=${BUILD_DEPLOY_DATA_DIR}
+    export APPLICATION_DEPLOY_DATA_DIR=${BUILD_DEPLOY_DATA_INFO_DIR}
+    export APPLICATION_DEPLOY_BACKUP_DIR=${BUILD_DEPLOY_DATA_BACKUP_DIR}
+  fi
+  
+  if [[ ${APPLICATION_DEPLOY_DATA_BK_DIR} == "" ]]; then
+    export APPLICATION_DEPLOY_DATA_BK_DIR=${BUILD_DEPLOY_DATA_BK_DIR}
   fi
 
-  log -lv "mkdir -p ${BUILD_DIR}"
-  mkdir -p ${BUILD_DIR}
+  makeDir ${BUILD_TEMP_DIR}
+  makeDir ${APPLICATION_DEPLOY_DATA_DIR} 777
+  makeDir ${APPLICATION_DEPLOY_BACKUP_DIR} 777
 }
 
 function __privateBuildEnvs()
 {
-  ENV_LIST=(default.env ${APPLICATION_ENV_FILE})
+  ENV_LIST=(default.env ${APPLICATION_ENV_FILES})
   for ENV_NAME in "${ENV_LIST[@]}"
   do
     ENV_FILE=${STACK_APPLICATIONS_ENV_DIR}/${ENV_NAME}
@@ -162,17 +178,16 @@ function __privateBuildEnvs()
     runSource ${ENV_FILE}
   done
 
-  echo "#join envs: ${APPLICATION_EXPORT_ENVS}" > ${BUILD_APP_ENV_FILE}
+  echo "#join envs: ${APPLICATION_EXPORT_ENVS}" > ${BUILD_TEMP_APP_ENV_FILE}
   ENV_LIST=(${APPLICATION_EXPORT_ENVS})
   for ENV_NAME in "${ENV_LIST[@]}"
   do
-    env | grep "^${ENV_NAME}">>${BUILD_APP_ENV_FILE}
+    env | grep "^${ENV_NAME}">>${BUILD_TEMP_APP_ENV_FILE}
   done
 }
 
 function utilPrepareStack()
 {
-    __privateBuildApplication
     __privateBuildDefault
     __privateBuildEnvs
 }

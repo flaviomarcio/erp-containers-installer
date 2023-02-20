@@ -13,26 +13,26 @@ function prepare()
     runSource ${RUN_FILE}
   fi
 
-  rm -rf ${BUILD_DIR}
-  mkdir -p ${BUILD_DIR}
-  mkdir -p ${BUILD_APP_DIR}
+  rm -rf ${BUILD_TEMP_DIR}
+  mkdir -p ${BUILD_TEMP_DIR}
+  mkdir -p ${BUILD_TEMP_APP_DIR}
   
   export APPLICATION_FILTER=app*.jar
   export DOCKER_FILE_SRC=${STACK_INSTALLER_DOCKER_FILE_DIR}/${DOCKER_FILE_NAME}
-  export DOCKER_FILE_DST=${BUILD_DIR}/Dockerfile
+  export DOCKER_FILE_DST=${BUILD_TEMP_DIR}/Dockerfile
 }
 
 
 function run()
 { 
    
-  if [[ -d ${BUILD_APP_BIN_SRC_DIR} ]]; then
-    rm -rf ${BUILD_APP_DIR}
-    cp -r ${BUILD_APP_BIN_SRC_DIR} ${BUILD_APP_DIR}
+  if [[ -d ${BUILD_TEMP_APP_BIN_SRC_DIR} ]]; then
+    rm -rf ${BUILD_TEMP_APP_DIR}
+    cp -r ${BUILD_TEMP_APP_BIN_SRC_DIR} ${BUILD_TEMP_APP_DIR}
   else
     if [[ ${APPLICATION_GIT} != "" ]]; then
       echo $'\n'"Cloning repository: [${APPLICATION_GIT}]"
-      rm -rf ${BUILD_SOURCE_DIR};
+      rm -rf ${BUILD_TEMP_SOURCE_DIR};
       echo $(git clone ${APPLICATION_GIT} src)>/dev/null    
       if [[ ${STACK_LOG_VERBOSE} == 1 ]]; then
         git config pull.rebase false
@@ -46,10 +46,10 @@ function run()
         echo $(git pull origin ${APPLICATION_GIT_BRANCH})>/dev/null
       fi
 
-      echo $'\n'"Building source [${BUILD_IMAGE_NAME}]"        
+      echo $'\n'"Building source [${BUILD_DEPLOY_IMAGE_NAME}]"        
       
       log -lv "mvn clean install -DskipTests"
-      cd ${BUILD_SOURCE_DIR}
+      cd ${BUILD_TEMP_SOURCE_DIR}
       if [[ ${STACK_LOG_VERBOSE} == 1 ]]; then
         mvn clean install -DskipTests
       else
@@ -57,38 +57,38 @@ function run()
       fi
 
       cd ${ROOT_DIR}
-      rm -rf ${BUILD_APP_JAR};
-      export APPLICATION_JAR=$(find ${BUILD_APP_JAR} -name 'app*.jar')
-      log -lv "cp -r ${APPLICATION_JAR} ${BUILD_APP_JAR}"      
-      cp -r ${APPLICATION_JAR} ${BUILD_APP_JAR}
+      rm -rf ${BUILD_TEMP_APP_JAR};
+      export APPLICATION_JAR=$(find ${BUILD_TEMP_APP_JAR} -name 'app*.jar')
+      log -lv "cp -r ${APPLICATION_JAR} ${BUILD_TEMP_APP_JAR}"      
+      cp -r ${APPLICATION_JAR} ${BUILD_TEMP_APP_JAR}
     fi    
   fi
   
   
-  echo $'\n'"Building docker image [${BUILD_IMAGE_NAME}]"
+  echo $'\n'"Building docker image [${BUILD_DEPLOY_IMAGE_NAME}]"
   echo $(rm -rf ${DOCK+ER_FILE_DST})>/dev/null
 
   if ! [[ -f ${DOCKER_FILE_SRC} ]]; then
     echo $'\n'"Docker file not found [${DOCKER_FILE_SRC}]"
   else
     cp -r ${DOCKER_FILE_SRC} ${DOCKER_FILE_DST}
-    cd ${BUILD_DIR}
-    log -lv "docker build -t ${BUILD_IMAGE_NAME} ."
+    cd ${BUILD_TEMP_DIR}
+    log -lv "docker build -t ${BUILD_DEPLOY_IMAGE_NAME} ."
     if [[ ${STACK_LOG_VERBOSE} == 1 ]]; then
-      docker build -t ${BUILD_IMAGE_NAME} . 
+      docker build -t ${BUILD_DEPLOY_IMAGE_NAME} . 
     else
-      echo $(docker build -t ${BUILD_IMAGE_NAME} .)>/dev/null
+      echo $(docker build -t ${BUILD_DEPLOY_IMAGE_NAME} .)>/dev/null
     fi
     cd ${ROOT_DIR}
 
-    TAG_URL=${STACK_REGISTRY_DNS}/${BUILD_IMAGE_NAME}
+    TAG_URL=${STACK_REGISTRY_DNS}/${BUILD_DEPLOY_IMAGE_NAME}
     
-    echo $'\n'"Sending docker image [${BUILD_IMAGE_NAME}] to registry"
+    echo $'\n'"Sending docker image [${BUILD_DEPLOY_IMAGE_NAME}] to registry"
 
     if [[ ${STACK_LOG_VERBOSE_SUPER} == 1 ]]; then
-      docker image tag ${BUILD_IMAGE_NAME} ${TAG_URL}
+      docker image tag ${BUILD_DEPLOY_IMAGE_NAME} ${TAG_URL}
     else
-      echo $(docker image tag ${BUILD_IMAGE_NAME} ${TAG_URL})&>/dev/null
+      echo $(docker image tag ${BUILD_DEPLOY_IMAGE_NAME} ${TAG_URL})&>/dev/null
     fi
 
     log -lvs "docker push ${TAG_URL}"

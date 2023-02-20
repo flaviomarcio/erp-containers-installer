@@ -2,7 +2,7 @@ version: '3.9'
    
 networks:
   stack-inbound:
-    name: ${STACK_NETWORK_INBOUND}
+    name: ${APPLICATION_DEPLOY_NETWORK_NAME}
     external: true
     
 services:
@@ -11,16 +11,16 @@ services:
     hostname: ${APPLICATION_DEPLOY_HOSTNAME}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ${POSTGRES_DATA}:/postgresql/pg/data
-      - ${POSTGRES_BACKUP}:/backup
+      - ${APPLICATION_DEPLOY_DATA_DIR}:/postgresql/pg/data
+      - ${APPLICATION_DEPLOY_BACKUP_DIR}:/postgresql/pg/backup
       - ${STACK_APPLICATIONS_CONFIG_DIR}/postgres/pg_hba.conf:/etc/postgresql/pg_hba.conf
-    #env_file:
-    #  - ${BUILD_APP_ENV_FILE}
+    env_file:
+     - ${APPLICATION_DEPLOY_ENV_FILE}
     environment:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     ports:
-      - target: 5432
+      - target: ${APPLICATION_DEPLOY_PORT}
         protocol: tcp
         mode: ingress
     deploy:

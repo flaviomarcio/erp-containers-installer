@@ -4,19 +4,18 @@ networks:
   stack-inbound:
     name: ${APPLICATION_DEPLOY_NETWORK_NAME}
     external: true
-    
+
 services:
-  debian:
+  api:
     image: ${APPLICATION_DEPLOY_IMAGE}
     hostname: ${APPLICATION_DEPLOY_HOSTNAME}
     env_file:
-     - ${APPLICATION_DEPLOY_ENV_FILE}
+      - ${APPLICATION_DEPLOY_ENV_FILE}
     environment:
       - SERVER_CONTEXT_PATH=${APPLICATION_DEPLOY_CONTEXT_PATH}
+      - SERVER_PORT=${APPLICATION_DEPLOY_PORT}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ${HOME}:/home-host
-      - ${STACK_APPLICATIONS_CONFIG_DIR}/debian/run:/opt/run
       - ${APPLICATION_DEPLOY_DATA_DIR}:/app/data
       - ${APPLICATION_DEPLOY_BACKUP_DIR}:/app/backup
     ports:
@@ -39,6 +38,5 @@ services:
         - "traefik.http.routers.${APPLICATION_NAME}.service=${APPLICATION_NAME}"
         - "traefik.http.services.${APPLICATION_NAME}.loadbalancer.server.port=${APPLICATION_DEPLOY_PORT}"
         - "traefik.docker.network=${APPLICATION_DEPLOY_NETWORK_NAME}"
-    entrypoint: sh /opt/run
     networks:
       - stack-inbound

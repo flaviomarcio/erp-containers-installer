@@ -27,7 +27,7 @@ function buildProjectPull()
   GIT_BRANCH=${2}
 
   echo $'\n'"Cloning repository: [${GIT_REPOSITORY}:${GIT_BRANCH}]"
-  rm -rf ${BUILD_SOURCE_DIR};
+  rm -rf ${BUILD_TEMP_SOURCE_DIR};
   echo $(git clone ${GIT_REPOSITORY} src)>/dev/null    
   if [[ ${STACK_LOG_VERBOSE} == 1 ]]; then
     git config pull.rebase false
@@ -41,7 +41,7 @@ function buildProjectPull()
     echo $(git pull origin ${GIT_BRANCH})>/dev/null
   fi
 
-  if [[ -d ${BUILD_SOURCE_DIR} ]]; then
+  if [[ -d ${BUILD_TEMP_SOURCE_DIR} ]]; then
     return 1;
   else
     return 0;
@@ -50,20 +50,20 @@ function buildProjectPull()
 
 function buildProjectSource()
 {
-  echo $'\n'"Building source [${BUILD_IMAGE_NAME}]"        
+  echo $'\n'"Building source [${BUILD_DEPLOY_IMAGE_NAME}]"        
   
   log -lv "mvn clean install -DskipTests"
-  cd ${BUILD_SOURCE_DIR}
+  cd ${BUILD_TEMP_SOURCE_DIR}
   if [[ ${STACK_LOG_VERBOSE} == 1 ]]; then
     mvn clean install -DskipTests
   else
     echo $(mvn clean install -DskipTests)>/dev/null
   fi
   cd ${ROOT_DIR}
-  rm -rf ${BUILD_APP_JAR};
-  export APPLICATION_JAR=$(find ${BUILD_APP_JAR} -name 'app*.jar')
-  log -lv "cp -r ${APPLICATION_JAR} ${BUILD_APP_JAR}"      
-  cp -r ${APPLICATION_JAR} ${BUILD_APP_JAR}
+  rm -rf ${BUILD_TEMP_APP_JAR};
+  export APPLICATION_JAR=$(find ${BUILD_TEMP_APP_JAR} -name 'app*.jar')
+  log -lv "cp -r ${APPLICATION_JAR} ${BUILD_TEMP_APP_JAR}"      
+  cp -r ${APPLICATION_JAR} ${BUILD_TEMP_APP_JAR}
 }
 
 function buildDockerFile()
@@ -78,7 +78,7 @@ function buildDockerFile()
     return 1;
   else
     cp -r ${FILE_SRC} ${FILE_DST}
-    cd ${BUILD_DIR}
+    cd ${BUILD_TEMP_DIR}
     log -lv "docker build -t ${IMAGE_NAME} ."
     if [[ ${STACK_LOG_VERBOSE} == 1 ]]; then
       docker build -t ${IMAGE_NAME} . 
@@ -110,15 +110,15 @@ function buildRegistryPush()
 
 function buildRegistryImage()
 {
-  if [[ -d ${BUILD_APP_BIN_SRC_DIR} ]]; then
-    log "Invalid \${BUILD_APP_BIN_SRC_DIR}:${BUILD_APP_BIN_SRC_DIR}"
-    rm -rf ${BUILD_APP_DIR}
-    cp -r ${BUILD_APP_BIN_SRC_DIR} ${BUILD_APP_DIR}
+  if [[ -d ${BUILD_TEMP_APP_BIN_SRC_DIR} ]]; then
+    log "Invalid \${BUILD_TEMP_APP_BIN_SRC_DIR}:${BUILD_TEMP_APP_BIN_SRC_DIR}"
+    rm -rf ${BUILD_TEMP_APP_DIR}
+    cp -r ${BUILD_TEMP_APP_BIN_SRC_DIR} ${BUILD_TEMP_APP_DIR}
   elif [[ -f ${DOCKER_FILE_SRC} ]]; then
-    buildDockerFile ${BUILD_IMAGE_NAME} ${DOCKER_FILE_SRC} ${DOCKER_FILE_DST}
-    buildRegistryPush ${BUILD_IMAGE_NAME}
+    buildDockerFile ${BUILD_DEPLOY_IMAGE_NAME} ${DOCKER_FILE_SRC} ${DOCKER_FILE_DST}
+    buildRegistryPush ${BUILD_DEPLOY_IMAGE_NAME}
   elif buildProjectPull ${APPLICATION_GIT} ${APPLICATION_GIT_BRANCH}; then
-    buildProjectSource ${BUILD_SOURCE_DIR}
+    buildProjectSource ${BUILD_TEMP_SOURCE_DIR}
   else
     log "Invalid build mode"
     return 1;   
