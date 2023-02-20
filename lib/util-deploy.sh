@@ -67,11 +67,11 @@ function deployApp()
   pwd
   ls -l 
 
-  echo "docker stack deploy -c ${COMPOSE_SRC} ${APPLICATION_CONTAINER_NAME}"
+  echo "docker stack deploy -c ${COMPOSE_DST} ${APPLICATION_CONTAINER_NAME}"
   if [[ ${STACK_LOG_VERBOSE} == 1 ]]; then
-    docker stack deploy -c ${COMPOSE_SRC} ${APPLICATION_CONTAINER_NAME}
+    docker stack deploy -c ${COMPOSE_DST} ${APPLICATION_CONTAINER_NAME}
   else
-    echo $(docker stack deploy -c ${COMPOSE_SRC} ${APPLICATION_CONTAINER_NAME})&>/dev/null
+    echo $(docker stack deploy -c ${COMPOSE_DST} ${APPLICATION_CONTAINER_NAME})&>/dev/null
   fi
   logFinished "deployApp"
 }
