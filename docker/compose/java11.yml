@@ -7,8 +7,8 @@ networks:
 
 services:
   api:
-    image: ${BUILD_IMAGE_DNS}
-    hostname: ${APPLICATION_HOSTNAME}
+    image: ${APPLICATION_DEPLOY_IMAGE}
+    hostname: ${APPLICATION_DEPLOY_HOSTNAME}
     env_file:
       - ${BUILD_APP_ENV_FILE}
     environment:
@@ -20,10 +20,10 @@ services:
       - ${BUILD_APP_EXPOSE_PORT}
     deploy:
       mode: ${BUILD_DEPLOY_MODE}
-      replicas: ${BUILD_DEPLOY_REPLICAS}
+      replicas: ${APPLICATION_DEPLOY_REPLICAS}
       placement:
         constraints:
-          - ${BUILD_DEPLOY_NODE}
+          - ${APPLICATION_DEPLOY_NODE}
       update_config:
         parallelism: 1
         delay: 10s
@@ -33,6 +33,6 @@ services:
           - "traefik.http.routers.${APPLICATION_NAME}.rule=Host(`${BUILD_DEPLOY_DNS}`)"
           - "traefik.http.routers.${APPLICATION_NAME}.service=${BUILD_DEPLOY_APP_NAME}"
           - "traefik.http.services.${APPLICATION_NAME}.loadbalancer.server.port=${BUILD_APP_EXPOSE_PORT}"
-          - "traefik.docker.network=${BUILD_DEPLOY_NETWORK}"
+          - "traefik.docker.network=${STACK_NETWORK_INBOUND}"
     networks:
       - stack-inbound

@@ -7,8 +7,8 @@ networks:
     
 services:
   postgres:
-    image: postgres
-    hostname: ${BUILD_DEPLOY_HOSTNAME}
+    image: ${APPLICATION_DEPLOY_IMAGE}
+    hostname: ${APPLICATION_DEPLOY_HOSTNAME}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ${POSTGRES_DATA}:/postgresql/pg/data
@@ -20,16 +20,9 @@ services:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     ports:
-      - "5432"
-      - "${POSTGRES_EXPOSE_PORT}:5432"
-      # - target: 5432
-      #   published: ${POSTGRES_EXPOSE_PORT}
-      #   protocol: tcp
-      #   mode: host
-      # - target: 5432
-      #   published: ${POSTGRES_EXPOSE_PORT}
-      #   protocol: tcp
-      #   mode: ingresso
+      - target: 5432
+        protocol: tcp
+        mode: ingress
     deploy:
       mode: global
       placement:

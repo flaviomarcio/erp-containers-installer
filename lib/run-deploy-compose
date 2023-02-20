@@ -14,7 +14,7 @@ function prepare()
 function run()
 {
   echo $'\n'"Deploying stack:[${STACK_PROJECT}], image:[${BUILD_IMAGE_NAME}]"
-  echo "  DNS Service: ${BUILD_DEPLOY_HOSTNAME}"
+  echo "  DNS Service: ${APPLICATION_DEPLOY_HOSTNAME}"
 
   CHECK=$(docker stack ls | grep ${APPLICATION_CONTAINER_NAME})
   if [[ ${CHECK} != "" ]]; then

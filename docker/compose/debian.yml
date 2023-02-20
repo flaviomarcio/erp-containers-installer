@@ -7,8 +7,8 @@ networks:
     
 services:
   debian:
-    image: ${BUILD_IMAGE_DNS}
-    hostname: ${APPLICATION_HOSTNAME}
+    image: ${APPLICATION_DEPLOY_IMAGE}
+    hostname: ${APPLICATION_DEPLOY_HOSTNAME}
     environment:
       - SERVER_CONTEXT_PATH=${BUILD_APP_CONTEXT_PATH}
     volumes:
