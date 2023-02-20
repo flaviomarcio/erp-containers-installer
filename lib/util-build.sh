@@ -111,10 +111,11 @@ function buildRegistryPush()
 function buildRegistryImage()
 {
   if [[ -d ${BUILD_TEMP_APP_BIN_SRC_DIR} ]]; then
-    log "Invalid \${BUILD_TEMP_APP_BIN_SRC_DIR}:${BUILD_TEMP_APP_BIN_SRC_DIR}"
     rm -rf ${BUILD_TEMP_APP_DIR}
     cp -r ${BUILD_TEMP_APP_BIN_SRC_DIR} ${BUILD_TEMP_APP_DIR}
-  elif [[ -f ${DOCKER_FILE_SRC} ]]; then
+  fi
+  
+  if [[ -f ${DOCKER_FILE_SRC} ]]; then
     buildDockerFile ${BUILD_DEPLOY_IMAGE_NAME} ${DOCKER_FILE_SRC} ${DOCKER_FILE_DST}
     buildRegistryPush ${BUILD_DEPLOY_IMAGE_NAME}
   elif buildProjectPull ${APPLICATION_GIT} ${APPLICATION_GIT_BRANCH}; then

@@ -41,7 +41,12 @@ function runSource()
 function makeDir()
 {
   MAKE_DIR=${1}
-  MAKE_PARAM=${2}
+  MAKE_PERMISSION=${2}
+
+  if [[ ${MAKE_DIR} == "" || ${MAKE_PERMISSION} == "" ]]; then
+    log "Invalid parameters: MAKE_DIR == ${MAKE_DIR}, MAKE_PERMISSION == ${MAKE_PERMISSION} "
+    return;
+  fi
 
   log -l "Making dir [${MAKE_DIR}]"
   if [[ ${MAKE_DIR} == "" ]]; then
@@ -56,9 +61,9 @@ function makeDir()
   log -lvs ">>>> mkdir -p ${MAKE_DIR}"
   echo $(mkdir -p ${MAKE_DIR})&>/dev/null
 
-  if [[ ${MAKE_PARAM} != "" ]]; then
-    log -lvs ">>>> chmod ${MAKE_PARAM} ${MAKE_DIR}"
-    echo $(chmod ${MAKE_PARAM} ${MAKE_DIR})&>/dev/null
+  if [[ ${MAKE_PERMISSION} != "" ]]; then
+    log -lvs ">>>> chmod ${MAKE_PERMISSION} ${MAKE_DIR}"
+    echo $(chmod ${MAKE_PERMISSION} ${MAKE_DIR})&>/dev/null
   fi
 }
 

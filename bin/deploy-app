@@ -2,13 +2,7 @@
 
 . ${INSTALLER_DIR}/lib/util.sh
 
-function prepare()
-{
-  echo $(mkdir -p ${BUILD_TEMP_DIR})>/dev/null
-  echo $(mkdir -p ${BUILD_TEMP_APP_DIR})>/dev/null
-}
-
-function run()
+function main()
 {
   RUN_FILE=${STACK_INSTALLER_BIN_DIR}/prepare-${APPLICATION_STACK}.env
   if [[ -f ${RUN_FILE} ]]; then
@@ -17,12 +11,6 @@ function run()
 
   RUN_FILE=${STACK_INSTALLER_LIB_DIR}/run-deploy-compose
   runSource ${RUN_FILE}
-}
-
-function main()
-{
-  prepare
-  run
 }
 
 main

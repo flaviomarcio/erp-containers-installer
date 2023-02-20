@@ -14,8 +14,8 @@ function prepare()
   fi
 
   rm -rf ${BUILD_TEMP_DIR}
-  mkdir -p ${BUILD_TEMP_DIR}
-  mkdir -p ${BUILD_TEMP_APP_DIR}
+  makeDir ${BUILD_TEMP_DIR} 644
+  makeDir ${BUILD_TEMP_APP_DIR} 644
   
   export APPLICATION_FILTER=app*.jar
   export DOCKER_FILE_SRC=${STACK_INSTALLER_DOCKER_FILE_DIR}/${DOCKER_FILE_NAME}
