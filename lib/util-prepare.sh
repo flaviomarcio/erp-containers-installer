@@ -175,7 +175,6 @@ function __privateBuildDefault()
   makeDir ${APPLICATION_DEPLOY_DATA_DIR} 777
   makeDir ${APPLICATION_DEPLOY_BACKUP_DIR} 777
   logFinished "__privateBuildDefault"
-  export;
 }
 
 function __privateBuildEnvs()
