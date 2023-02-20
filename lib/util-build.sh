@@ -104,8 +104,8 @@ function buildProjectSource()
 function buildDockerFile()
 {
   IMAGE_NAME=${1}
-  FILE_SRC={2}
-  FILE_DST={2}
+  FILE_SRC=${2}
+  FILE_DST=${3}
   echo $'\n'"Building docker image [${IMAGE_NAME}]"
   echo $(rm -rf ${FILE_DST})>/dev/null
   if ! [[ -f ${FILE_SRC} ]]; then

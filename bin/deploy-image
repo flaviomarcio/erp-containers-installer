@@ -67,42 +67,7 @@ function run()
       log -lv "cp -r ${APPLICATION_JAR} ${BUILD_TEMP_APP_JAR}"      
       cp -r ${APPLICATION_JAR} ${BUILD_TEMP_APP_JAR}
     fi    
-  fi
-  
-  
-  echo $'\n'"Building docker image [${BUILD_DEPLOY_IMAGE_NAME}]"
-  echo $(rm -rf ${DOCKER_FILE_DST})>/dev/null
-
-  if ! [[ -f ${DOCKER_FILE_SRC} ]]; then
-    echo $'\n'"Docker file not found [${DOCKER_FILE_SRC}]"
-  else
-    cp -r ${DOCKER_FILE_SRC} ${DOCKER_FILE_DST}
-    cd ${BUILD_TEMP_DIR}
-    log -lv "docker build -t ${BUILD_DEPLOY_IMAGE_NAME} ."
-    if [[ ${STACK_LOG_VERBOSE} == 1 ]]; then
-      docker build -t ${BUILD_DEPLOY_IMAGE_NAME} . 
-    else
-      echo $(docker build -t ${BUILD_DEPLOY_IMAGE_NAME} .)>/dev/null
-    fi
-    cd ${ROOT_DIR}
-
-    TAG_URL=${STACK_REGISTRY_DNS}/${BUILD_DEPLOY_IMAGE_NAME}
-    
-    echo $'\n'"Sending docker image [${BUILD_DEPLOY_IMAGE_NAME}] to registry"
-
-    if [[ ${STACK_LOG_VERBOSE_SUPER} == 1 ]]; then
-      docker image tag ${BUILD_DEPLOY_IMAGE_NAME} ${TAG_URL}
-    else
-      echo $(docker image tag ${BUILD_DEPLOY_IMAGE_NAME} ${TAG_URL})&>/dev/null
-    fi
-
-    log -lvs "docker push ${TAG_URL}"
-    if [[ ${STACK_LOG_VERBOSE_SUPER} == 1 ]]; then
-      docker push ${TAG_URL}
-    else
-      echo $(docker push ${TAG_URL})&>/dev/null
-    fi
-  fi  
+  fi 
 }
 
 function main()
