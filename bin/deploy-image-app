@@ -9,7 +9,6 @@ function main()
   for ACTION in "${ACTION_LIST[@]}"
   do
     buildProjectPrepare ${ACTION} ${STACK_PROJECT}
-    buildRegistryImage
   done
 }
 
