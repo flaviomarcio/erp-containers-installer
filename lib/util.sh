@@ -61,11 +61,11 @@ function runSource()
 {
   RUN_FILE=$1
   if [[ ${RUN_FILE} == "" ]]; then
-    log -lv ">>>> empty ${RUN_FILE}"
+    log -lv "empty ${RUN_FILE}"
   elif ! [[ -f ${RUN_FILE} ]]; then
-    log -lv ">>>> source[${RUN_FILE}] invalid"
+    log -lv "source[${RUN_FILE}] invalid"
   else
-    log -lv ">>>> source ${RUN_FILE}"
+    log -lv "source ${RUN_FILE}"
     chmod +x ${RUN_FILE}
     if [[ ${STACK_LOG_VERBOSE_SUPER} == 1 ]]; then
       source ${RUN_FILE}
@@ -87,19 +87,19 @@ function makeDir()
 
   log -l "Making dir [${MAKE_DIR}]"
   if [[ ${MAKE_DIR} == "" ]]; then
-    log -lvs ">>>> dir is empty"
+    log -lvs "dir is empty"
     return;
   fi
   if [[ -d ${MAKE_DIR}  ]]; then
-    log -lvs ">>>> dir exists [${MAKE_DIR}]"
+    log -lvs "dir exists [${MAKE_DIR}]"
     return;
   fi
   
-  log -lvs ">>>> mkdir -p ${MAKE_DIR}"
+  log -lvs "mkdir -p ${MAKE_DIR}"
   echo $(mkdir -p ${MAKE_DIR})&>/dev/null
 
   if [[ ${MAKE_PERMISSION} != "" ]]; then
-    log -lvs ">>>> chmod ${MAKE_PERMISSION} ${MAKE_DIR}"
+    log -lvs "chmod ${MAKE_PERMISSION} ${MAKE_DIR}"
     echo $(chmod ${MAKE_PERMISSION} ${MAKE_DIR})&>/dev/null
   fi
 }
@@ -110,9 +110,9 @@ function copyFile(){
 
   log -lv "Copying ${SRC} to ${DST}"
   if [[ -f ${SRC} ]]; then
-    log -lvs ">>>> sources does not exists [${SRC}]" 
+    log -lvs "sources does not exists [${SRC}]" 
   elif [[ -f ${DST} ]]; then
-    log -lvs ">>>> [${DST}] override"
+    log -lvs "[${DST}] override"
   else
     log -lvs "cp -r ${SRC} ${DST}"
     cp -r ${SRC} ${DST}
@@ -125,11 +125,11 @@ function copyFileIfNotExists(){
 
   log -lv "Copying ${SRC} to ${DST}"
   if ! [[ -f ${SRC} ]]; then
-    log -lvs ">>>> sources does not exists [${SRC}]"
+    log -lvs "sources does not exists [${SRC}]"
   elif [[ -f ${DST} ]]; then
-    log -lvs ">>>> destine exists [${DST}]"
+    log -lvs "destine exists [${DST}]"
   else
-    log -lvs ">>>> cp -r ${SRC} ${DST}"
+    log -lvs "cp -r ${SRC} ${DST}"
     cp -r ${SRC} ${DST}
   fi
 }
