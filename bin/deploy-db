@@ -4,7 +4,7 @@
 
 function run()
 {
-  DIR=${STACK_APPLICATION_SOURCE_DIR}/${STACK_PROJECT}
+  DIR=${STACK_APPLICATIONS_SOURCE_DIR}/${STACK_PROJECT}
   if ! [[ -d ${DIR} ]]; then
       echo "Invalid db for stack ${STACK_PROJECT}"
       return 0;
@@ -18,7 +18,7 @@ function select_data()
 {
   echo ""
   
-  OPTDIR=${STACK_APPLICATION_DB_DIR}
+  OPTDIR=${STACK_APPLICATIONS_DB_DIR}
   options=(back contaner storage)    
   PS3='Please select a local data: '
   select opt in "${options[@]}"

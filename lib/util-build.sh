@@ -8,14 +8,14 @@ function buildPrepareProject()
   log -l $'\n'"run::prepare_project(${STACK_ACTION},${STACK_PROJECT}):start"
   export STACK_ACTION=${1}
   export STACK_PROJECT=${2}
-  export STACK_APPLICATION_FILE=${STACK_APPLICATION_PROJECT_DIR}/${STACK_PROJECT}
-  runSource ${STACK_APPLICATION_FILE}
+  export STACK_APPLICATIONS_FILE=${STACK_APPLICATIONS_PROJECT_DIR}/${STACK_PROJECT}
+  runSource ${STACK_APPLICATIONS_FILE}
 
   RUN_FILE=${STACK_ENV_DIR}/run-prepare-${APPLICATION_STACK}.env
   runSource ${RUN_FILE}
 
   log "Running ${STACK_ACTION}"
-  RUN_FILE=${STACK_BIN_DIR}/${STACK_ACTION}
+  RUN_FILE=${STACK_INSTALLER_BIN_DIR}/${STACK_ACTION}
   chmod +x ${RUN_FILE}
   runSource ${RUN_FILE}
   log -l $'\n'"run::prepare_project(${STACK_ACTION},${STACK_PROJECT}):finished"

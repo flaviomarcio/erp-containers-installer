@@ -7,9 +7,9 @@ function selectProject()
 {
   echo ""  
   if [[ ${STACK_ACTION} == "deploy-db" || ${STACK_ACTION} == "deploy-db-drop"  ]]; then
-    OPTDIR=${STACK_APPLICATION_DB_DIR}
+    OPTDIR=${STACK_APPLICATIONS_DB_DIR}
   else
-    OPTDIR=${STACK_APPLICATION_PROJECT_DIR}
+    OPTDIR=${STACK_APPLICATIONS_PROJECT_DIR}
   fi
   options=(back $(ls ${OPTDIR}))    
   PS3='Please select a project: '
@@ -27,7 +27,7 @@ function selectProject()
 function selectAction()
 {
   echo ""
-  options=(quit $(ls ${STACK_BIN_DIR}))
+  options=(quit $(ls ${STACK_INSTALLER_BIN_DIR}))
   PS3='Please select a action: '
   select opt in "${options[@]}"
   do

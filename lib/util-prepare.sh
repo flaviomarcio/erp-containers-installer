@@ -2,19 +2,18 @@
 
 . ${INSTALLER_DIR}/lib/util.sh
 
-function prepare()
+function __privateEnvsPrepare()
 {    
   export PUBLIC_APPLICATIONS_DIR=${HOME}/applications
   export PUBLIC_STORAGE_DIR=${PUBLIC_APPLICATIONS_DIR}/storage
   export PUBLIC_LIB_DIR=${PUBLIC_APPLICATIONS_DIR}/lib
   export PUBLIC_ENVIRONMENT_FILE=${PUBLIC_APPLICATIONS_DIR}/stack_envs
 
-  export STACK_APPLICATIONS_DIR=${ROOT_DIR}/applications
   export STACK_DB_DROP=0
   export STACK_DOMAIN=portela-professional.com.br
 }
 
-function prepareEnvsPublic()
+function __privateEnvsPublic()
 {
   if ! [[ -f ${PUBLIC_ENVIRONMENT_FILE} ]]; then
     log "Invalid public env: ${PUBLIC_ENVIRONMENT_FILE}"
@@ -23,7 +22,7 @@ function prepareEnvsPublic()
   fi
 }
 
-function prepareEnvsDefault()
+function __privateEnvsDefault()
 {
   if [[ ${QT_VERSION} == "" ]]; then
       export QT_VERSION=6.4.2
@@ -54,58 +53,69 @@ function prepareEnvsDefault()
   fi
 }
 
-function prepareEnvsFinal()
+function __privateEnvsFinal()
 {
   export STACK_PREFIX=${STACK_ENVIRONMENT}-${STACK_TARGET}
   export STACK_NETWORK_INBOUND=${STACK_PREFIX}-inbound
   export STACK_REGISTRY_DNS=${STACK_PREFIX}-registry.${STACK_DOMAIN}:5000
 }
 
-function prepareEnvsDir()
+function __privateEnvsDir()
 {
-  export STACK_APPLICATION_PROJECT_DIR=${STACK_APPLICATIONS_DIR}/projects
-  export STACK_APPLICATION_DB_DIR=${STACK_APPLICATIONS_DIR}/db
-  export STACK_APPLICATION_DATA_DIR=${STACK_APPLICATIONS_DIR}/data
-  export STACK_APPLICATION_ENV_DIR=${STACK_APPLICATION_DATA_DIR}/envs
-  export STACK_APPLICATION_CONFIG_DIR=${STACK_APPLICATION_DATA_DIR}/conf
-  export STACK_APPLICATION_SOURCE_DIR=${STACK_APPLICATION_DATA_DIR}/source
-  export STACK_BIN_DIR=${INSTALLER_DIR}/bin
-  export STACK_LIB_DIR=${INSTALLER_DIR}/lib
-  export STACK_DOCKER_DIR=${INSTALLER_DIR}/docker
-  export STACK_DOCKER_FILE_DIR=${STACK_DOCKER_DIR}/dockerfiles
-  export STACK_DOCKER_COMPOSE_DIR=${STACK_DOCKER_DIR}/compose
+  #APPLICATIONS DIR
+  export STACK_APPLICATIONS_DIR=${ROOT_DIR}/applications
+  export STACK_APPLICATIONS_PROJECT_DIR=${STACK_APPLICATIONS_DIR}/projects
+  export STACK_APPLICATIONS_DB_DIR=${STACK_APPLICATIONS_DIR}/db  
+  export STACK_APPLICATIONS_DATA_DIR=${STACK_APPLICATIONS_DIR}/data
+  export STACK_APPLICATIONS_ENV_DIR=${STACK_APPLICATIONS_DATA_DIR}/envs
+  export STACK_APPLICATIONS_CONFIG_DIR=${STACK_APPLICATIONS_DATA_DIR}/conf
+  export STACK_APPLICATIONS_SOURCE_DIR=${STACK_APPLICATIONS_DATA_DIR}/source
+
+  #INSTALLER DIR
+  export STACK_INSTALLER_BIN_DIR=${INSTALLER_DIR}/bin
+  export STACK_INSTALLER_LIB_DIR=${INSTALLER_DIR}/lib
+  export STACK_INSTALLER_DOCKER_DIR=${INSTALLER_DIR}/docker
+  export STACK_INSTALLER_DOCKER_FILE_DIR=${STACK_INSTALLER_DOCKER_DIR}/dockerfiles
+  export STACK_INSTALLER_DOCKER_COMPOSE_DIR=${STACK_INSTALLER_DOCKER_DIR}/compose
 }
 
 
 function utilPrepareInit()
 {
-  prepare
-  prepareEnvsPublic
-  prepareEnvsDefault
-  prepareEnvsFinal
-  prepareEnvsDir
+  __privateEnvsPrepare
+  __privateEnvsPublic
+  __privateEnvsDefault
+  __privateEnvsFinal
+  __privateEnvsDir
 }
 
-function __privateUtilBuildDefault()
+function __privateBuildApplication()
 {
   if [[ ${APPLICATION_NAME} == "" ]]; then
     export APPLICATION_NAME=${STACK_PROJECT}
   fi
 
-  APP_NAME=${STACK_PREFIX}-${APPLICATION_NAME}
-  export BUILD_DIR=${HOME}/build/${APP_NAME}
+  if [[ ${APPLICATION_PORT} == "" ]]; then
+    export APPLICATION_PORT=8080
+  fi
+  export APPLICATION_CONTAINER_NAME=${STACK_PREFIX}-${APPLICATION_NAME}
+}
+
+function __privateBuildDefault()
+{
+  export BUILD_DIR=${HOME}/build/${APPLICATION_CONTAINER_NAME}
   export BUILD_SOURCE_DIR=${BUILD_DIR}/src
   export BUILD_APP_DIR=${BUILD_DIR}/app
   export BUILD_APP_JAR=${BUILD_DIR}/app/app.jar
-  export BUILD_IMAGE_NAME=${APP_NAME}
+  export BUILD_IMAGE_NAME=${APPLICATION_CONTAINER_NAME}
   export BUILD_IMAGE_DNS=${STACK_REGISTRY_DNS}/${BUILD_IMAGE_NAME}
   export BUILD_DEPLOY_NETWORK=${STACK_NETWORK_INBOUND}
   export BUILD_DEPLOY_REPLICAS=${STACK_DEPLOY_REPLICAS}
   export BUILD_DEPLOY_MODE=${STACK_DEPLOY_MODE}
   export BUILD_DEPLOY_NODE=${STACK_DEPLOY_NODE}
   export BUILD_APP_ENV_FILE=${BUILD_DIR}/env_file.env
-  export BUILD_APP_BIN_SRC_DIR=${STACK_APPLICATION_SOURCE_DIR}/${APPLICATION_NAME}
-  export BUILD_DEPLOY_DNS=${${STACK_PREFIX}}-${APPLICATION_NAME}.${STACK_DOMAIN}
+  export BUILD_APP_BIN_SRC_DIR=${STACK_APPLICATIONS_SOURCE_DIR}/${APPLICATION_NAME}
+  export BUILD_DEPLOY_DNS=${APPLICATION_CONTAINER_NAME}.${STACK_DOMAIN}
 
   export BUILD_APP_LIB=
   if [[ ${APPLICATION_STACK} == "qt-api" || ${APPLICATION_STACK} == "qt-srv" ]]; then
@@ -123,11 +133,6 @@ function __privateUtilBuildDefault()
     export BUILD_DEPLOY_DNS=${APPLICATION_DEPLOY_DNS}
   fi
   
-  if [[ ${APPLICATION_PORT} == "" ]]; then
-    export APPLICATION_PORT=8080
-  fi
-  
-  
   if [[ ${APPLICATION_DEPLOY_NODE} != "" ]]; then
     export BUILD_DEPLOY_MODE=${APPLICATION_DEPLOY_NODE}
   fi
@@ -140,17 +145,7 @@ function __privateUtilBuildDefault()
     export BUILD_DEPLOY_NETWORK=${APPLICATION_NETWORK}
   fi
    
-  if [[ ${STACK_TARGET} != "" ]]; then
-    export BUILD_DEPLOY_HOSTNAME=${STACK_PREFIX}-${BUILD_DEPLOY_APP_NAME}
-  else
-    export BUILD_DEPLOY_HOSTNAME=${STACK_ENVIRONMENT}-${BUILD_DEPLOY_APP_NAME}
-  fi
-
-  if [[ ${APPLICATION_DATA_DIR} == "" ]]; then
-    export APPLICATION_DATA_DIR=${STACK_ENVIRONMENT}-${BUILD_DEPLOY_APP_NAME}
-  fi
-
-  export DOCKER_STACK_NAME_FINAL=${STACK_PREFIX}-${STACK_PROJECT}
+  export APPLICATION_HOSTNAME=${APPLICATION_CONTAINER_NAME}
   export DOCKER_FILE_NAME=${APPLICATION_STACK}.dockerfile
   export DOCKER_STACK_FILE_NAME=${APPLICATION_STACK}.yml
 
@@ -158,12 +153,12 @@ function __privateUtilBuildDefault()
   mkdir -p ${BUILD_DIR}
 }
 
-function __privateUtilBuildEnvs()
+function __privateBuildEnvs()
 {
   ENV_LIST=(default.env ${APPLICATION_ENV_FILE})
   for ENV_NAME in "${ENV_LIST[@]}"
   do
-    ENV_FILE=${STACK_APPLICATION_ENV_DIR}/${ENV_NAME}
+    ENV_FILE=${STACK_APPLICATIONS_ENV_DIR}/${ENV_NAME}
     if ! [[ -f ${ENV_FILE} ]]; then
       log -lvs "runSource ${ENV_FILE} not found"
       continue;
@@ -181,6 +176,7 @@ function __privateUtilBuildEnvs()
 
 function utilPrepareStack()
 {
-    __privateUtilBuildDefault
-    __privateUtilBuildEnvs
+    __privateBuildApplication
+    __privateBuildDefault
+    __privateBuildEnvs
 }

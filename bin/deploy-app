@@ -10,12 +10,12 @@ function prepare()
 
 function run()
 {
-  RUN_FILE=${STACK_BIN_DIR}/prepare-${APPLICATION_STACK}.env
+  RUN_FILE=${STACK_INSTALLER_BIN_DIR}/prepare-${APPLICATION_STACK}.env
   if [[ -f ${RUN_FILE} ]]; then
     runSource ${RUN_FILE}
   fi
 
-  RUN_FILE=${STACK_LIB_DIR}/run-deploy-compose
+  RUN_FILE=${STACK_INSTALLER_LIB_DIR}/run-deploy-compose
   runSource ${RUN_FILE}
 }
 

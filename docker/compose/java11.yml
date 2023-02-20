@@ -8,7 +8,7 @@ networks:
 services:
   api:
     image: ${BUILD_IMAGE_DNS}
-    hostname: ${BUILD_DEPLOY_HOSTNAME}
+    hostname: ${APPLICATION_HOSTNAME}
     env_file:
       - ${BUILD_APP_ENV_FILE}
     environment:

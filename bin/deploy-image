@@ -6,7 +6,7 @@
 function prepare()
 {
   utilPrepareStack
-  RUN_FILE="${STACK_BIN_DIR}/prepare-${APPLICATION_STACK}.env"
+  RUN_FILE="${STACK_INSTALLER_BIN_DIR}/prepare-${APPLICATION_STACK}.env"
 
   if [[ -f ${RUN_FILE} ]]; then
     log -lv "runSource ${RUN_FILE}"
@@ -18,7 +18,7 @@ function prepare()
   mkdir -p ${BUILD_APP_DIR}
   
   export APPLICATION_FILTER=app*.jar
-  export DOCKER_FILE_SRC=${STACK_DOCKER_FILE_DIR}/${DOCKER_FILE_NAME}
+  export DOCKER_FILE_SRC=${STACK_INSTALLER_DOCKER_FILE_DIR}/${DOCKER_FILE_NAME}
   export DOCKER_FILE_DST=${BUILD_DIR}/Dockerfile
 }
 

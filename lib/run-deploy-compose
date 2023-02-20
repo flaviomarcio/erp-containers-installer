@@ -16,29 +16,29 @@ function run()
   echo $'\n'"Deploying stack:[${STACK_PROJECT}], image:[${BUILD_IMAGE_NAME}]"
   echo "  DNS Service: ${BUILD_DEPLOY_HOSTNAME}"
 
-  CHECK=$(docker stack ls | grep ${DOCKER_STACK_NAME_FINAL})
+  CHECK=$(docker stack ls | grep ${APPLICATION_CONTAINER_NAME})
   if [[ ${CHECK} != "" ]]; then
-    log -lv "docker stack rm ${DOCKER_STACK_NAME_FINAL}"
+    log -lv "docker stack rm ${APPLICATION_CONTAINER_NAME}"
     if [[ ${STACK_LOG_VERBOSE} == 1 ]]; then
-      docker stack rm ${DOCKER_STACK_NAME_FINAL}
+      docker stack rm ${APPLICATION_CONTAINER_NAME}
     else
-      echo $(docker stack rm ${DOCKER_STACK_NAME_FINAL})&>/dev/null
+      echo $(docker stack rm ${APPLICATION_CONTAINER_NAME})&>/dev/null
     fi    
   fi
 
-  RUN_FILE_COMPOSE=${STACK_DOCKER_COMPOSE_DIR}/${DOCKER_STACK_FILE_NAME}
+  RUN_FILE_COMPOSE=${STACK_INSTALLER_DOCKER_COMPOSE_DIR}/${DOCKER_STACK_FILE_NAME}
 
-  log -lv "docker stack deploy -c ${RUN_FILE_COMPOSE} ${DOCKER_STACK_NAME_FINAL}"
+  log -lv "docker stack deploy -c ${RUN_FILE_COMPOSE} ${APPLICATION_CONTAINER_NAME}"
   if [[ ${STACK_LOG_VERBOSE} == 1 ]]; then
-    docker stack deploy -c ${RUN_FILE_COMPOSE} ${DOCKER_STACK_NAME_FINAL}
+    docker stack deploy -c ${RUN_FILE_COMPOSE} ${APPLICATION_CONTAINER_NAME}
   else
-    echo $(docker stack deploy -c ${RUN_FILE_COMPOSE} ${DOCKER_STACK_NAME_FINAL})&>/dev/null
+    echo $(docker stack deploy -c ${RUN_FILE_COMPOSE} ${APPLICATION_CONTAINER_NAME})&>/dev/null
   fi
 }
 
 function main()
 {
-  #cd ${STACK_APPLICATION_STACKS_DIR}
+  #cd ${STACK_APPLICATIONS_STACKS_DIR}
   prepare
   run
 }

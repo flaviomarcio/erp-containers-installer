@@ -13,7 +13,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - ${POSTGRES_DATA}:/postgresql/pg/data
       - ${POSTGRES_BACKUP}:/backup
-      - ${STACK_APPLICATION_CONFIG_DIR}/postgres/pg_hba.conf:/etc/postgresql/pg_hba.conf
+      - ${STACK_APPLICATIONS_CONFIG_DIR}/postgres/pg_hba.conf:/etc/postgresql/pg_hba.conf
     #env_file:
     #  - ${BUILD_APP_ENV_FILE}
     environment:
