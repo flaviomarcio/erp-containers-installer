@@ -5,7 +5,6 @@
 
 function buildPrepareProject()
 {
-  log -l $'\n'"run::prepare_project(${STACK_ACTION},${STACK_PROJECT}):start"
   export STACK_ACTION=${1}
   export STACK_PROJECT=${2}
   export STACK_APPLICATIONS_FILE=${STACK_APPLICATIONS_PROJECT_DIR}/${STACK_PROJECT}
@@ -18,7 +17,6 @@ function buildPrepareProject()
   RUN_FILE=${STACK_INSTALLER_BIN_DIR}/${STACK_ACTION}
   chmod +x ${RUN_FILE}
   runSource ${RUN_FILE}
-  log -l $'\n'"run::prepare_project(${STACK_ACTION},${STACK_PROJECT}):finished"
 }
 
 function buildProjectPull()
