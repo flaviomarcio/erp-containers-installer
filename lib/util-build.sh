@@ -6,25 +6,14 @@
 function buildProjectPrepare()
 {
   logStart "buildProjectPrepare"
-  export STACK_ACTION=${1}
-  export STACK_PROJECT=${2}
+  if [[ ${1} != "" && ${2} != "" ]]; then
+    export STACK_ACTION=${1}
+    export STACK_PROJECT=${2}
+  fi
   export STACK_APPLICATIONS_RUN=${STACK_APPLICATIONS_PROJECT_DIR}/${STACK_PROJECT}
 
-  runSource ${STACK_APPLICATIONS_RUN}
-
-  RUN_FILE=${STACK_ENV_DIR}/run-prepare-${APPLICATION_STACK}.env
+  RUN_FILE=${STACK_APPLICATIONS_RUN}
   runSource ${RUN_FILE}
-
-  log "Running ${STACK_ACTION}"
-  RUN_FILE=${STACK_INSTALLER_BIN_DIR}/${STACK_ACTION}
-  chmod +x ${RUN_FILE}
-  log "Running ${STACK_ACTION}"
-  runSource "RUN_FILE==${RUN_FILE}"
-  runSource "RUN_FILE==${RUN_FILE}"
-  runSource "RUN_FILE==${RUN_FILE}"
-  runSource "RUN_FILE==${RUN_FILE}"
-  runSource "RUN_FILE==${RUN_FILE}"
-  runSource "RUN_FILE==${RUN_FILE}"
   logFinished "buildProjectPrepare"
 }
 

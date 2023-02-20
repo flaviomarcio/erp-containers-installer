@@ -19,7 +19,7 @@ function select_data()
   echo ""
   
   OPTDIR=${STACK_APPLICATIONS_DB_DIR}
-  options=(back contaner storage)    
+  options=(back container storage)    
   PS3='Please select a local data: '
   select opt in "${options[@]}"
   do

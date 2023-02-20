@@ -1,13 +1,17 @@
 #!/bin/bash
 
 . ${INSTALLER_DIR}/lib/util.sh
-. ${INSTALLER_DIR}/lib/util-prepare.sh
 . ${INSTALLER_DIR}/lib/util-build.sh
+. ${INSTALLER_DIR}/lib/util-prepare.sh
 
 
 function deployImage()
 {
   logStart "deployImage"
+  if [[ ${1} != "" && ${2} != "" ]]; then
+    export STACK_ACTION=${1}
+    export STACK_PROJECT=${2}
+  fi
   utilPrepareStack
   RUN_FILE="${STACK_INSTALLER_BIN_DIR}/prepare-${APPLICATION_STACK}.env"
 
@@ -32,6 +36,10 @@ function deployImage()
 function deployApp()
 {
   logStart "deployApp"
+  if [[ ${1} != "" && ${2} != "" ]]; then
+    export STACK_ACTION=${1}
+    export STACK_PROJECT=${2}
+  fi
   utilPrepareStack
   echo $'\n'"Deploying stack:[${STACK_PROJECT}], image:[${BUILD_DEPLOY_IMAGE_NAME}]"
   echo "  DNS Service: ${APPLICATION_DEPLOY_HOSTNAME}"
@@ -60,7 +68,10 @@ function deployApp()
 function deployImageApp()
 {
   logStart "deployImageApp"
-  buildProjectPrepare ${ACTION} ${STACK_PROJECT}
-  deployApp
-  logFinished "deployImageApp"
+  if [[ ${1} != "" && ${2} != "" ]]; then
+    export STACK_ACTION=${1}
+    export STACK_PROJECT=${2}
+  fi
+  buildProjectPrepare ${STACK_ACTION} ${STACK_PROJECT}
+  deployApp ${STACK_ACTION} ${STACK_PROJECT}
 }

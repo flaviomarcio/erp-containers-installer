@@ -5,6 +5,21 @@
 . ${INSTALLER_DIR}/lib/util-selectors.sh
 . ${INSTALLER_DIR}/lib/util-build.sh
 
+
+function runOption()
+{
+  logStart "runOption"
+  
+  export STACK_ACTION=${1}
+  export STACK_PROJECT=${2}
+  
+  buildProjectPrepare ${STACK_ACTION} ${STACK_PROJECT}
+
+  RUN_FILE=${STACK_INSTALLER_BIN_DIR}/${STACK_ACTION}
+  runSource ${RUN_FILE}
+  logFinished "runOption"
+}
+
 function main()
 {
   if selectEnviroment != 1; then
@@ -26,7 +41,7 @@ function main()
         continue;
       fi
 
-      buildProjectPrepare ${STACK_ACTION} ${STACK_PROJECT}
+      runOption ${STACK_ACTION} ${STACK_PROJECT}
     done
   fi
 }
