@@ -2,12 +2,6 @@
 
 . ${INSTALLER_DIR}/lib/util.sh
 
-function prepare()
-{
-  makeDir ${BUILD_TEMP_DIR} 644
-  makeDir ${BUILD_TEMP_APP_DIR} 644
-}
-
 function run()
 {
   echo $'\n'"Deploying stack:[${STACK_PROJECT}], image:[${BUILD_DEPLOY_IMAGE_NAME}]"
@@ -35,7 +29,6 @@ function run()
 
 function main()
 {
-  #cd ${STACK_APPLICATIONS_STACKS_DIR}
   prepare
   run
 }

@@ -27,8 +27,30 @@ function buildProjectPull()
   GIT_BRANCH=${2}
 
   echo $'\n'"Cloning repository: [${GIT_REPOSITORY}:${GIT_BRANCH}]"
+  cd ${BUILD_TEMP_DIR}
+  if [[ ${PWD} != ${BUILD_TEMP_DIR} ]]; then
+    log "Invalid BUILD_TEMP_SOURCE_DIR==${BUILD_TEMP_SOURCE_DIR}"
+    return 0;
+  fi
+
   rm -rf ${BUILD_TEMP_SOURCE_DIR};
-  echo $(git clone ${GIT_REPOSITORY} src)>/dev/null    
+  if [[ ${STACK_LOG_VERBOSE} == 1 ]]; then
+    echo $(git clone ${GIT_REPOSITORY} src)>/dev/null    
+  else
+    git clone ${GIT_REPOSITORY} src
+  fi
+
+  if [[ -d ${BUILD_TEMP_SOURCE_DIR} ]]; then
+    log "Invalid src dir==${BUILD_TEMP_SOURCE_DIR}"
+    return 0;
+  fi
+
+  cd ${BUILD_TEMP_SOURCE_DIR}
+  if [[ ${PWD} != ${BUILD_TEMP_SOURCE_DIR} ]]; then
+    log "Invalid src dir==${BUILD_TEMP_SOURCE_DIR}/src"
+    return 0;
+  fi
+
   if [[ ${STACK_LOG_VERBOSE} == 1 ]]; then
     git config pull.rebase false
     git reset --hard
