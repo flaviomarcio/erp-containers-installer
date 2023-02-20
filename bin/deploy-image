@@ -25,7 +25,12 @@ function prepare()
 
 function run()
 { 
-   
+  
+  if ! buildRegistryImage; then
+    return 0;
+  fi
+  return 1
+
   if [[ -d ${BUILD_TEMP_APP_BIN_SRC_DIR} ]]; then
     rm -rf ${BUILD_TEMP_APP_DIR}
     cp -r ${BUILD_TEMP_APP_BIN_SRC_DIR} ${BUILD_TEMP_APP_DIR}

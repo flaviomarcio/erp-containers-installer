@@ -23,8 +23,14 @@ function buildPrepareProject()
 
 function buildProjectPull()
 {
-  GIT_REPOSITORY=${1}
-  GIT_BRANCH=${2}
+  GIT_REPOSITORY=${APPLICATION_GIT}
+  GIT_BRANCH=${APPLICATION_GIT_BRANCH}
+
+  rm -rf ${BUILD_TEMP_SOURCE_DIR};
+
+  if [[ ${GIT_REPOSITORY} == "" ]]; then
+    return 1
+  fi
 
   echo $'\n'"Cloning repository: [${GIT_REPOSITORY}:${GIT_BRANCH}]"
   cd ${BUILD_TEMP_DIR}
@@ -33,7 +39,6 @@ function buildProjectPull()
     return 0;
   fi
 
-  rm -rf ${BUILD_TEMP_SOURCE_DIR};
   pwd
   pwd
   pwd
@@ -79,10 +84,18 @@ function buildProjectPull()
 
 function buildProjectSource()
 {
+  if ! [[ -d ${BUILD_TEMP_SOURCE_DIR} ]]; then
+    return 0;
+  fi
+  cd ${BUILD_TEMP_SOURCE_DIR}
+  if [[ ${PWD} != ${BUILD_TEMP_SOURCE_DIR} ]]; then
+    log "Invalid build dir: ${BUILD_TEMP_SOURCE_DIR}"
+    exit 0;
+  fi
+
   echo $'\n'"Building source [${BUILD_DEPLOY_IMAGE_NAME}]"        
   
   log -lv "mvn clean install -DskipTests"
-  cd ${BUILD_TEMP_SOURCE_DIR}
   if [[ ${STACK_LOG_VERBOSE} == 1 ]]; then
     mvn clean install -DskipTests
   else
@@ -93,6 +106,7 @@ function buildProjectSource()
   export APPLICATION_JAR=$(find ${BUILD_TEMP_APP_JAR} -name 'app*.jar')
   log -lv "cp -r ${APPLICATION_JAR} ${BUILD_TEMP_APP_JAR}"      
   cp -r ${APPLICATION_JAR} ${BUILD_TEMP_APP_JAR}
+  return 1;
 }
 
 function buildDockerFile()
@@ -143,16 +157,17 @@ function buildRegistryImage()
     rm -rf ${BUILD_TEMP_APP_DIR}
     cp -r ${BUILD_TEMP_APP_BIN_SRC_DIR} ${BUILD_TEMP_APP_DIR}
   fi
-  
-  if [[ -f ${DOCKER_FILE_SRC} ]]; then
-    buildDockerFile ${BUILD_DEPLOY_IMAGE_NAME} ${DOCKER_FILE_SRC} ${DOCKER_FILE_DST}
-    buildRegistryPush ${BUILD_DEPLOY_IMAGE_NAME}
-  elif buildProjectPull ${APPLICATION_GIT} ${APPLICATION_GIT_BRANCH}; then
-    buildProjectSource ${BUILD_TEMP_SOURCE_DIR}
-  else
-    log "Invalid build mode"
-    return 1;   
+
+  if ! buildProjectPull; then
+    return 0;
   fi
+
+  if buildProjectSource; then
+    return 0;
+  fi
+    
+  buildDockerFile ${BUILD_DEPLOY_IMAGE_NAME} ${DOCKER_FILE_SRC} ${DOCKER_FILE_DST}
+  buildRegistryPush ${BUILD_DEPLOY_IMAGE_NAME}
   return 1;   
 }
 
