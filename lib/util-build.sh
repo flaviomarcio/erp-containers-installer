@@ -35,9 +35,13 @@ function buildProjectPull()
 
   rm -rf ${BUILD_TEMP_SOURCE_DIR};
   if [[ ${STACK_LOG_VERBOSE} == 1 ]]; then
-    echo $(git clone ${GIT_REPOSITORY} src)>/dev/null    
-  else
+    pwd
+    pwd
+    pwd
+    pwd
     git clone ${GIT_REPOSITORY} src
+  else
+    echo $(git clone ${GIT_REPOSITORY} src)>/dev/null    
   fi
 
   if [[ -d ${BUILD_TEMP_SOURCE_DIR} ]]; then
