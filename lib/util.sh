@@ -2,8 +2,14 @@
 
 function log()
 {
-  FLG_1=$1
-  FLG_2=$2
+  if [[ ${1} != "" && ${1} == -* ]]; then
+    FLG_1="${1}"
+    FLG_2="${2}"
+  else
+    FLG_1="${1} ${2}"
+    FLG_2=
+  fi
+
   if [[ ${FLG_1} == "-l" || ${FLG_1} == "-lv" || ${FLG_1} == "-lvs" ]]; then
     
     if [[ ${FLG_2} != "" ]]; then
@@ -18,6 +24,37 @@ function log()
   elif [[ ${FLG_1} != "" ]]; then
     echo ${FLG_1}
   fi
+}
+
+function logStart()
+{
+    P1=${1}
+    P2=${2}
+    if [[ ${1} != "" && ${1} != -* ]]; then
+      P1=-lvs
+      P2="${1}${2}"
+    fi
+    if [[ ${P2} != ""  ]]; then
+      P2=${P2}":start"
+    fi
+    log ${P1} ${P2}
+}
+
+function logFinished()
+{
+    P1=${1}
+    P2=${2}
+    if [[ ${1} != "" && ${1} != -* ]]; then
+      P1=${1}
+      P2=${2}
+    else
+      P1=-lvs
+      P2=${1}${2}
+    fi
+    if [[ ${P2} != ""  ]]; then
+      P2=${P2}":start"
+    fi
+    log ${P1} ${P2}
 }
 
 function runSource()

@@ -8,8 +8,8 @@ function main()
   ACTION_LIST=(deploy-image deploy-app)
   for ACTION in "${ACTION_LIST[@]}"
   do
-    log -lv "call buildPrepareProject ${ACTION} ${STACK_PROJECT}"
-    buildPrepareProject ${ACTION} ${STACK_PROJECT}
+    buildProjectPrepare ${ACTION} ${STACK_PROJECT}
+    buildRegistryImage
   done
 }
 

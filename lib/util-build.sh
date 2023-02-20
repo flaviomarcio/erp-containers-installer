@@ -3,12 +3,14 @@
 . ${INSTALLER_DIR}/lib/util.sh
 . ${INSTALLER_DIR}/lib/util-prepare.sh
 
-function buildPrepareProject()
+function buildProjectPrepare()
 {
+  logStart "buildProjectPrepare"
   export STACK_ACTION=${1}
   export STACK_PROJECT=${2}
-  export STACK_APPLICATIONS_FILE=${STACK_APPLICATIONS_PROJECT_DIR}/${STACK_PROJECT}
-  runSource ${STACK_APPLICATIONS_FILE}
+  export STACK_APPLICATIONS_RUN=${STACK_APPLICATIONS_PROJECT_DIR}/${STACK_PROJECT}
+
+  runSource ${STACK_APPLICATIONS_RUN}
 
   RUN_FILE=${STACK_ENV_DIR}/run-prepare-${APPLICATION_STACK}.env
   runSource ${RUN_FILE}
@@ -17,10 +19,12 @@ function buildPrepareProject()
   RUN_FILE=${STACK_INSTALLER_BIN_DIR}/${STACK_ACTION}
   chmod +x ${RUN_FILE}
   runSource ${RUN_FILE}
+  logFinished "buildProjectPrepare"
 }
 
 function buildProjectPull()
 {
+  logStart "buildProjectPull"
   GIT_REPOSITORY=${APPLICATION_GIT}
   GIT_BRANCH=${APPLICATION_GIT_BRANCH}
 
@@ -70,10 +74,12 @@ function buildProjectPull()
   else
     return 0;
   fi   
+  logFinished "buildProjectPull"
 }
 
 function buildProjectSource()
 {
+  logStart "buildProjectSource"
   if ! [[ -d ${BUILD_TEMP_SOURCE_DIR} ]]; then
     return 0;
   fi
@@ -96,11 +102,14 @@ function buildProjectSource()
   export APPLICATION_JAR=$(find ${BUILD_TEMP_SOURCE_DIR} -name 'app*.jar')
   log -lv "cp -r ${APPLICATION_JAR} ${BUILD_TEMP_APP_JAR}"      
   cp -r ${APPLICATION_JAR} ${BUILD_TEMP_APP_JAR}
+
+  logFinished "buildProjectSource"
   return 1;
 }
 
 function buildDockerFile()
 {
+  logStart "buildDockerFile"
   IMAGE_NAME=${1}
   FILE_SRC=${2}
   FILE_DST=${3}
@@ -108,7 +117,7 @@ function buildDockerFile()
   echo $(rm -rf ${FILE_DST})>/dev/null
   if ! [[ -f ${FILE_SRC} ]]; then
     echo $'\n'"Docker file not found [${FILE_SRC}]"
-    return 1;
+    __RETURN=1;
   else
     cp -r ${FILE_SRC} ${FILE_DST}
     cd ${BUILD_TEMP_DIR}
@@ -119,12 +128,15 @@ function buildDockerFile()
       echo $(docker build -t ${IMAGE_NAME} .)>/dev/null
     fi
     cd ${ROOT_DIR}
+    __RETURN=1;
   fi
-  return 1;
+  logFinished "buildDockerFile"
+  return ${__RETURN}
 }
 
 function buildRegistryPush()
 {
+  logStart "buildRegistryPush"
   IMAGE_NAME=${1}
   TAG_URL=${STACK_REGISTRY_DNS}/${IMAGE_NAME}
   echo $'\n'"Sending docker image [${IMAGE_NAME}] to registry"
@@ -140,10 +152,12 @@ function buildRegistryPush()
   else
     echo $(docker push ${TAG_URL})&>/dev/null
   fi
+  logFinished "buildRegistryPush"
 }
 
 function buildRegistryImage()
 {
+  logStart "buildRegistryImage"
   if [[ -d ${BUILD_TEMP_APP_BIN_SRC_DIR} ]]; then
     rm -rf ${BUILD_TEMP_APP_DIR}
     cp -r ${BUILD_TEMP_APP_BIN_SRC_DIR} ${BUILD_TEMP_APP_DIR}
@@ -153,12 +167,14 @@ function buildRegistryImage()
     return 0;
   fi
 
-  if buildProjectSource; then
+  if ! buildProjectSource; then
     return 0;
   fi
-    
+
   buildDockerFile ${BUILD_DEPLOY_IMAGE_NAME} ${DOCKER_FILE_SRC} ${DOCKER_FILE_DST}
   buildRegistryPush ${BUILD_DEPLOY_IMAGE_NAME}
+  logFinished "buildRegistryImage"
   return 1;   
+    
 }
 

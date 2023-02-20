@@ -26,7 +26,7 @@ function main()
         continue;
       fi
 
-      buildPrepareProject ${STACK_ACTION} ${STACK_PROJECT}
+      buildProjectPrepare ${STACK_ACTION} ${STACK_PROJECT}
     done
   fi
 }
