@@ -1,6 +1,6 @@
 #!/bin/bash
 
-. ${INSTALLER_DIR}/lib/util-prepare.sh
+. ${INSTALLER_DIR}/lib/util-deploy.sh
 
 function main()
 {
