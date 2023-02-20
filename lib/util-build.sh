@@ -13,7 +13,9 @@ function buildProjectPrepare()
   export STACK_APPLICATIONS_RUN=${STACK_APPLICATIONS_PROJECT_DIR}/${STACK_PROJECT}
 
   RUN_FILE=${STACK_APPLICATIONS_RUN}
-  runSource ${RUN_FILE}
+
+  logMethod "run ${RUN_FILE}"
+  runSource ${RUN_FILE}  1
   logFinished "buildProjectPrepare"
 }
 
@@ -30,9 +32,8 @@ function buildProjectPull()
   fi
 
   echo $'\n'"Cloning repository: [${GIT_REPOSITORY}:${GIT_BRANCH}]"
-  cd ${BUILD_TEMP_DIR}
-  if [[ ${PWD} != ${BUILD_TEMP_DIR} ]]; then
-    log "Invalid BUILD_TEMP_SOURCE_DIR==${BUILD_TEMP_SOURCE_DIR}"
+  cdDir ${BUILD_TEMP_DIR}
+  if ! [ "$?" -eq 1 ]; then
     return 0;
   fi
 
@@ -42,15 +43,8 @@ function buildProjectPull()
     echo $(git clone ${GIT_REPOSITORY} src)>/dev/null    
   fi
 
-
-  if [[ -d ${BUILD_TEMP_SOURCE_DIR} ]]; then
-    log "Invalid src dir==${BUILD_TEMP_SOURCE_DIR}"
-    return 0;
-  fi
-
-  cd ${BUILD_TEMP_SOURCE_DIR}
-  if [[ ${PWD} != ${BUILD_TEMP_SOURCE_DIR} ]]; then
-    log "Invalid src dir==${BUILD_TEMP_SOURCE_DIR}/src"
+  cdDir ${BUILD_TEMP_SOURCE_DIR};
+  if ! [ "$?" -eq 1 ]; then
     return 0;
   fi
 
@@ -75,16 +69,21 @@ function buildProjectPull()
 function buildProjectSource()
 {
   logStart "buildProjectSource"
-  if ! [[ -d ${BUILD_TEMP_SOURCE_DIR} ]]; then
+  log -lvs "call buildProjectSource:"
+  log -lvs ".    - target: ${BUILD_TEMP_SOURCE_DIR} "
+
+  cdDir ${BUILD_TEMP_SOURCE_DIR}
+  if ! [ "$?" -eq 1 ]; then
+    log -lvs ".    - error: dir not found, fileName: ${BUILD_TEMP_SOURCE_DIR}"
     return 0;
   fi
-  cd ${BUILD_TEMP_SOURCE_DIR}
-  if [[ ${PWD} != ${BUILD_TEMP_SOURCE_DIR} ]]; then
-    log "Invalid build dir: ${BUILD_TEMP_SOURCE_DIR}"
-    exit 0;
+
+  if ! fileExists "pom.xml"; then
+    log -lvs ".    - manven: ignored"
+    return 1;
   fi
 
-  echo $'\n'"Building source [${BUILD_DEPLOY_IMAGE_NAME}]"        
+  echo $'\n'"Building source [${BUILD_DEPLOY_IMAGE_NAME}]"
   
   log -lv "mvn clean install -DskipTests"
   if [[ ${STACK_LOG_VERBOSE} == 1 ]]; then
@@ -98,7 +97,7 @@ function buildProjectSource()
   log -lv "cp -r ${APPLICATION_JAR} ${BUILD_TEMP_APP_JAR}"      
   cp -r ${APPLICATION_JAR} ${BUILD_TEMP_APP_JAR}
 
-  logFinished "buildProjectSource"
+  log -lvs ".    - result: success"
   return 1;
 }
 
@@ -158,11 +157,13 @@ function buildRegistryImage()
     cp -r ${BUILD_TEMP_APP_BIN_SRC_DIR} ${BUILD_TEMP_APP_DIR}
   fi
 
-  if ! buildProjectPull; then
+  buildProjectPull
+  if ! [ "$?" -eq 1 ]; then
     return 0;
   fi
 
-  if ! buildProjectSource; then
+  buildProjectSource
+  if ! [ "$?" -eq 1 ]; then
     return 0;
   fi
 

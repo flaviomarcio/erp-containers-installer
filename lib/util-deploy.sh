@@ -15,10 +15,7 @@ function deployImage()
   utilPrepareStack
   RUN_FILE="${STACK_INSTALLER_BIN_DIR}/prepare-${APPLICATION_STACK}.env"
 
-  if [[ -f ${RUN_FILE} ]]; then
-    log -lv "runSource ${RUN_FILE}"
-    runSource ${RUN_FILE}
-  fi
+  runSource ${RUN_FILE}
 
   rm -rf ${BUILD_TEMP_DIR}
   makeDir ${BUILD_TEMP_DIR} 777
@@ -40,7 +37,14 @@ function deployApp()
     export STACK_ACTION=${1}
     export STACK_PROJECT=${2}
   fi
+
   utilPrepareStack
+
+  cdDir ${BUILD_TEMP_SOURCE_DIR};
+  if ! [ "$?" -eq 1 ]; then
+    return 0;
+  fi
+
   echo $'\n'"Deploying stack:[${STACK_PROJECT}], image:[${BUILD_DEPLOY_IMAGE_NAME}]"
   echo "  DNS Service: ${APPLICATION_DEPLOY_HOSTNAME}"
 

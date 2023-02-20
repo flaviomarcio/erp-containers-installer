@@ -7,7 +7,6 @@ function __privateEnvsPrepare()
   export PUBLIC_APPLICATIONS_DIR=${HOME}/applications
   export PUBLIC_STORAGE_DIR=${PUBLIC_APPLICATIONS_DIR}/storage
   export PUBLIC_LIB_DIR=${PUBLIC_APPLICATIONS_DIR}/lib
-  export PUBLIC_ENVIRONMENT_FILE=${PUBLIC_APPLICATIONS_DIR}/stack_envs.env
 
   export STACK_DB_DROP=0
   export STACK_DOMAIN=portela-professional.com.br
@@ -15,6 +14,7 @@ function __privateEnvsPrepare()
 
 function __privateEnvsPublic()
 {
+  export PUBLIC_ENVIRONMENT_FILE=${PUBLIC_APPLICATIONS_DIR}/${STACK_ENVIRONMENT}/stack_envs.env
   if ! [[ -f ${PUBLIC_ENVIRONMENT_FILE} ]]; then
     log "Invalid public env: ${PUBLIC_ENVIRONMENT_FILE}"
   else

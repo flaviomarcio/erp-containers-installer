@@ -28,23 +28,50 @@ function log()
 
 function logStart()
 {
-  log ${1} ${2}":start"
+  log -lvs "call ${1}"
+  log -lvs ".    - started: ${1}"
+}
+
+function logMethod()
+{
+  log -lvs ".    - info: ${1}"
 }
 
 function logFinished()
 {
-  log ${1} ${2}":finished"
+  log -lvs "call ${1}"
+  if [[ ${2} != "" ]]; then
+    log -lvs ".    - message: ${2}"
+  fi
+  log -lvs ".    - finished: ${1}"
 }
 
 function runSource()
 {
-  RUN_FILE=$1
+  RUN_FILE=${1}
+  RUN_IDENT=${2}
+  if [[ ${RUN_IDENT} == "" ]]; then
+    RUN_IDENT=0
+  fi
+
+  RUN_CHARS="."
+  if [[ ${RUN_IDENT} > 0 ]]; then
+    RUN_CHARS=
+    for i in {1..${RUN_IDENT}}
+    do
+      RUN_CHARS="${RUN_CHARS}....."
+    done
+    RUN_CHARS="${RUN_CHARS}-"
+  fi
+
+  log -lvs "${RUN_CHARS}call runSource:"
+  log -lvs "${RUN_CHARS}    - target: ${RUN_FILE} "
   if [[ ${RUN_FILE} == "" ]]; then
-    log -lv "empty ${RUN_FILE}"
+    log -lvs "${RUN_CHARS}    - error: empty"
   elif ! [[ -f ${RUN_FILE} ]]; then
-    log -lv "source[${RUN_FILE}] invalid"
+    log -lvs "${RUN_CHARS}    - error: not found"
   else
-    log -lv "source ${RUN_FILE}"
+    log -lvs "${RUN_CHARS}    - result: success"
     chmod +x ${RUN_FILE}
     if [[ ${STACK_LOG_VERBOSE_SUPER} == 1 ]]; then
       source ${RUN_FILE}
@@ -54,47 +81,112 @@ function runSource()
   fi
 }
 
+function cdDir()
+{
+  NEW_DIR=${1}
+  OLD_DIR=${PWD}
+  log -lvs "call cdDir:"
+  log -lvs ".    - of: ${OLD_DIR} "
+  log -lvs ".    - to: ${NEW_DIR}"
+  if ! [[ -d ${NEW_DIR} ]]; then
+    log -lvs ".    - result: invalid dir: ${NEW_DIR}"
+    return 0;
+  fi
+  cd ${NEW_DIR}
+  if [[ ${PWD} != ${NEW_DIR} ]]; then
+    log -lvs ".    - result: no access dir: ${NEW_DIR}"
+    return 0;
+  fi
+  log -lvs ".    - result: success"
+  return 1;
+}
+
+function fileExists()
+{
+  TARGET=${1}
+  DIR=${2}
+  if [[ ${DIR} == "" ]]; then
+    DIR=${PWD}
+  fi
+
+  log -lvs "call fileExists:"
+  log -lvs ".    - target: ${TARGET} "
+  log -lvs ".    - dir ${DIR}"
+  FILE=${DIR}/${TARGET}
+  if ! [[ -f ${FILE} ]]; then
+    log -lvs ".    - error: file not found, fileName: ${FILE}"
+    return 0;
+  fi
+  log -lvs ".    - result: success"
+  return 1;
+}
+
+
+
 function makeDir()
 {
   MAKE_DIR=${1}
   MAKE_PERMISSION=${2}
 
+  log -lvs "call makeDir:"
+  log -lvs ".    - target: ${MAKE_DIR} "
+  log -lvs ".    - permission: ${MAKE_PERMISSION} "
+
+
   if [[ ${MAKE_DIR} == "" || ${MAKE_PERMISSION} == "" ]]; then
-    log "Invalid parameters: MAKE_DIR == ${MAKE_DIR}, MAKE_PERMISSION == ${MAKE_PERMISSION} "
+    MSG="Invalid parameters: MAKE_DIR == ${MAKE_DIR}, MAKE_PERMISSION == ${MAKE_PERMISSION} "
+    log ${MSG}
+    log -lvs ".    - error: ${MSG} "
     return;
   fi
 
-  log -l "Making dir [${MAKE_DIR}]"
   if [[ ${MAKE_DIR} == "" ]]; then
-    log -lvs "dir is empty"
+    MSG="dir is empty"
+    log ${MSG}
+    log -lvs ".    - error: ${MSG} "
     return;
   fi
-  if [[ -d ${MAKE_DIR}  ]]; then
-    log -lvs "dir exists [${MAKE_DIR}]"
-    return;
-  fi
-  
-  log -lvs "mkdir -p ${MAKE_DIR}"
-  echo $(mkdir -p ${MAKE_DIR})&>/dev/null
+
+  if ! [[ -d ${MAKE_DIR}  ]]; then
+    mkdir -p ${MAKE_DIR}
+    if ! [[ -d ${MAKE_DIR}  ]]; then
+      log -lvs ".    - error: no create dir: ${MSG} "
+      return 0
+    fi
+  fi  
+
 
   if [[ ${MAKE_PERMISSION} != "" ]]; then
-    log -lvs "chmod ${MAKE_PERMISSION} ${MAKE_DIR}"
-    echo $(chmod ${MAKE_PERMISSION} ${MAKE_DIR})&>/dev/null
+    chmod ${MAKE_PERMISSION} ${MAKE_DIR};
   fi
+
+  log -lvs ".    - result: success"
+  return 1;
 }
 
-function copyFile(){
+function copyFile()
+{
   SRC=$1
   DST=$2
 
+  log -lvs "call copyFile:"
+  log -lvs ".    - target: ${SRC}"
+  log -lvs ".    - destine: ${DST}"
+
   log -lv "Copying ${SRC} to ${DST}"
   if [[ -f ${SRC} ]]; then
-    log -lvs "sources does not exists [${SRC}]" 
+    MSG="sources does not exists [${SRC}]"
+    log ${MSG}
+    log -lvs ".    - error: ${MSG} "
   elif [[ -f ${DST} ]]; then
-    log -lvs "[${DST}] override"
+    MSG="destine exists [${DST}]"
+    log ${MSG}
+    log -lvs ".    - error: ${MSG} "
   else
-    log -lvs "cp -r ${SRC} ${DST}"
     cp -r ${SRC} ${DST}
+    if [[ -f ${DST} ]]; then
+      log -lvs ".    - result: success"
+    fi
   fi
 }
 
@@ -102,14 +194,24 @@ function copyFileIfNotExists(){
   SRC=$1
   DST=$2
 
+  log -lvs "call copyFile:"
+  log -lvs ".    - target: ${SRC}"
+  log -lvs ".    - destine: ${DST}"
+
   log -lv "Copying ${SRC} to ${DST}"
   if ! [[ -f ${SRC} ]]; then
-    log -lvs "sources does not exists [${SRC}]"
-  elif [[ -f ${DST} ]]; then
-    log -lvs "destine exists [${DST}]"
+    MSG="source does not exists [${SRC}]"
+    log ${MSG}
+    log -lvs ".    - error: ${MSG} "
   else
-    log -lvs "cp -r ${SRC} ${DST}"
+    if [[ -d ${DST} ]]; then
+      rm -rf ${DST}
+      log -lvs ".    - remove: ${DST}"
+    fi
     cp -r ${SRC} ${DST}
+    if [[ -d ${DST} ]]; then
+      log -lvs ".    - result: success"
+    fi
   fi
 }
 
