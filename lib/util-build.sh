@@ -146,6 +146,7 @@ function buildRegistryPush()
   else
     echo $(docker push ${TAG_URL})&>/dev/null
   fi
+  echo $(docker image rm -f $(docker image ls | grep ${IMAGE_NAME} | awk '{print $3}'))&>/dev/null
   logFinished "buildRegistryPush"
 }
 

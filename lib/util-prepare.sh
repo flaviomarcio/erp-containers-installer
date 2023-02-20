@@ -15,11 +15,7 @@ function __privateEnvsPrepare()
 function __privateEnvsPublic()
 {
   export PUBLIC_ENVIRONMENT_FILE=${PUBLIC_APPLICATIONS_DIR}/${STACK_ENVIRONMENT}/stack_envs.env
-  if ! [[ -f ${PUBLIC_ENVIRONMENT_FILE} ]]; then
-    log "Invalid public env: ${PUBLIC_ENVIRONMENT_FILE}"
-  else
-    runSource ${PUBLIC_ENVIRONMENT_FILE}
-  fi
+  runSource ${PUBLIC_ENVIRONMENT_FILE}
 }
 
 function __privateEnvsDefault()
@@ -161,7 +157,7 @@ function __privateBuildDefault()
   fi  
 
   export APPLICATION_STORAGE_TARGET=${PUBLIC_STORAGE_DIR}/${STACK_PREFIX}
-
+  makeDir ${BUILD_TEMP_DIR} 777
   
   export BUILD_DEPLOY_DATA_DIR=${APPLICATION_STORAGE_TARGET}/${APPLICATION_NAME}
   export BUILD_DEPLOY_DATA_APP_DIR=${BUILD_DEPLOY_DATA_DIR}/data
@@ -184,16 +180,25 @@ function __privateBuildDefault()
 function __privateBuildEnvs()
 {
   logStart "__privateBuildEnvs"
+  logMethod "target: ${BUILD_TEMP_APP_ENV_FILE}"
+
+  echo "#!/bin/bash" > ${BUILD_TEMP_APP_ENV_FILE} 
+
   ENV_LIST=(default.env ${APPLICATION_ENV_FILES})
   for ENV_NAME in "${ENV_LIST[@]}"
   do
     ENV_FILE=${STACK_APPLICATIONS_ENV_DIR}/${ENV_NAME}
     if ! [[ -f ${ENV_FILE} ]]; then
-      log -lvs "runSource ${ENV_FILE} not found"
+      logMethod "warning: ${ENV_FILE} not found"
       continue;
     fi  
     runSource ${ENV_FILE}
+    logMethod "info: append ${ENV_FILE}"
+    cat ${ENV_FILE} >> ${BUILD_TEMP_APP_ENV_FILE} 
   done
+
+  logMethod "info: parser info"
+  envsParserFile ${BUILD_TEMP_APP_ENV_FILE}
 
   echo "#join envs: ${APPLICATION_EXPORT_ENVS}" > ${BUILD_TEMP_APP_ENV_FILE}
   ENV_LIST=(${APPLICATION_EXPORT_ENVS})
