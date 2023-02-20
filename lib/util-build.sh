@@ -18,7 +18,13 @@ function buildProjectPrepare()
   log "Running ${STACK_ACTION}"
   RUN_FILE=${STACK_INSTALLER_BIN_DIR}/${STACK_ACTION}
   chmod +x ${RUN_FILE}
-  runSource ${RUN_FILE}
+  log "Running ${STACK_ACTION}"
+  runSource "RUN_FILE==${RUN_FILE}"
+  runSource "RUN_FILE==${RUN_FILE}"
+  runSource "RUN_FILE==${RUN_FILE}"
+  runSource "RUN_FILE==${RUN_FILE}"
+  runSource "RUN_FILE==${RUN_FILE}"
+  runSource "RUN_FILE==${RUN_FILE}"
   logFinished "buildProjectPrepare"
 }
 
