@@ -45,13 +45,15 @@ function deployApp()
     return 0;
   fi
 
+  logMethod "build dir: ${PWD}" 1
+
   echo $'\n'"Deploying stack:[${STACK_PROJECT}], image:[${BUILD_DEPLOY_IMAGE_NAME}]"
   echo "  DNS Service: ${APPLICATION_DEPLOY_HOSTNAME}"
 
   CHECK=$(docker stack ls | grep ${APPLICATION_CONTAINER_NAME})
   if [[ ${CHECK} != "" ]]; then
     if [[ ${STACK_LOG_VERBOSE} == 1 ]]; then
-      log "docker stack rm ${APPLICATION_CONTAINER_NAME}"
+      logMethod "docker stack rm ${APPLICATION_CONTAINER_NAME}" 1
       docker stack rm ${APPLICATION_CONTAINER_NAME}
     else
       echo $(docker stack rm ${APPLICATION_CONTAINER_NAME})&>/dev/null
@@ -61,13 +63,16 @@ function deployApp()
   COMPOSE_SRC=${STACK_INSTALLER_DOCKER_COMPOSE_DIR}/${DOCKER_STACK_FILE_NAME}
   COMPOSE_DST=docker-compose.yml
 
+  logMethod "source: ${COMPOSE_SRC}" 1
+  logMethod "destine: ${COMPOSE_DST}" 1
+
   rm -rf ${COMPOSE_DST}
   cp -r ${COMPOSE_SRC} ./${COMPOSE_DST}
 
   pwd
   ls -l 
 
-  echo "docker stack deploy -c ${COMPOSE_DST} ${APPLICATION_CONTAINER_NAME}"
+  logMethod "command: docker stack deploy -c ${COMPOSE_DST} ${APPLICATION_CONTAINER_NAME}" 1
   if [[ ${STACK_LOG_VERBOSE} == 1 ]]; then
     docker stack deploy -c ${COMPOSE_DST} ${APPLICATION_CONTAINER_NAME}
   else
