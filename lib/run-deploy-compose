@@ -19,11 +19,10 @@ function run()
 
   RUN_FILE_COMPOSE=${STACK_INSTALLER_DOCKER_COMPOSE_DIR}/${DOCKER_STACK_FILE_NAME}
 
+  log -lv "docker stack deploy -c ${RUN_FILE_COMPOSE} ${APPLICATION_CONTAINER_NAME}"
   if [[ ${STACK_LOG_VERBOSE} == 1 ]]; then
-    log "docker stack deploy -c ${RUN_FILE_COMPOSE} ${APPLICATION_CONTAINER_NAME}"
     docker stack deploy -c ${RUN_FILE_COMPOSE} ${APPLICATION_CONTAINER_NAME}
   else
-    log "docker stack deploy -c ${RUN_FILE_COMPOSE} ${APPLICATION_CONTAINER_NAME}"
     echo $(docker stack deploy -c ${RUN_FILE_COMPOSE} ${APPLICATION_CONTAINER_NAME})&>/dev/null
   fi
 }

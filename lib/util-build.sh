@@ -112,9 +112,9 @@ function buildDockerFile()
   else
     cp -r ${FILE_SRC} ${FILE_DST}
     cd ${BUILD_TEMP_DIR}
-    log -lv "docker build -t ${IMAGE_NAME} ."
     if [[ ${STACK_LOG_VERBOSE} == 1 ]]; then
-      docker build -t ${IMAGE_NAME} . 
+      log "docker build -t ${IMAGE_NAME} ."
+      docker build -t ${IMAGE_NAME} .
     else
       echo $(docker build -t ${IMAGE_NAME} .)>/dev/null
     fi
