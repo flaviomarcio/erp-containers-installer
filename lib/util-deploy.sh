@@ -59,19 +59,19 @@ function deployApp()
   fi
 
   COMPOSE_SRC=${STACK_INSTALLER_DOCKER_COMPOSE_DIR}/${DOCKER_STACK_FILE_NAME}
-  COMPOSE_DST=${BUILD_TEMP_DIR}/docker-compose.yml
+  COMPOSE_DST=docker-compose.yml
 
   rm -rf ${COMPOSE_DST}
-  cp -r ${COMPOSE_SRC} ${COMPOSE_DST}
+  cp -r ${COMPOSE_SRC} ./${COMPOSE_DST}
 
   pwd
   ls -l 
 
-  echo "docker stack deploy -c ${COMPOSE_DST} ${APPLICATION_CONTAINER_NAME}"
+  echo "docker stack deploy -c ${COMPOSE_SRC} ${APPLICATION_CONTAINER_NAME}"
   if [[ ${STACK_LOG_VERBOSE} == 1 ]]; then
-    docker stack deploy -c ${COMPOSE_DST} ${APPLICATION_CONTAINER_NAME}
+    docker stack deploy -c ${COMPOSE_SRC} ${APPLICATION_CONTAINER_NAME}
   else
-    echo $(docker stack deploy -c ${COMPOSE_DST} ${APPLICATION_CONTAINER_NAME})&>/dev/null
+    echo $(docker stack deploy -c ${COMPOSE_SRC} ${APPLICATION_CONTAINER_NAME})&>/dev/null
   fi
   logFinished "deployApp"
 }
