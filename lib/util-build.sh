@@ -39,18 +39,12 @@ function buildProjectPull()
     return 0;
   fi
 
-  pwd
-  pwd
-  pwd
-  pwd
   if [[ ${STACK_LOG_VERBOSE} == 1 ]]; then
     git clone ${GIT_REPOSITORY} src
   else
     echo $(git clone ${GIT_REPOSITORY} src)>/dev/null    
   fi
-  ls -l 
 
-  exit 0
 
   if [[ -d ${BUILD_TEMP_SOURCE_DIR} ]]; then
     log "Invalid src dir==${BUILD_TEMP_SOURCE_DIR}"
@@ -65,14 +59,12 @@ function buildProjectPull()
 
   if [[ ${STACK_LOG_VERBOSE} == 1 ]]; then
     git config pull.rebase false
-    # git reset --hard
-    # git checkout ${GIT_BRANCH}
-    # git pull origin ${GIT_BRANCH}
+    git checkout ${GIT_BRANCH}
+    git pull origin ${GIT_BRANCH}
   else
     echo $(git config pull.rebase false)>/dev/null
-    # echo $(git reset --hard)>/dev/null
-    # echo $(git checkout ${GIT_BRANCH})>/dev/null
-    # echo $(git pull origin ${GIT_BRANCH})>/dev/null
+    echo $(git checkout ${GIT_BRANCH})>/dev/null
+    echo $(git pull origin ${GIT_BRANCH})>/dev/null
   fi
 
   if [[ -d ${BUILD_TEMP_SOURCE_DIR} ]]; then
@@ -103,7 +95,7 @@ function buildProjectSource()
   fi
   cd ${ROOT_DIR}
   rm -rf ${BUILD_TEMP_APP_JAR};
-  export APPLICATION_JAR=$(find ${BUILD_TEMP_APP_JAR} -name 'app*.jar')
+  export APPLICATION_JAR=$(find ${BUILD_TEMP_SOURCE_DIR} -name 'app*.jar')
   log -lv "cp -r ${APPLICATION_JAR} ${BUILD_TEMP_APP_JAR}"      
   cp -r ${APPLICATION_JAR} ${BUILD_TEMP_APP_JAR}
   return 1;

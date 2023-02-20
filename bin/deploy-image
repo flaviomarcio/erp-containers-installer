@@ -71,7 +71,7 @@ function run()
   
   
   echo $'\n'"Building docker image [${BUILD_DEPLOY_IMAGE_NAME}]"
-  echo $(rm -rf ${DOCK+ER_FILE_DST})>/dev/null
+  echo $(rm -rf ${DOCKER_FILE_DST})>/dev/null
 
   if ! [[ -f ${DOCKER_FILE_SRC} ]]; then
     echo $'\n'"Docker file not found [${DOCKER_FILE_SRC}]"
