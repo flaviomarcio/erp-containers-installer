@@ -1,15 +1,10 @@
 #!/bin/bash
 
-. ${INSTALLER_DIR}/lib/util.sh
-. ${INSTALLER_DIR}/lib/util-build.sh
+. ${INSTALLER_DIR}/lib/util-deploy.sh
 
 function main()
 {
-  ACTION_LIST=(deploy-image deploy-app)
-  for ACTION in "${ACTION_LIST[@]}"
-  do
-    buildProjectPrepare ${ACTION} ${STACK_PROJECT}
-  done
+  deployImageApp
 }
 
 main

@@ -175,6 +175,5 @@ function buildRegistryImage()
   buildRegistryPush ${BUILD_DEPLOY_IMAGE_NAME}
   logFinished "buildRegistryImage"
   return 1;   
-    
 }
 

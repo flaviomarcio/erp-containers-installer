@@ -1,40 +1,10 @@
 #!/bin/bash
 
-. ${INSTALLER_DIR}/lib/util.sh
-. ${INSTALLER_DIR}/lib/util-prepare.sh
-
-function prepare()
-{
-  utilPrepareStack
-  RUN_FILE="${STACK_INSTALLER_BIN_DIR}/prepare-${APPLICATION_STACK}.env"
-
-  if [[ -f ${RUN_FILE} ]]; then
-    log -lv "runSource ${RUN_FILE}"
-    runSource ${RUN_FILE}
-  fi
-
-  rm -rf ${BUILD_TEMP_DIR}
-  makeDir ${BUILD_TEMP_DIR} 777
-  makeDir ${BUILD_TEMP_APP_DIR} 777
-  
-  export APPLICATION_FILTER=app*.jar
-  export DOCKER_FILE_SRC=${STACK_INSTALLER_DOCKER_FILE_DIR}/${DOCKER_FILE_NAME}
-  export DOCKER_FILE_DST=${BUILD_TEMP_DIR}/Dockerfile
-}
-
-
-function run()
-{ 
-  if ! buildRegistryImage; then
-    return 0;
-  fi
-  return 1
-}
+. ${INSTALLER_DIR}/lib/util-deploy.sh
 
 function main()
 {
-  prepare
-  run
+  deployImage
 }
 
 main
