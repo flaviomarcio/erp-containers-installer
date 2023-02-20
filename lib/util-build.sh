@@ -128,9 +128,10 @@ function buildDockerFile()
 function buildRegistryPush()
 {
   IMAGE_NAME=${1}
-  URL_TAG=${STACK_REGISTRY_DNS}/${IMAGE_NAME}
+  TAG_URL=${STACK_REGISTRY_DNS}/${IMAGE_NAME}
   echo $'\n'"Sending docker image [${IMAGE_NAME}] to registry"
   if [[ ${STACK_LOG_VERBOSE_SUPER} == 1 ]]; then
+    log -lvs "docker image tag ${IMAGE_NAME} ${TAG_URL}"
     docker image tag ${IMAGE_NAME} ${TAG_URL}
   else
     echo $(docker image tag ${IMAGE_NAME} ${TAG_URL})&>/dev/null
