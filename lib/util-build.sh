@@ -34,15 +34,18 @@ function buildProjectPull()
   fi
 
   rm -rf ${BUILD_TEMP_SOURCE_DIR};
+  pwd
+  pwd
+  pwd
+  pwd
   if [[ ${STACK_LOG_VERBOSE} == 1 ]]; then
-    pwd
-    pwd
-    pwd
-    pwd
     git clone ${GIT_REPOSITORY} src
   else
     echo $(git clone ${GIT_REPOSITORY} src)>/dev/null    
   fi
+  ls -l 
+
+  exit 0
 
   if [[ -d ${BUILD_TEMP_SOURCE_DIR} ]]; then
     log "Invalid src dir==${BUILD_TEMP_SOURCE_DIR}"
