@@ -9,8 +9,8 @@ function run()
 
   CHECK=$(docker stack ls | grep ${APPLICATION_CONTAINER_NAME})
   if [[ ${CHECK} != "" ]]; then
-    log -lv "docker stack rm ${APPLICATION_CONTAINER_NAME}"
     if [[ ${STACK_LOG_VERBOSE} == 1 ]]; then
+      log "docker stack rm ${APPLICATION_CONTAINER_NAME}"
       docker stack rm ${APPLICATION_CONTAINER_NAME}
     else
       echo $(docker stack rm ${APPLICATION_CONTAINER_NAME})&>/dev/null
@@ -23,13 +23,13 @@ function run()
     log "docker stack deploy -c ${RUN_FILE_COMPOSE} ${APPLICATION_CONTAINER_NAME}"
     docker stack deploy -c ${RUN_FILE_COMPOSE} ${APPLICATION_CONTAINER_NAME}
   else
+    log "docker stack deploy -c ${RUN_FILE_COMPOSE} ${APPLICATION_CONTAINER_NAME}"
     echo $(docker stack deploy -c ${RUN_FILE_COMPOSE} ${APPLICATION_CONTAINER_NAME})&>/dev/null
   fi
 }
 
 function main()
 {
-  prepare
   run
 }
 

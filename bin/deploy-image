@@ -25,49 +25,10 @@ function prepare()
 
 function run()
 { 
-  
   if ! buildRegistryImage; then
     return 0;
   fi
   return 1
-
-  if [[ -d ${BUILD_TEMP_APP_BIN_SRC_DIR} ]]; then
-    rm -rf ${BUILD_TEMP_APP_DIR}
-    cp -r ${BUILD_TEMP_APP_BIN_SRC_DIR} ${BUILD_TEMP_APP_DIR}
-  else
-    if [[ ${APPLICATION_GIT} != "" ]]; then
-      echo $'\n'"Cloning repository: [${APPLICATION_GIT}]"
-      rm -rf ${BUILD_TEMP_SOURCE_DIR};
-      echo $(git clone ${APPLICATION_GIT} src)>/dev/null    
-      if [[ ${STACK_LOG_VERBOSE} == 1 ]]; then
-        git config pull.rebase false
-        git reset --hard
-        git checkout ${APPLICATION_GIT_BRANCH}
-        git pull origin ${APPLICATION_GIT_BRANCH}
-      else
-        echo $(git config pull.rebase false)>/dev/null
-        echo $(git reset --hard)>/dev/null
-        echo $(git checkout ${APPLICATION_GIT_BRANCH})>/dev/null
-        echo $(git pull origin ${APPLICATION_GIT_BRANCH})>/dev/null
-      fi
-
-      echo $'\n'"Building source [${BUILD_DEPLOY_IMAGE_NAME}]"        
-      
-      log -lv "mvn clean install -DskipTests"
-      cd ${BUILD_TEMP_SOURCE_DIR}
-      if [[ ${STACK_LOG_VERBOSE} == 1 ]]; then
-        mvn clean install -DskipTests
-      else
-        echo $(mvn clean install -DskipTests)>/dev/null
-      fi
-
-      cd ${ROOT_DIR}
-      rm -rf ${BUILD_TEMP_APP_JAR};
-      export APPLICATION_JAR=$(find ${BUILD_TEMP_APP_JAR} -name 'app*.jar')
-      log -lv "cp -r ${APPLICATION_JAR} ${BUILD_TEMP_APP_JAR}"      
-      cp -r ${APPLICATION_JAR} ${BUILD_TEMP_APP_JAR}
-    fi    
-  fi 
 }
 
 function main()
