@@ -52,7 +52,7 @@ function logFinished()
       P2=${1}${2}
     fi
     if [[ ${P2} != ""  ]]; then
-      P2=${P2}":start"
+      P2=${P2}":finished"
     fi
     log ${P1} ${P2}
 }
