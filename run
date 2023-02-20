@@ -28,6 +28,7 @@ function main()
     utilPrepareInit
     while :
     do
+      cd ${ROOT_DIR}
       export STACK_ACTION=
       export STACK_PROJECT=
       
@@ -40,7 +41,6 @@ function main()
         log "Invalid selectProject"
         continue;
       fi
-
       runOption ${STACK_ACTION} ${STACK_PROJECT}
     done
   fi
