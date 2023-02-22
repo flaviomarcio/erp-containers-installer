@@ -127,35 +127,27 @@ function logSuccess()
 
 function logStart()
 {
-  if [[ ${2} == "" ]]; then
-    logMethod ${1} "started"
-  else
-    logMethod ${1} "started, ${2}"
-  fi
-  if [[ ${3} != "" ]]; then
-    logInfo ${1} "message" ${3}
+  logMethod ${1} "started"
+  if [[ ${2} != "" ]]; then
+    logTarget ${1} ${2}
   fi
 }
 
 function logFinished()
 {
-  if [[ ${3} != "" ]]; then
-    logInfo ${1} "message" ${3}
+  if [[ ${2} != "" ]]; then
+    logInfo ${1} "message" ${2}
   fi
-  logMethod ${1} "${2} finished"
+  logMethod ${1} "finished"
 }
 
 function runSource()
 {
-  IDENT=$(toInt ${1})
   RUN_FILE=${2}
   logStart ${1} "runSource"
   logTarget ${1} ${FILE}
-  if [[ ${IDENT} == "" ]]; then
-    IDENT=0
-  fi
 
-  RUN_CHARS=$(logIdent ${IDENT} "." })
+  RUN_CHARS=$(logIdent ${1} "." })
 
   logTarget ${1} ${RUN_FILE}
   if [[ ${RUN_FILE} == "" ]]; then
