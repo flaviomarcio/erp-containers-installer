@@ -1,5 +1,53 @@
 #!/bin/bash
 
+if [[ ${ROOT_DIR} == "" ]]; then
+  export ROOT_DIR=${PWD}
+fi
+export STACK_RUN_BIN=${ROOT_DIR}/bin
+
+
+function toInt()
+{
+  v=${1}
+  [ ! -z "${v##*[!0-9]*}" ] && echo -n ${v} || echo 0;
+}
+
+function incInt()
+{
+  v=$(toInt ${1})
+  let "v=${v} + 1"
+  echo ${v}
+}
+
+function logIdent()
+{
+  IDENT=$(toInt ${1})
+  CHAR=${2}
+
+  if [[ ${CHAR} == "" ]]; then
+    CHAR="."
+  fi
+
+  if [[ ${IDENT} == "" ]]; then
+    echo -n ${CHAR}
+    return;
+  fi
+
+  for i in $(seq 1 4);
+  do
+    TEXT="${TEXT}${CHAR}"
+  done
+  TEXT="${TEXT}"
+  
+  for i in $(seq 1 ${IDENT})
+  do
+    CHARS="${TEXT}${CHARS}"
+  done
+  echo -n ${CHARS}
+
+  return;
+}
+
 function log()
 {
   if [[ ${1} != "" && ${1} == -* ]]; then
@@ -14,11 +62,11 @@ function log()
     
     if [[ ${FLG_2} != "" ]]; then
       if [[ ${FLG_1} == "-l" && ${STACK_LOG} == 1 ]]; then
-        echo ">> ${FLG_2}"
+        echo ".  ${FLG_2}"
       elif [[ ${FLG_1} == "-lv" && ${STACK_LOG_VERBOSE} == 1 ]]; then
-        echo ">>>> ${FLG_2}"
+        echo ".    ${FLG_2}"
       elif [[ ${FLG_1} == "-lvs" && ${STACK_LOG_VERBOSE_SUPER} == 1 ]]; then
-        echo ">>>>>>> ${FLG_2}"
+        echo ".       ${FLG_2}"
       fi
     fi
   elif [[ ${FLG_1} != "" ]]; then
@@ -26,131 +74,178 @@ function log()
   fi
 }
 
-function logStart()
-{
-  log -lvs "call ${1}"
-  log -lvs ".    - started: ${1}"
-}
-
 function logMethod()
 {
-  log -lvs ".    - info: ${1}"
+  log -lvs "$(logIdent ${1})${2}"
+}
+
+function logForce()
+{
+  v=${2}
+  log "$(logIdent ${1}) ${v}"
+}
+
+function logInfo()
+{
+  let "IDENT = $(toInt ${1}) + 1"
+  if [[ ${2} != "" && ${3} != "" ]]; then
+    LOG="-${2}:${3}"
+  else
+    LOG="-${2}"
+  fi
+  if [[ ${LOG} != "" ]]; then
+    logMethod ${IDENT} ${LOG}
+  fi
+}
+
+function logCommand()
+{
+  logInfo ${1} "command" ${2}
+}
+
+function logTarget()
+{
+  logInfo ${1} "target" ${2}
+}
+
+function logError()
+{
+  if [[ ${2} != "" ]]; then
+    #logForce ${1} "error: ${2}"
+    logInfo ${1} "error: ${2}"
+  fi
+}
+
+function logSuccess()
+{
+  if [[ ${2} == "" ]]; then
+    logInfo ${1} "result" "success"
+  else
+    logInfo ${1} "result" "success" ${2}
+  fi
+}
+
+function logStart()
+{
+  if [[ ${2} == "" ]]; then
+    logMethod ${1} "started"
+  else
+    logMethod ${1} "started, ${2}"
+  fi
+  if [[ ${3} != "" ]]; then
+    logInfo ${1} "message" ${3}
+  fi
 }
 
 function logFinished()
 {
-  log -lvs "call ${1}"
-  if [[ ${2} != "" ]]; then
-    log -lvs ".    - message: ${2}"
+  if [[ ${3} != "" ]]; then
+    logInfo ${1} "message" ${3}
   fi
-  log -lvs ".    - finished: ${1}"
+  logMethod ${1} "${2} finished"
 }
 
 function runSource()
 {
-  RUN_FILE=${1}
-  RUN_IDENT=${2}
-  if [[ ${RUN_IDENT} == "" ]]; then
-    RUN_IDENT=0
+  IDENT=$(toInt ${1})
+  RUN_FILE=${2}
+  logStart ${1} "runSource"
+  logTarget ${1} ${FILE}
+  if [[ ${IDENT} == "" ]]; then
+    IDENT=0
   fi
 
-  RUN_CHARS="."
-  if [[ ${RUN_IDENT} > 0 ]]; then
-    RUN_CHARS=
-    for i in {1..${RUN_IDENT}}
-    do
-      RUN_CHARS="${RUN_CHARS}....."
-    done
-    RUN_CHARS="${RUN_CHARS}-"
-  fi
+  RUN_CHARS=$(logIdent ${IDENT} "." })
 
-  log -lvs "${RUN_CHARS}call runSource:"
-  log -lvs "${RUN_CHARS}    - target: ${RUN_FILE} "
+  logTarget ${1} ${RUN_FILE}
   if [[ ${RUN_FILE} == "" ]]; then
-    log -lvs "${RUN_CHARS}    - error: empty"
+    logError ${1} "run-file-is-empty"
   elif ! [[ -f ${RUN_FILE} ]]; then
-    log -lvs "${RUN_CHARS}    - error: not found"
+    logError ${1} "run-file-not-found"
   else
-    log -lvs "${RUN_CHARS}    - result: success"
     chmod +x ${RUN_FILE}
     if [[ ${STACK_LOG_VERBOSE_SUPER} == 1 ]]; then
       source ${RUN_FILE}
     else
       echo $(source ${RUN_FILE})&>/dev/null
     fi
+    logSuccess ${1}
+    logFinished ${1} "runSource ${RUN_FILE}"
+    return 1
   fi
+  logFinished ${1} "runSource ${RUN_FILE}"
+  return 0
 }
 
 function cdDir()
 {
-  NEW_DIR=${1}
+  NEW_DIR=${2}
   OLD_DIR=${PWD}
-  log -lvs "call cdDir:"
-  log -lvs ".    - of: ${OLD_DIR} "
-  log -lvs ".    - to: ${NEW_DIR}"
+  logStart ${1} "cdDir"
+  logInfo ${1} "of" ${OLD_DIR}
+  logInfo ${1} "to" ${NEW_DIR}
   if ! [[ -d ${NEW_DIR} ]]; then
-    log -lvs ".    - result: invalid dir: ${NEW_DIR}"
+    logError ${1} "invalid-dir:${NEW_DIR}"
     return 0;
   fi
   cd ${NEW_DIR}
   if [[ ${PWD} != ${NEW_DIR} ]]; then
-    log -lvs ".    - result: no access dir: ${NEW_DIR}"
+    logError ${1} "no-access-dir:${NEW_DIR}"
+    logFinished ${1} "cdDir"
     return 0;
   fi
-  log -lvs ".    - result: success"
+  logSuccess ${1}
+  logFinished ${1} "cdDir"
   return 1;
 }
 
 function fileExists()
 {
-  TARGET=${1}
-  DIR=${2}
+  logStart ${1} "fileExists"
+  TARGET=${2}
+  DIR=${3}
   if [[ ${DIR} == "" ]]; then
     DIR=${PWD}
   fi
 
-  log -lvs "call fileExists:"
-  log -lvs ".    - target: ${TARGET} "
-  log -lvs ".    - dir ${DIR}"
+  logTarget ${1} ${TARGET}
+  logInfo ${1} "dir" ${DIR}
   FILE=${DIR}/${TARGET}
   if ! [[ -f ${FILE} ]]; then
-    log -lvs ".    - error: file not found, fileName: ${FILE}"
+    logError ${1} "file-not-found|fileName:${FILE}"
+    logFinished ${1} "fileExists"
     return 0;
   fi
-  log -lvs ".    - result: success"
+  logSuccess "success"
+  logFinished ${1} "fileExists"
   return 1;
 }
 
 
-
 function makeDir()
 {
-  MAKE_DIR=${1}
-  MAKE_PERMISSION=${2}
+  logStart ${1} "makeDir"
+  MAKE_DIR=${2}
+  MAKE_PERMISSION=${3}
 
-  log -lvs "call makeDir:"
-  log -lvs ".    - target: ${MAKE_DIR} "
-  log -lvs ".    - permission: ${MAKE_PERMISSION} "
-
+  logTarget ${1} ${MAKE_DIR}
+  logInfo ${1} "permission" ${MAKE_PERMISSION}
 
   if [[ ${MAKE_DIR} == "" || ${MAKE_PERMISSION} == "" ]]; then
-    MSG="Invalid parameters: MAKE_DIR == ${MAKE_DIR}, MAKE_PERMISSION == ${MAKE_PERMISSION} "
-    log ${MSG}
-    log -lvs ".    - error: ${MSG} "
+    logError ${1} "Invalid-parameters:MAKE_DIR==${MAKE_DIR},MAKE_PERMISSION==${MAKE_PERMISSION}"
     return;
   fi
 
   if [[ ${MAKE_DIR} == "" ]]; then
-    MSG="dir is empty"
-    log ${MSG}
-    log -lvs ".    - error: ${MSG} "
+    MSG="dir-is-empty"
+    logError ${1} ${MSG}
     return;
   fi
 
   if ! [[ -d ${MAKE_DIR}  ]]; then
     mkdir -p ${MAKE_DIR}
     if ! [[ -d ${MAKE_DIR}  ]]; then
-      log -lvs ".    - error: no create dir: ${MSG} "
+      logError ${1} "no-create-dir:${MSG}"
       return 0
     fi
   fi  
@@ -160,59 +255,55 @@ function makeDir()
     chmod ${MAKE_PERMISSION} ${MAKE_DIR};
   fi
 
-  log -lvs ".    - result: success"
+  logSuccess ${1}
+  logFinished ${1} "makeDir"
   return 1;
 }
 
 function copyFile()
 {
+  logStart ${1} "copyFile"
   SRC=$1
   DST=$2
 
-  log -lvs "call copyFile:"
-  log -lvs ".    - target: ${SRC}"
-  log -lvs ".    - destine: ${DST}"
+  logTarget ${1} ${SRC}
+  logInfo ${1} "destine" ${DST}
 
   log -lv "Copying ${SRC} to ${DST}"
   if [[ -f ${SRC} ]]; then
-    MSG="sources does not exists [${SRC}]"
-    log ${MSG}
-    log -lvs ".    - error: ${MSG} "
+    logError ${1} "sources-does-not-exists[${SRC}]"
   elif [[ -f ${DST} ]]; then
-    MSG="destine exists [${DST}]"
-    log ${MSG}
-    log -lvs ".    - error: ${MSG} "
+    logError ${1} "destine-exists-[${DST}]"
   else
     cp -r ${SRC} ${DST}
     if [[ -f ${DST} ]]; then
-      log -lvs ".    - result: success"
+      logSuccess ${1}
     fi
   fi
+  logFinished ${1} "copyFile"
 }
 
-function copyFileIfNotExists(){
+function copyFileIfNotExists()
+{
+  logStart ${1} "copyFileIfNotExists"
   SRC=$1
   DST=$2
-
-  log -lvs "call copyFile:"
-  log -lvs ".    - target: ${SRC}"
-  log -lvs ".    - destine: ${DST}"
-
-  log -lv "Copying ${SRC} to ${DST}"
+  
+  logTarget ${1} ${SRC}
+  logInfo ${1} "destine" ${DST}
   if ! [[ -f ${SRC} ]]; then
-    MSG="source does not exists [${SRC}]"
-    log ${MSG}
-    log -lvs ".    - error: ${MSG} "
+    logError ${1} "source-does-not-exists-[${SRC}]"
   else
     if [[ -d ${DST} ]]; then
       rm -rf ${DST}
-      log -lvs ".    - remove: ${DST}"
+      logInfo ${1} "remove" ${DST}
     fi
     cp -r ${SRC} ${DST}
     if [[ -d ${DST} ]]; then
-      log -lvs ".    - result: success"
+      logSuccess ${1} "success"
     fi
   fi
+  logFinished ${1} "copyFileIfNotExists"
 }
 
 function utilInitialize()
@@ -238,14 +329,15 @@ function utilInitialize()
   elif [[ ${STACK_LOG} == 1 ]]; then
     echo "Log enabled"
   fi
+
+  export PATH=${PATH}:${STACK_RUN_BIN}
 }
 
 function envsParserFile()
 {
+  logStart ${1} "envsParserFile"
   FILE=$1
-  if ! [[ -f ${FILE} ]]; then
-    return 0;
-  else
+  if [[ -f ${FILE} ]]; then
     ENVSLIST=()
     ENVSLIST+=($(printenv | grep STACK_ENVIRONMENT ))
     ENVSLIST+=($(printenv | grep STACK_DOMAIN ))
@@ -257,52 +349,49 @@ function envsParserFile()
     ENVSLIST+=($(printenv | grep STACK_PROXY ))
     ENVSLIST+=($(printenv | grep STACK_LOG ))
 
-    log -lvs "replace envs in ${FILE}"
+    logInfo ${1} "replace-envs-in-${FILE}"
     for ENV in "${ENVSLIST[@]}"
     do
-      if [[ ${STACK_LOG_VERBOSE_SUPER} == 1 ]]; then
-        log -lvs "ENV=${ENV}"
-      fi
       ENV=(${ENV//=/ })
       replace="\${${ENV[0]}}"
       replacewith=${ENV[1]}
       if [[ ${replace} == "" || ${replace} == "_" || ${replacewith} == ""  ]]; then
         continue;
       fi
-
-      log -lvs "s/${replace}/${replacewith}/"
       FILE_BACK=${FILE}-sed.bak
       rm -rf ${FILE_BACK}
       cp -r ${FILE} ${FILE_BACK}
       echo $(sed -i "s/${replace}/${replacewith}/g" ${FILE})&>/dev/null
     done
-    #cat $FILE;
+
+    logFinished ${1} "envsParserFile"
     return 1;
   fi
+  logFinished ${1} "envsParserFile"
+  return 0;
 }
 
 
 function envsParserDir()
 {
+  logStart ${1} "envsParserDir"
   export DIR=$1
   export EXT=$2
 
   if [[ ${DIR} == "" || ${EXT} == "" ]]; then
-    return 0;
-  fi
-
-  if ! [[ -d ${DIR} ]]; then
-    return 0;
-  fi
-
-  log -lv "parser dir: ${DIR}"
-  FILELIST=($(find ${DIR} -name ${EXT}))
-  for FILE in "${FILELIST[@]}"
-  do
-    if [[ ${STACK_LOG_VERBOSE} == 1 ]]; then
-      log -lv "parser file: ${FILE}"
+    if [[ -d ${DIR} ]]; then
+      logInfo ${1} "parser-dir" ${DIR}
+      FILELIST=($(find ${DIR} -name ${EXT}))
+      for FILE in "${FILELIST[@]}"
+      do
+        if [[ ${STACK_LOG_VERBOSE} == 1 ]]; then
+          logInfo ${1} "parser-file" ${FILE}
+        fi
+        envsParserFile $(incInt ${1}) ${FILE}
+      done
     fi
-    envsParserFile ${FILE}
-  done
+  fi
+
+  logFinished ${1} "envsParserDir"
   return 1;
 }

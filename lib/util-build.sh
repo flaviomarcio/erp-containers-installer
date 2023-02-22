@@ -5,7 +5,7 @@
 
 function buildProjectPrepare()
 {
-  logStart "buildProjectPrepare"
+  logStart 1 "buildProjectPrepare"
   if [[ ${1} != "" && ${2} != "" ]]; then
     export STACK_ACTION=${1}
     export STACK_PROJECT=${2}
@@ -14,14 +14,14 @@ function buildProjectPrepare()
 
   RUN_FILE=${STACK_APPLICATIONS_RUN}
 
-  logMethod "run ${RUN_FILE}"
-  runSource ${RUN_FILE}  1
-  logFinished "buildProjectPrepare"
+  logMethod 1 "run ${RUN_FILE}"
+  runSource 1 ${RUN_FILE}  
+  logFinished 1 "buildProjectPrepare"
 }
 
 function buildProjectPull()
 {
-  logStart "buildProjectPull"
+  logStart 1 "buildProjectPull"
   GIT_REPOSITORY=${APPLICATION_GIT}
   GIT_BRANCH=${APPLICATION_GIT_BRANCH}
 
@@ -32,7 +32,7 @@ function buildProjectPull()
   fi
 
   echo $'\n'"Cloning repository: [${GIT_REPOSITORY}:${GIT_BRANCH}]"
-  cdDir ${BUILD_TEMP_DIR}
+  cdDir 2 ${BUILD_TEMP_DIR}
   if ! [ "$?" -eq 1 ]; then
     return 0;
   fi
@@ -43,7 +43,7 @@ function buildProjectPull()
     echo $(git clone ${GIT_REPOSITORY} src)>/dev/null    
   fi
 
-  cdDir ${BUILD_TEMP_SOURCE_DIR};
+  cdDir 2 ${BUILD_TEMP_SOURCE_DIR};
   if ! [ "$?" -eq 1 ]; then
     return 0;
   fi
@@ -63,29 +63,29 @@ function buildProjectPull()
   else
     return 0;
   fi   
-  logFinished "buildProjectPull"
+  logFinished 1 "buildProjectPull"
 }
 
 function buildProjectSource()
 {
-  logStart "buildProjectSource"
+  logStart 1 "buildProjectSource"
   log -lvs "call buildProjectSource:"
   log -lvs ".    - target: ${BUILD_TEMP_SOURCE_DIR} "
 
-  cdDir ${BUILD_TEMP_SOURCE_DIR}
+  cdDir 2 ${BUILD_TEMP_SOURCE_DIR}
   if ! [ "$?" -eq 1 ]; then
     log -lvs ".    - error: dir not found, fileName: ${BUILD_TEMP_SOURCE_DIR}"
     return 0;
   fi
 
-  if ! fileExists "pom.xml"; then
+  if ! fileExists 2 "pom.xml"; then
     log -lvs ".    - manven: ignored"
     return 1;
   fi
 
   echo $'\n'"Building source [${BUILD_DEPLOY_IMAGE_NAME}]"
   
-  log -lv "mvn clean install -DskipTests"
+  logCommand 1 "mvn clean install -DskipTests"
   if [[ ${STACK_LOG_VERBOSE} == 1 ]]; then
     mvn clean install -DskipTests
   else
@@ -94,16 +94,17 @@ function buildProjectSource()
   cd ${ROOT_DIR}
   rm -rf ${BUILD_TEMP_APP_JAR};
   export APPLICATION_JAR=$(find ${BUILD_TEMP_SOURCE_DIR} -name 'app*.jar')
-  log -lv "cp -r ${APPLICATION_JAR} ${BUILD_TEMP_APP_JAR}"      
+  logCommand 1 "cp -r ${APPLICATION_JAR} ${BUILD_TEMP_APP_JAR}"      
   cp -r ${APPLICATION_JAR} ${BUILD_TEMP_APP_JAR}
 
-  log -lvs ".    - result: success"
+  logSuccess 1 "success"
+  logFinished 1 "buildProjectSource"
   return 1;
 }
 
 function buildDockerFile()
 {
-  logStart "buildDockerFile"
+  logStart 1 "buildDockerFile"
   IMAGE_NAME=${1}
   FILE_SRC=${2}
   FILE_DST=${3}
@@ -116,7 +117,7 @@ function buildDockerFile()
     cp -r ${FILE_SRC} ${FILE_DST}
     cd ${BUILD_TEMP_DIR}
     if [[ ${STACK_LOG_VERBOSE} == 1 ]]; then
-      log "docker build -t ${IMAGE_NAME} ."
+      logCommand 1 "docker build -t ${IMAGE_NAME} ."
       docker build -t ${IMAGE_NAME} .
     else
       echo $(docker build -t ${IMAGE_NAME} .)>/dev/null
@@ -124,24 +125,24 @@ function buildDockerFile()
     cd ${ROOT_DIR}
     __RETURN=1;
   fi
-  logFinished "buildDockerFile"
+  logFinished 1 "buildDockerFile"
   return ${__RETURN}
 }
 
 function buildRegistryPush()
 {
-  logStart "buildRegistryPush"
+  logStart 1 "buildRegistryPush"
   IMAGE_NAME=${1}
   TAG_URL=${STACK_REGISTRY_DNS}/${IMAGE_NAME}
   echo $'\n'"Sending docker image [${IMAGE_NAME}] to registry"
   if [[ ${STACK_LOG_VERBOSE_SUPER} == 1 ]]; then
-    log "docker image tag ${IMAGE_NAME} ${TAG_URL}"
+    logCommand 1 "docker image tag ${IMAGE_NAME} ${TAG_URL}"
     docker image tag ${IMAGE_NAME} ${TAG_URL}
   else
     echo $(docker image tag ${IMAGE_NAME} ${TAG_URL})&>/dev/null
   fi
   if [[ ${STACK_LOG_VERBOSE_SUPER} == 1 ]]; then
-    log "docker push ${TAG_URL}"
+    logCommand 1 "docker push ${TAG_URL}"
     docker push ${TAG_URL}
   else
     echo $(docker push ${TAG_URL})&>/dev/null
@@ -151,12 +152,12 @@ function buildRegistryPush()
   #if [[ ${CHECK} != "" ]]; then
   #  echo $(docker image rm -f $(docker image ls | grep ${IMAGE_NAME} | awk '{print $3}' | sort --unique ))&>/dev/null
   #fi
-  logFinished "buildRegistryPush"
+  logFinished 1 "buildRegistryPush"
 }
 
 function buildRegistryImage()
 {
-  logStart "buildRegistryImage"
+  logStart 1 "buildRegistryImage"
   if [[ -d ${BUILD_TEMP_APP_BIN_SRC_DIR} ]]; then
     rm -rf ${BUILD_TEMP_APP_DIR}
     cp -r ${BUILD_TEMP_APP_BIN_SRC_DIR} ${BUILD_TEMP_APP_DIR}
@@ -174,7 +175,7 @@ function buildRegistryImage()
 
   buildDockerFile ${BUILD_DEPLOY_IMAGE_NAME} ${DOCKER_FILE_SRC} ${DOCKER_FILE_DST}
   buildRegistryPush ${BUILD_DEPLOY_IMAGE_NAME}
-  logFinished "buildRegistryImage"
+  logFinished 1 "buildRegistryImage"
   return 1;   
 }
 

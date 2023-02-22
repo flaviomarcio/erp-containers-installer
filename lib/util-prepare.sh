@@ -4,22 +4,31 @@
 
 function __privateEnvsPrepare()
 {    
+  logStart 2 "__privateEnvsPrepare"
   export PUBLIC_APPLICATIONS_DIR=${HOME}/applications
   export PUBLIC_STORAGE_DIR=${PUBLIC_APPLICATIONS_DIR}/storage
   export PUBLIC_LIB_DIR=${PUBLIC_APPLICATIONS_DIR}/lib
 
   export STACK_DB_DROP=0
   export STACK_DOMAIN=portela-professional.com.br
+  logFinished 2 "__privateEnvsPrepare"
 }
 
 function __privateEnvsPublic()
 {
+  logStart 2 "__privateEnvsPublic"
   export PUBLIC_ENVIRONMENT_FILE=${PUBLIC_APPLICATIONS_DIR}/${STACK_ENVIRONMENT}/stack_envs.env
-  runSource ${PUBLIC_ENVIRONMENT_FILE}
+  runSource 1 ${PUBLIC_ENVIRONMENT_FILE} 
+  if ! [ "$?" -eq 1 ]; then
+    return 0
+  fi
+  logFinished 2 "__privateEnvsPublic"
+  return 1
 }
 
 function __privateEnvsDefault()
 {
+  logStart 2 "__privateEnvsDefault"
   if [[ ${QT_VERSION} == "" ]]; then
       export QT_VERSION=6.4.2
   fi
@@ -41,17 +50,21 @@ function __privateEnvsDefault()
   if [[ ${STACK_TARGET} == "" ]]; then
       export STACK_TARGET=company
   fi
+  logFinished 2 "__privateEnvsDefault"
 }
 
 function __privateEnvsFinal()
 {
+  logStart 2 "__privateEnvsDefault"
   export STACK_PREFIX=${STACK_ENVIRONMENT}-${STACK_TARGET}
   export STACK_NETWORK_INBOUND=${STACK_PREFIX}-inbound
   export STACK_REGISTRY_DNS=${STACK_PREFIX}-registry.${STACK_DOMAIN}:5000
+  logFinished 2 "__privateEnvsFinal"
 }
 
 function __privateEnvsDir()
 {
+  logStart 2 "__privateEnvsDir"
   #APPLICATIONS DIR
   export STACK_APPLICATIONS_DIR=${ROOT_DIR}/applications
   export STACK_APPLICATIONS_PROJECT_DIR=${STACK_APPLICATIONS_DIR}/projects
@@ -67,23 +80,29 @@ function __privateEnvsDir()
   export STACK_INSTALLER_DOCKER_DIR=${INSTALLER_DIR}/docker
   export STACK_INSTALLER_DOCKER_FILE_DIR=${STACK_INSTALLER_DOCKER_DIR}/dockerfiles
   export STACK_INSTALLER_DOCKER_COMPOSE_DIR=${STACK_INSTALLER_DOCKER_DIR}/compose
+  logFinished 2 "__privateEnvsDir"
 }
 
 
 function utilPrepareInit()
 {
-  logStart "utilPrepareInit"
+  logStart 1 "utilPrepareInit"
   __privateEnvsPrepare
   __privateEnvsPublic
-  __privateEnvsDefault
-  __privateEnvsFinal
-  __privateEnvsDir
-  logFinished "utilPrepareInit"
+  if [ "$?" -eq 1 ]; then
+    __privateEnvsDefault
+    __privateEnvsFinal
+    __privateEnvsDir
+    logFinished 1 "utilPrepareInit"
+    return 1
+  fi
+  logFinished 1 "utilPrepareInit"
+  return 0
 }
 
 function __privateBuildDefault()
 {
-  logStart "__privateBuildDefault"
+  logStart 2 "__privateBuildDefault"
   if [[ ${APPLICATION_NAME} == "" ]]; then
     export APPLICATION_NAME=${STACK_PROJECT}
   fi
@@ -106,8 +125,8 @@ function __privateBuildDefault()
   export BUILD_TEMP_APP_ENV_FILE=${BUILD_TEMP_DIR}/env_file.env
   export BUILD_TEMP_APP_BIN_SRC_DIR=${STACK_APPLICATIONS_SOURCE_DIR}/${STACK_PROJECT}
 
-  makeDir ${BUILD_TEMP_DIR} 777
-  makeDir ${BUILD_TEMP_APP_DIR} 777
+  makeDir 3 ${BUILD_TEMP_DIR} 777
+  makeDir 3 ${BUILD_TEMP_APP_DIR} 777
 
   export DOCKER_FILE_NAME=${APPLICATION_STACK}.dockerfile
   export DOCKER_STACK_FILE_NAME=${APPLICATION_STACK}.yml
@@ -157,7 +176,7 @@ function __privateBuildDefault()
   fi  
 
   export APPLICATION_STORAGE_TARGET=${PUBLIC_STORAGE_DIR}/${STACK_PREFIX}
-  makeDir ${BUILD_TEMP_DIR} 777
+  makeDir 2 ${BUILD_TEMP_DIR} 777
   
   export BUILD_DEPLOY_DATA_DIR=${APPLICATION_STORAGE_TARGET}/${APPLICATION_NAME}
   export BUILD_DEPLOY_DATA_APP_DIR=${BUILD_DEPLOY_DATA_DIR}/data
@@ -171,16 +190,16 @@ function __privateBuildDefault()
     export APPLICATION_DEPLOY_DATA_BK_DIR=${BUILD_DEPLOY_DATA_BK_DIR}
   fi
 
-  makeDir ${BUILD_TEMP_DIR} 777
-  makeDir ${APPLICATION_DEPLOY_DATA_DIR} 777
-  makeDir ${APPLICATION_DEPLOY_BACKUP_DIR} 777
-  logFinished "__privateBuildDefault"
+  makeDir 2 ${BUILD_TEMP_DIR} 777
+  makeDir 2 ${APPLICATION_DEPLOY_DATA_DIR} 777
+  makeDir 2 ${APPLICATION_DEPLOY_BACKUP_DIR} 777
+  logFinished 2 "__privateBuildDefault"
 }
 
 function __privateBuildEnvs()
 {
-  logStart "__privateBuildEnvs"
-  logMethod "target: ${BUILD_TEMP_APP_ENV_FILE}"
+  logStart 2 "__privateBuildEnvs"
+  logMethod 2 "target: ${BUILD_TEMP_APP_ENV_FILE}"
 
   echo "#!/bin/bash" > ${BUILD_TEMP_APP_ENV_FILE} 
 
@@ -189,16 +208,16 @@ function __privateBuildEnvs()
   do
     ENV_FILE=${STACK_APPLICATIONS_ENV_DIR}/${ENV_NAME}
     if ! [[ -f ${ENV_FILE} ]]; then
-      logMethod "warning: ${ENV_FILE} not found"
+      logMethod 2 "warning: ${ENV_FILE} not found"
       continue;
     fi  
-    runSource ${ENV_FILE}
-    logMethod "info: append ${ENV_FILE}"
+    runSource 1 ${ENV_FILE} 
+    logMethod 2 "info: append ${ENV_FILE}"
     cat ${ENV_FILE} >> ${BUILD_TEMP_APP_ENV_FILE} 
   done
 
-  logMethod "info: parser info"
-  envsParserFile ${BUILD_TEMP_APP_ENV_FILE}
+  logMethod 2 "info: parser info"
+  envsParserFile 2 ${BUILD_TEMP_APP_ENV_FILE}
 
   echo "#join envs: ${APPLICATION_EXPORT_ENVS}" > ${BUILD_TEMP_APP_ENV_FILE}
   ENV_LIST=(${APPLICATION_EXPORT_ENVS})
@@ -206,13 +225,13 @@ function __privateBuildEnvs()
   do
     env | grep "^${ENV_NAME}">>${BUILD_TEMP_APP_ENV_FILE}
   done
-  logFinished "__privateBuildEnvs"
+  logFinished 2 "__privateBuildEnvs"
 }
 
 function utilPrepareStack()
 {
-  logStart "utilPrepareStack"
+  logStart 1 "utilPrepareStack"
   __privateBuildDefault
   __privateBuildEnvs
-  logFinished "utilPrepareStack"
+  logFinished 1 "utilPrepareStack"
 }

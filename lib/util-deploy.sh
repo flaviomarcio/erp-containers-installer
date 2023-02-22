@@ -7,7 +7,9 @@
 
 function deployImage()
 {
-  logStart "deployImage"
+  logStart 1 "deployImage"
+  logMethod ${1} "action: ${STACK_ACTION}"
+  logMethod  1 "project: ${STACK_PROJECT}"
   if [[ ${1} != "" && ${2} != "" ]]; then
     export STACK_ACTION=${1}
     export STACK_PROJECT=${2}
@@ -15,40 +17,42 @@ function deployImage()
   utilPrepareStack
   RUN_FILE="${STACK_INSTALLER_BIN_DIR}/prepare-${APPLICATION_STACK}.env"
 
-  runSource ${RUN_FILE}
+  runSource 1 ${RUN_FILE} 
 
   buildProjectPrepare ${STACK_ACTION} ${STACK_PROJECT}
   buildRegistryImage
 
   rm -rf ${BUILD_TEMP_DIR}
-  makeDir ${BUILD_TEMP_DIR} 777
-  makeDir ${BUILD_TEMP_APP_DIR} 777
+  makeDir 2 ${BUILD_TEMP_DIR} 777
+  makeDir 2 ${BUILD_TEMP_APP_DIR} 777
   
   export APPLICATION_FILTER=app*.jar
   export DOCKER_FILE_SRC=${STACK_INSTALLER_DOCKER_FILE_DIR}/${DOCKER_FILE_NAME}
   export DOCKER_FILE_DST=${BUILD_TEMP_DIR}/Dockerfile
 
-  logFinished "deployImage"
+  logFinished 1 "deployImage"
   return 1
 }
 
 
 function deployApp()
 {
-  logStart "deployApp"
+  logStart 1 "deployApp"
   if [[ ${1} != "" && ${2} != "" ]]; then
     export STACK_ACTION=${1}
     export STACK_PROJECT=${2}
   fi
+  logInfo 1 "action" ${STACK_ACTION}
+  logInfo 1 "project" ${STACK_PROJECT}
 
   utilPrepareStack
 
-  cdDir ${BUILD_TEMP_DIR};
+  cdDir 2 ${BUILD_TEMP_DIR};
   if ! [ "$?" -eq 1 ]; then
     return 0;
   fi
 
-  logMethod "build dir: ${PWD}" 1
+  logInfo 2 "build-dir" ${PWD}
 
   echo $'\n'"Deploying stack:[${STACK_PROJECT}], image:[${BUILD_DEPLOY_IMAGE_NAME}]"
   echo "  DNS Service: ${APPLICATION_DEPLOY_HOSTNAME}"
@@ -56,7 +60,7 @@ function deployApp()
   CHECK=$(docker stack ls | grep ${APPLICATION_CONTAINER_NAME})
   if [[ ${CHECK} != "" ]]; then
     if [[ ${STACK_LOG_VERBOSE} == 1 ]]; then
-      logMethod "docker stack rm ${APPLICATION_CONTAINER_NAME}" 1
+      logCommand 1 "docker stack rm ${APPLICATION_CONTAINER_NAME}"
       docker stack rm ${APPLICATION_CONTAINER_NAME}
     else
       echo $(docker stack rm ${APPLICATION_CONTAINER_NAME})&>/dev/null
@@ -65,8 +69,8 @@ function deployApp()
 
   COMPOSE_SRC=${STACK_INSTALLER_DOCKER_COMPOSE_DIR}/${DOCKER_STACK_FILE_NAME}
   COMPOSE_DST=${PWD}/docker-compose.yml
-  logMethod "source: ${COMPOSE_SRC}" 1
-  logMethod "destine: ${COMPOSE_DST}" 1
+  logInfo 1 "source" ${COMPOSE_SRC}
+  logInfo 1 "destine" ${COMPOSE_DST}
 
   rm -rf ${COMPOSE_DST}
   cp -r ${COMPOSE_SRC} ${COMPOSE_DST}
@@ -88,22 +92,25 @@ function deployApp()
   # echo "APPLICATION_DEPLOY_PORT=${APPLICATION_DEPLOY_PORT}"
   # echo "APPLICATION_DEPLOY_NETWORK_NAME=${APPLICATION_DEPLOY_NETWORK_NAME}"
 
-  logMethod "command: docker stack deploy -c ${COMPOSE_DST} ${APPLICATION_CONTAINER_NAME}" 1
+  logCommand ${1} "docker stack deploy -c ${COMPOSE_DST} ${APPLICATION_CONTAINER_NAME}"
   if [[ ${STACK_LOG_VERBOSE} == 1 ]]; then
     docker stack deploy -c ${COMPOSE_DST} ${APPLICATION_CONTAINER_NAME}
   else
     echo $(docker stack deploy -c ${COMPOSE_DST} ${APPLICATION_CONTAINER_NAME})&>/dev/null
   fi
-  logFinished "deployApp"
+  logFinished 1 "deployApp"
 }
 
 function deployImageApp()
 {
-  logStart "deployImageApp"
+  logStart 1 "deployImageApp"
   if [[ ${1} != "" && ${2} != "" ]]; then
     export STACK_ACTION=${1}
     export STACK_PROJECT=${2}
   fi
+  logMethod ${1} "action: ${STACK_ACTION}"
+  logMethod ${1} "project: ${STACK_PROJECT}"
   buildProjectPrepare ${STACK_ACTION} ${STACK_PROJECT}
   deployApp ${STACK_ACTION} ${STACK_PROJECT}
+  logFinished 1 "deployApp"
 }

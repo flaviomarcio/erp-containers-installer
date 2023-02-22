@@ -8,7 +8,9 @@
 
 function runOption()
 {
-  logStart "runOption"
+  logStart 1 "runOption"
+  logMethod 1 "action: ${STACK_ACTION}"
+  logMethod 1 "project: ${STACK_PROJECT}"
   
   export STACK_ACTION=${1}
   export STACK_PROJECT=${2}
@@ -16,16 +18,40 @@ function runOption()
   buildProjectPrepare ${STACK_ACTION} ${STACK_PROJECT}
 
   RUN_FILE=${STACK_INSTALLER_BIN_DIR}/${STACK_ACTION}
-  runSource ${RUN_FILE}
-  logFinished "runOption"
+  runSource 1 ${RUN_FILE} 
+  logFinished 1 "runOption"
 }
 
 function main()
 {
+  echo $(u-env Potiguar)>&/dev/null
+  utilInitialize "$@"
+
+  export STACK_ARGS=${1}
+  export STACK_ENVIRONMENT=${2}
+  export STACK_ACTION=${3}
+  export STACK_PROJECT=${4}
+
+  if [[ ${STACK_ENVIRONMENT} != "" && ${STACK_ACTION} != ""  && ${STACK_PROJECT} != "" ]] ; then
+    if utilPrepareInit != 1; then
+      exit 0;
+    fi
+    runOption ${STACK_ACTION} ${STACK_PROJECT}
+    return 1;
+  fi
+
+
+  export STACK_ENVIRONMENT=
+  export STACK_ACTION=
+  export STACK_PROJECT=
+
   if selectEnviroment != 1; then
     log "Invalid call selectEnviroment"
   else
-    utilPrepareInit
+    if utilPrepareInit != 1; then
+      exit 0;
+    fi
+    
     while :
     do
       cd ${ROOT_DIR}
@@ -48,5 +74,4 @@ function main()
   fi
 }
 
-utilInitialize "$@"
-main
+main "$@"
