@@ -217,7 +217,7 @@ function copyFileIfNotExists(){
 
 function utilInitialize()
 {
-  for PARAM in "$@" 
+  for PARAM in "$@"
   do
     if [[ $PARAM == "-l" ]]; then
       export STACK_LOG=1            
