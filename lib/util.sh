@@ -9,12 +9,19 @@ export STACK_RUN_BIN=${ROOT_DIR}/bin
 function toInt()
 {
   v=${1}
+  if [[ ${v} == "" ]]; then
+    v=0
+  fi
   [ ! -z "${v##*[!0-9]*}" ] && echo -n ${v} || echo 0;
 }
 
 function incInt()
 {
-  v=$(toInt ${1})
+  v=${1}
+  if [[ ${v} == "" ]]; then
+    v=0
+  fi
+  v=$(toInt ${v})
   let "v=${v} + 1"
   echo ${v}
 }
@@ -54,19 +61,19 @@ function log()
     FLG_1="${1}"
     FLG_2="${2}"
   else
-    FLG_1="${1} ${2}"
+    FLG_1="$@"
     FLG_2=
   fi
-
-  if [[ ${FLG_1} == "-l" || ${FLG_1} == "-lv" || ${FLG_1} == "-lvs" ]]; then
-    
-    if [[ ${FLG_2} != "" ]]; then
-      if [[ ${FLG_1} == "-l" && ${STACK_LOG} == 1 ]]; then
-        echo ".  ${FLG_2}"
-      elif [[ ${FLG_1} == "-lv" && ${STACK_LOG_VERBOSE} == 1 ]]; then
-        echo ".    ${FLG_2}"
-      elif [[ ${FLG_1} == "-lvs" && ${STACK_LOG_VERBOSE_SUPER} == 1 ]]; then
-        echo ".       ${FLG_2}"
+  if [[ ${FLG_1} == "-l" || ${FLG_1} == "-lv" || ${FLG_1} == "-lvs" ]]; then    
+    if [[ ${STACK_LOG} == 1 || ${STACK_LOG_VERBOSE} == 1 || ${STACK_LOG_VERBOSE_SUPER} == 1 ]]; then
+      if [[ ${FLG_2} != "" ]]; then
+        if [[ ${FLG_1} == "-l" && ${STACK_LOG} == 1 ]]; then
+          echo ".  ${FLG_2}"
+        elif [[ ${FLG_1} == "-lv" && ${STACK_LOG_VERBOSE} == 1 ]]; then
+          echo ".    ${FLG_2}"
+        elif [[ ${FLG_1} == "-lvs" && ${STACK_LOG_VERBOSE_SUPER} == 1 ]]; then
+          echo ".       ${FLG_2}"
+        fi
       fi
     fi
   elif [[ ${FLG_1} != "" ]]; then
@@ -89,30 +96,35 @@ function logInfo()
 {
   let "IDENT = $(toInt ${1}) + 1"
   if [[ ${2} != "" && ${3} != "" ]]; then
-    LOG="-${2}:${3}"
+    LOG="-${2}: ${3}"
   else
     LOG="-${2}"
   fi
   if [[ ${LOG} != "" ]]; then
-    logMethod ${IDENT} ${LOG}
+    logMethod ${IDENT} "${LOG}"
   fi
 }
 
 function logCommand()
 {
-  logInfo ${1} "command" ${2}
+  logInfo ${1} "command" "${2}"
 }
 
 function logTarget()
 {
-  logInfo ${1} "target" ${2}
+  logInfo ${1} "target" "${2}"
 }
 
 function logError()
 {
   if [[ ${2} != "" ]]; then
-    #logForce ${1} "error: ${2}"
-    logInfo ${1} "error: ${2}"
+    MSG="error: ${2}"
+    if [[ ${STACK_LOG} == 1 || ${STACK_LOG_VERBOSE} == 1 || ${STACK_LOG_VERBOSE_SUPER} == 1 ]]; then
+      logInfo ${1} "${MSG}"
+      log "${MSG}"
+    else
+      log "${MSG}"
+    fi
   fi
 }
 
@@ -121,51 +133,44 @@ function logSuccess()
   if [[ ${2} == "" ]]; then
     logInfo ${1} "result" "success"
   else
-    logInfo ${1} "result" "success" ${2}
+    logInfo ${1} "result" "success" "${2}"
   fi
 }
 
 function logStart()
 {
-  logMethod ${1} "started"
-  if [[ ${2} != "" ]]; then
-    logTarget ${1} ${2}
+  logInfo ${1} "${2}" "started"
+  if [[ ${3} != "" ]]; then
+    logInfo ${1} "message" "${3}"
   fi
 }
 
 function logFinished()
 {
-  if [[ ${2} != "" ]]; then
-    logInfo ${1} "message" ${2}
+  if [[ ${3} != "" ]]; then
+    logInfo ${1} "message" "${3}"
   fi
-  logMethod ${1} "finished"
+  logInfo ${1} "${2}" "finished"
 }
 
 function runSource()
 {
   RUN_FILE=${2}
   logStart ${1} "runSource"
-  logTarget ${1} ${FILE}
+  logTarget ${1} "${RUN_FILE}"
 
-  RUN_CHARS=$(logIdent ${1} "." })
-
-  logTarget ${1} ${RUN_FILE}
   if [[ ${RUN_FILE} == "" ]]; then
-    logError ${1} "run-file-is-empty"
+    logError ${1} "run file is empty"
   elif ! [[ -f ${RUN_FILE} ]]; then
-    logError ${1} "run-file-not-found"
+    logError ${1} "run file not found"
   else
     chmod +x ${RUN_FILE}
-    if [[ ${STACK_LOG_VERBOSE_SUPER} == 1 ]]; then
-      source ${RUN_FILE}
-    else
-      echo $(source ${RUN_FILE})&>/dev/null
-    fi
+    source ${RUN_FILE}
     logSuccess ${1}
     logFinished ${1} "runSource ${RUN_FILE}"
     return 1
   fi
-  logFinished ${1} "runSource ${RUN_FILE}"
+  logFinished ${1} "runSource" ${RUN_FILE}
   return 0
 }
 
@@ -177,7 +182,7 @@ function cdDir()
   logInfo ${1} "of" ${OLD_DIR}
   logInfo ${1} "to" ${NEW_DIR}
   if ! [[ -d ${NEW_DIR} ]]; then
-    logError ${1} "invalid-dir:${NEW_DIR}"
+    logError ${1} "invalid-dir: ${NEW_DIR}"
     return 0;
   fi
   cd ${NEW_DIR}
@@ -300,6 +305,9 @@ function copyFileIfNotExists()
 
 function utilInitialize()
 {
+  export STACK_LOG=0            
+  export STACK_LOG_VERBOSE=0            
+  export STACK_LOG_VERBOSE_SUPER=0
   for PARAM in "$@"
   do
     if [[ $PARAM == "-l" ]]; then
@@ -379,7 +387,7 @@ function envsParserDir()
         if [[ ${STACK_LOG_VERBOSE} == 1 ]]; then
           logInfo ${1} "parser-file" ${FILE}
         fi
-        envsParserFile $(incInt ${1}) ${FILE}
+        envsParserFile "$(incInt ${1})" ${FILE}
       done
     fi
   fi

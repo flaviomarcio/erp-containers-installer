@@ -8,18 +8,16 @@
 
 function runOption()
 {
-  logStart 1 "runOption"
-  logMethod 1 "action: ${STACK_ACTION}"
-  logMethod 1 "project: ${STACK_PROJECT}"
+  logStart ${1} "runOption"
+  logMethod ${1} "action: ${STACK_ACTION}"
+  logMethod ${1} "project: ${STACK_PROJECT}"
   
-  export STACK_ACTION=${1}
-  export STACK_PROJECT=${2}
-  
-  buildProjectPrepare ${STACK_ACTION} ${STACK_PROJECT}
+  export STACK_ACTION=${2}
+  export STACK_PROJECT=${3}
 
   RUN_FILE=${STACK_INSTALLER_BIN_DIR}/${STACK_ACTION}
-  runSource 1 ${RUN_FILE} 
-  logFinished 1 "runOption"
+  runSource "$(incInt ${1})" ${RUN_FILE} 
+  logFinished ${1} "runOption"
 }
 
 function main()
@@ -36,7 +34,8 @@ function main()
     if utilPrepareInit != 1; then
       exit 0;
     fi
-    runOption ${STACK_ACTION} ${STACK_PROJECT}
+    runOption 1 ${STACK_ACTION} ${STACK_PROJECT}
+    cd ${ROOT_DIR}
     return 1;
   fi
 
@@ -69,7 +68,7 @@ function main()
         log "Invalid selectProject"
         continue;
       fi
-      runOption ${STACK_ACTION} ${STACK_PROJECT}
+      runOption 1 ${STACK_ACTION} ${STACK_PROJECT}
     done
   fi
 }

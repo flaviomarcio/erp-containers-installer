@@ -4,7 +4,7 @@
 
 function main()
 {
-  deployImageApp
+  deployImageApp 1
 }
 
 main

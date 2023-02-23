@@ -5,23 +5,28 @@
 
 function buildProjectPrepare()
 {
-  logStart 1 "buildProjectPrepare"
-  if [[ ${1} != "" && ${2} != "" ]]; then
-    export STACK_ACTION=${1}
-    export STACK_PROJECT=${2}
+  logStart ${1} "buildProjectPrepare"
+  if [[ ${2} != "" && ${3} != "" ]]; then
+    export STACK_ACTION=${2}
+    export STACK_PROJECT=${3}
   fi
+  
   export STACK_APPLICATIONS_RUN=${STACK_APPLICATIONS_PROJECT_DIR}/${STACK_PROJECT}
-
   RUN_FILE=${STACK_APPLICATIONS_RUN}
+  runSource "$(incInt ${1})" ${RUN_FILE}
+  if ! [ "$?" -eq 1 ]; then
+    logFinished ${1} "buildProjectPrepare on execute ${STACK_APPLICATIONS_RUN}"
+    return 0;
+  fi
 
-  logMethod 1 "run ${RUN_FILE}"
-  runSource 1 ${RUN_FILE}  
-  logFinished 1 "buildProjectPrepare"
+  utilPrepareStack "$(incInt ${1})" ${STACK_ACTION} ${STACK_PROJECT}
+  logFinished ${1} "buildProjectPrepare"
+  return 1;
 }
 
 function buildProjectPull()
 {
-  logStart 1 "buildProjectPull"
+  logStart ${1} "buildProjectPull"
   GIT_REPOSITORY=${APPLICATION_GIT}
   GIT_BRANCH=${APPLICATION_GIT_BRANCH}
 
@@ -32,7 +37,7 @@ function buildProjectPull()
   fi
 
   echo $'\n'"Cloning repository: [${GIT_REPOSITORY}:${GIT_BRANCH}]"
-  cdDir 2 ${BUILD_TEMP_DIR}
+  cdDir ${1} ${BUILD_TEMP_DIR}
   if ! [ "$?" -eq 1 ]; then
     return 0;
   fi
@@ -43,7 +48,7 @@ function buildProjectPull()
     echo $(git clone ${GIT_REPOSITORY} src)>/dev/null    
   fi
 
-  cdDir 2 ${BUILD_TEMP_SOURCE_DIR};
+  cdDir ${1} ${BUILD_TEMP_SOURCE_DIR};
   if ! [ "$?" -eq 1 ]; then
     return 0;
   fi
@@ -63,29 +68,29 @@ function buildProjectPull()
   else
     return 0;
   fi   
-  logFinished 1 "buildProjectPull"
+  logFinished ${1} "buildProjectPull"
 }
 
 function buildProjectSource()
 {
-  logStart 1 "buildProjectSource"
-  log -lvs "call buildProjectSource:"
-  log -lvs ".    - target: ${BUILD_TEMP_SOURCE_DIR} "
+  logStart ${1} "buildProjectSource"
+  logTarget ${1} ${BUILD_TEMP_SOURCE_DIR}
 
   cdDir 2 ${BUILD_TEMP_SOURCE_DIR}
   if ! [ "$?" -eq 1 ]; then
-    log -lvs ".    - error: dir not found, fileName: ${BUILD_TEMP_SOURCE_DIR}"
+    logError "dir not found, fileName: ${BUILD_TEMP_SOURCE_DIR}"
     return 0;
   fi
 
-  if ! fileExists 2 "pom.xml"; then
-    log -lvs ".    - manven: ignored"
+  fileExists ${1} "pom.xml";
+  if ! [ "$?" -eq 1 ]; then
+    logCommand ${1} "manven:ignored"
     return 1;
   fi
 
   echo $'\n'"Building source [${BUILD_DEPLOY_IMAGE_NAME}]"
   
-  logCommand 1 "mvn clean install -DskipTests"
+  logCommand 1 "mvn_clean_install_-DskipTests"
   if [[ ${STACK_LOG_VERBOSE} == 1 ]]; then
     mvn clean install -DskipTests
   else
@@ -94,30 +99,30 @@ function buildProjectSource()
   cd ${ROOT_DIR}
   rm -rf ${BUILD_TEMP_APP_JAR};
   export APPLICATION_JAR=$(find ${BUILD_TEMP_SOURCE_DIR} -name 'app*.jar')
-  logCommand 1 "cp -r ${APPLICATION_JAR} ${BUILD_TEMP_APP_JAR}"      
+  logCommand ${1} "cp -r ${APPLICATION_JAR} ${BUILD_TEMP_APP_JAR}"      
   cp -r ${APPLICATION_JAR} ${BUILD_TEMP_APP_JAR}
 
-  logSuccess 1 "success"
-  logFinished 1 "buildProjectSource"
+  logSuccess ${1} "success"
+  logFinished ${1} "buildProjectSource"
   return 1;
 }
 
 function buildDockerFile()
 {
-  logStart 1 "buildDockerFile"
-  IMAGE_NAME=${1}
-  FILE_SRC=${2}
-  FILE_DST=${3}
+  logStart ${1} "buildDockerFile"
+  IMAGE_NAME=${2}
+  FILE_SRC=${3}
+  FILE_DST=${4}
   echo $'\n'"Building docker image [${IMAGE_NAME}]"
   echo $(rm -rf ${FILE_DST})>/dev/null
   if ! [[ -f ${FILE_SRC} ]]; then
-    echo $'\n'"Docker file not found [${FILE_SRC}]"
+      logError ${1} "Docker file not found [${FILE_SRC}]"
     __RETURN=1;
   else
     cp -r ${FILE_SRC} ${FILE_DST}
     cd ${BUILD_TEMP_DIR}
+    logCommand "$(incInt ${1})" "docker build -t ${IMAGE_NAME} ."
     if [[ ${STACK_LOG_VERBOSE} == 1 ]]; then
-      logCommand 1 "docker build -t ${IMAGE_NAME} ."
       docker build -t ${IMAGE_NAME} .
     else
       echo $(docker build -t ${IMAGE_NAME} .)>/dev/null
@@ -125,57 +130,60 @@ function buildDockerFile()
     cd ${ROOT_DIR}
     __RETURN=1;
   fi
-  logFinished 1 "buildDockerFile"
+  logFinished ${1} "buildDockerFile"
   return ${__RETURN}
 }
 
 function buildRegistryPush()
 {
-  logStart 1 "buildRegistryPush"
+  logStart ${1} "buildRegistryPush"
   IMAGE_NAME=${1}
   TAG_URL=${STACK_REGISTRY_DNS}/${IMAGE_NAME}
   echo $'\n'"Sending docker image [${IMAGE_NAME}] to registry"
+  logCommand ${1} "docker image tag ${IMAGE_NAME} ${TAG_URL}"
   if [[ ${STACK_LOG_VERBOSE_SUPER} == 1 ]]; then
-    logCommand 1 "docker image tag ${IMAGE_NAME} ${TAG_URL}"
     docker image tag ${IMAGE_NAME} ${TAG_URL}
   else
     echo $(docker image tag ${IMAGE_NAME} ${TAG_URL})&>/dev/null
   fi
+  logCommand ${1} "docker push ${TAG_URL}"
   if [[ ${STACK_LOG_VERBOSE_SUPER} == 1 ]]; then
-    logCommand 1 "docker push ${TAG_URL}"
     docker push ${TAG_URL}
   else
     echo $(docker push ${TAG_URL})&>/dev/null
   fi
 
-  #CHECK=$(docker image ls | grep ${IMAGE_NAME})
-  #if [[ ${CHECK} != "" ]]; then
-  #  echo $(docker image rm -f $(docker image ls | grep ${IMAGE_NAME} | awk '{print $3}' | sort --unique ))&>/dev/null
-  #fi
-  logFinished 1 "buildRegistryPush"
+  IMAGE_LIST_RM=($(docker image ls | grep ${IMAGE_NAME} | awk '{print $3}' | sort --unique ))
+
+  for IMAGE_ID in "${IMAGE_LIST_RM[@]}"
+  do
+    logCommand ${1} "docker image rm -f ${IMAGE_ID}"
+    echo $(docker image rm -f ${IMAGE_ID})&>/dev/null
+  done
+  logFinished ${1} "buildRegistryPush"
 }
 
 function buildRegistryImage()
 {
-  logStart 1 "buildRegistryImage"
+  logStart ${1} "buildRegistryImage"
   if [[ -d ${BUILD_TEMP_APP_BIN_SRC_DIR} ]]; then
     rm -rf ${BUILD_TEMP_APP_DIR}
     cp -r ${BUILD_TEMP_APP_BIN_SRC_DIR} ${BUILD_TEMP_APP_DIR}
   fi
 
-  buildProjectPull
+  buildProjectPull "$(incInt ${1})"
   if ! [ "$?" -eq 1 ]; then
     return 0;
   fi
 
-  buildProjectSource
+  buildProjectSource "$(incInt ${1})"
   if ! [ "$?" -eq 1 ]; then
     return 0;
   fi
 
-  buildDockerFile ${BUILD_DEPLOY_IMAGE_NAME} ${DOCKER_FILE_SRC} ${DOCKER_FILE_DST}
-  buildRegistryPush ${BUILD_DEPLOY_IMAGE_NAME}
-  logFinished 1 "buildRegistryImage"
-  return 1;   
+  buildDockerFile "$(incInt ${1})" ${BUILD_DEPLOY_IMAGE_NAME} ${DOCKER_FILE_SRC} ${DOCKER_FILE_DST}
+  buildRegistryPush "$(incInt ${1})" ${BUILD_DEPLOY_IMAGE_NAME}
+  logFinished ${1} "buildRegistryImage"
+  return ${1};   
 }
 

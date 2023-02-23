@@ -4,31 +4,31 @@
 
 function __privateEnvsPrepare()
 {    
-  logStart 2 "__privateEnvsPrepare"
+  logStart ${1} "__privateEnvsPrepare"
   export PUBLIC_APPLICATIONS_DIR=${HOME}/applications
   export PUBLIC_STORAGE_DIR=${PUBLIC_APPLICATIONS_DIR}/storage
   export PUBLIC_LIB_DIR=${PUBLIC_APPLICATIONS_DIR}/lib
 
   export STACK_DB_DROP=0
   export STACK_DOMAIN=portela-professional.com.br
-  logFinished 2 "__privateEnvsPrepare"
+  logFinished ${1} "__privateEnvsPrepare"
 }
 
 function __privateEnvsPublic()
 {
-  logStart 2 "__privateEnvsPublic"
+  logStart ${1} "__privateEnvsPublic"
   export PUBLIC_ENVIRONMENT_FILE=${PUBLIC_APPLICATIONS_DIR}/${STACK_ENVIRONMENT}/stack_envs.env
-  runSource 1 ${PUBLIC_ENVIRONMENT_FILE} 
+  runSource ${1} ${PUBLIC_ENVIRONMENT_FILE} 
   if ! [ "$?" -eq 1 ]; then
     return 0
   fi
-  logFinished 2 "__privateEnvsPublic"
+  logFinished ${1} "__privateEnvsPublic"
   return 1
 }
 
 function __privateEnvsDefault()
 {
-  logStart 2 "__privateEnvsDefault"
+  logStart ${1} "__privateEnvsDefault"
   if [[ ${QT_VERSION} == "" ]]; then
       export QT_VERSION=6.4.2
   fi
@@ -50,21 +50,21 @@ function __privateEnvsDefault()
   if [[ ${STACK_TARGET} == "" ]]; then
       export STACK_TARGET=company
   fi
-  logFinished 2 "__privateEnvsDefault"
+  logFinished ${1} "__privateEnvsDefault"
 }
 
 function __privateEnvsFinal()
 {
-  logStart 2 "__privateEnvsDefault"
+  logStart ${1} "__privateEnvsDefault"
   export STACK_PREFIX=${STACK_ENVIRONMENT}-${STACK_TARGET}
   export STACK_NETWORK_INBOUND=${STACK_PREFIX}-inbound
   export STACK_REGISTRY_DNS=${STACK_PREFIX}-registry.${STACK_DOMAIN}:5000
-  logFinished 2 "__privateEnvsFinal"
+  logFinished ${1} "__privateEnvsFinal"
 }
 
 function __privateEnvsDir()
 {
-  logStart 2 "__privateEnvsDir"
+  logStart ${1} "__privateEnvsDir"
   #APPLICATIONS DIR
   export STACK_APPLICATIONS_DIR=${ROOT_DIR}/applications
   export STACK_APPLICATIONS_PROJECT_DIR=${STACK_APPLICATIONS_DIR}/projects
@@ -80,29 +80,29 @@ function __privateEnvsDir()
   export STACK_INSTALLER_DOCKER_DIR=${INSTALLER_DIR}/docker
   export STACK_INSTALLER_DOCKER_FILE_DIR=${STACK_INSTALLER_DOCKER_DIR}/dockerfiles
   export STACK_INSTALLER_DOCKER_COMPOSE_DIR=${STACK_INSTALLER_DOCKER_DIR}/compose
-  logFinished 2 "__privateEnvsDir"
+  logFinished ${1} "__privateEnvsDir"
 }
 
 
 function utilPrepareInit()
 {
-  logStart 1 "utilPrepareInit"
-  __privateEnvsPrepare
-  __privateEnvsPublic
+  logStart ${1} "utilPrepareInit"
+  __privateEnvsPrepare "$(incInt ${1})"
+  __privateEnvsPublic "$(incInt ${1})"
   if [ "$?" -eq 1 ]; then
-    __privateEnvsDefault
-    __privateEnvsFinal
-    __privateEnvsDir
-    logFinished 1 "utilPrepareInit"
+    __privateEnvsDefault "$(incInt ${1})"
+    __privateEnvsFinal "$(incInt ${1})"
+    __privateEnvsDir "$(incInt ${1})"
+    logFinished ${1} "utilPrepareInit"
     return 1
   fi
-  logFinished 1 "utilPrepareInit"
+  logFinished ${1} "utilPrepareInit"
   return 0
 }
 
-function __privateBuildDefault()
+function __utilPrepareStackEnvsDefault()
 {
-  logStart 2 "__privateBuildDefault"
+  logStart ${1} "__utilPrepareStackEnvsDefault"
   if [[ ${APPLICATION_NAME} == "" ]]; then
     export APPLICATION_NAME=${STACK_PROJECT}
   fi
@@ -125,8 +125,8 @@ function __privateBuildDefault()
   export BUILD_TEMP_APP_ENV_FILE=${BUILD_TEMP_DIR}/env_file.env
   export BUILD_TEMP_APP_BIN_SRC_DIR=${STACK_APPLICATIONS_SOURCE_DIR}/${STACK_PROJECT}
 
-  makeDir 3 ${BUILD_TEMP_DIR} 777
-  makeDir 3 ${BUILD_TEMP_APP_DIR} 777
+  makeDir "$(incInt ${1})" ${BUILD_TEMP_DIR} 777
+  makeDir "$(incInt ${1})" ${BUILD_TEMP_APP_DIR} 777
 
   export DOCKER_FILE_NAME=${APPLICATION_STACK}.dockerfile
   export DOCKER_STACK_FILE_NAME=${APPLICATION_STACK}.yml
@@ -156,7 +156,7 @@ function __privateBuildDefault()
   fi
 
   if [[ ${APPLICATION_DEPLOY_HOSTNAME} == "" ]]; then
-    export APPLICATION_DEPLOY_HOSTNAME=${APPLICATION_CONTAINER_NAME}
+    export APPLICATION_DEPLOY_HOSTNAME=${BUILD_DEPLOY_CONTAINER_NAME}
   fi
  
   if [[ ${APPLICATION_DEPLOY_MODE} == "" ]]; then
@@ -176,7 +176,7 @@ function __privateBuildDefault()
   fi  
 
   export APPLICATION_STORAGE_TARGET=${PUBLIC_STORAGE_DIR}/${STACK_PREFIX}
-  makeDir 2 ${BUILD_TEMP_DIR} 777
+  makeDir "$(incInt ${1})" ${BUILD_TEMP_DIR} 777
   
   export BUILD_DEPLOY_DATA_DIR=${APPLICATION_STORAGE_TARGET}/${APPLICATION_NAME}
   export BUILD_DEPLOY_DATA_APP_DIR=${BUILD_DEPLOY_DATA_DIR}/data
@@ -190,16 +190,16 @@ function __privateBuildDefault()
     export APPLICATION_DEPLOY_DATA_BK_DIR=${BUILD_DEPLOY_DATA_BK_DIR}
   fi
 
-  makeDir 2 ${BUILD_TEMP_DIR} 777
-  makeDir 2 ${APPLICATION_DEPLOY_DATA_DIR} 777
-  makeDir 2 ${APPLICATION_DEPLOY_BACKUP_DIR} 777
-  logFinished 2 "__privateBuildDefault"
+  makeDir "$(incInt ${1})" ${BUILD_TEMP_DIR} 777
+  makeDir "$(incInt ${1})" ${APPLICATION_DEPLOY_DATA_DIR} 777
+  makeDir "$(incInt ${1})" ${APPLICATION_DEPLOY_BACKUP_DIR} 777
+  logFinished ${1} "__utilPrepareStackEnvsDefault"
 }
 
-function __privateBuildEnvs()
+function __utilPrepareStackEnvs()
 {
-  logStart 2 "__privateBuildEnvs"
-  logMethod 2 "target: ${BUILD_TEMP_APP_ENV_FILE}"
+  logStart ${1} "__utilPrepareStackEnvs"
+  logTarget ${1} "target" ${BUILD_TEMP_APP_ENV_FILE}
 
   echo "#!/bin/bash" > ${BUILD_TEMP_APP_ENV_FILE} 
 
@@ -211,12 +211,12 @@ function __privateBuildEnvs()
       logMethod 2 "warning: ${ENV_FILE} not found"
       continue;
     fi  
-    runSource 1 ${ENV_FILE} 
-    logMethod 2 "info: append ${ENV_FILE}"
+    runSource "$(incInt ${1})" ${ENV_FILE} 
+    logMethod "$(incInt ${1})" "info: append ${ENV_FILE}"
     cat ${ENV_FILE} >> ${BUILD_TEMP_APP_ENV_FILE} 
   done
 
-  logMethod 2 "info: parser info"
+  logMethod ${1} "info: parser info"
   envsParserFile 2 ${BUILD_TEMP_APP_ENV_FILE}
 
   echo "#join envs: ${APPLICATION_EXPORT_ENVS}" > ${BUILD_TEMP_APP_ENV_FILE}
@@ -225,13 +225,13 @@ function __privateBuildEnvs()
   do
     env | grep "^${ENV_NAME}">>${BUILD_TEMP_APP_ENV_FILE}
   done
-  logFinished 2 "__privateBuildEnvs"
+  logFinished ${1} "__utilPrepareStackEnvs"
 }
 
 function utilPrepareStack()
 {
-  logStart 1 "utilPrepareStack"
-  __privateBuildDefault
-  __privateBuildEnvs
-  logFinished 1 "utilPrepareStack"
+  logStart ${1} "utilPrepareStack"
+  __utilPrepareStackEnvsDefault "$(incInt ${1})"
+  __utilPrepareStackEnvs "$(incInt ${1})"
+  logFinished ${1} "utilPrepareStack"
 }
