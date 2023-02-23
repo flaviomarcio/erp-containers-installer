@@ -74,7 +74,7 @@ function deployApp()
         logCommand ${1} "docker stack rm ${APPLICATION_CONTAINER_NAME}"
         docker stack rm ${APPLICATION_CONTAINER_NAME}
       else
-        echo $(docker stack rm ${APPLICATION_CONTAINER_NAME})&>/dev/null
+        echo $(docker stack rm ${APPLICATION_CONTAINER_NAME})&>/dev/null&>/dev/null
       fi    
     fi
 

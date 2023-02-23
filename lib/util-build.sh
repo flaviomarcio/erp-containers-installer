@@ -36,7 +36,7 @@ function buildProjectPull()
     return 1
   fi
 
-  echo $'\n'"Cloning repository: [${GIT_REPOSITORY}:${GIT_BRANCH}]"
+  log $'\n'"Cloning repository: [${GIT_REPOSITORY}:${GIT_BRANCH}]"
   cdDir ${1} ${BUILD_TEMP_DIR}
   if ! [ "$?" -eq 1 ]; then
     return 0;
@@ -88,7 +88,7 @@ function buildProjectSource()
     return 1;
   fi
 
-  echo $'\n'"Building source [${BUILD_DEPLOY_IMAGE_NAME}]"
+  log "Building source [${BUILD_DEPLOY_IMAGE_NAME}]"
   
   logCommand 1 "mvn_clean_install_-DskipTests"
   if [[ ${STACK_LOG_VERBOSE} == 1 ]]; then
@@ -113,7 +113,7 @@ function buildDockerFile()
   IMAGE_NAME=${2}
   FILE_SRC=${3}
   FILE_DST=${4}
-  echo $'\n'"Building docker image [${IMAGE_NAME}]"
+  log "Building docker image [${IMAGE_NAME}]"
   echo $(rm -rf ${FILE_DST})>/dev/null
   if ! [[ -f ${FILE_SRC} ]]; then
       logError ${1} "Docker file not found [${FILE_SRC}]"
@@ -137,7 +137,7 @@ function buildDockerFile()
 function buildRegistryPush()
 {
   logStart ${1} "buildRegistryPush"
-  IMAGE_NAME=${1}
+  IMAGE_NAME=${2}
   TAG_URL=${STACK_REGISTRY_DNS}/${IMAGE_NAME}
   echo $'\n'"Sending docker image [${IMAGE_NAME}] to registry"
   logCommand ${1} "docker image tag ${IMAGE_NAME} ${TAG_URL}"
