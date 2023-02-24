@@ -1,6 +1,6 @@
 #!/bin/bash
 
-. ${INSTALLER_DIR}/lib/util.sh
+. ${BASH_BIN}/bash-util.sh
 . ${INSTALLER_DIR}/lib/util-prepare.sh
 . ${INSTALLER_DIR}/lib/util-selectors.sh
 
