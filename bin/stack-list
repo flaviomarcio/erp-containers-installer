@@ -1,0 +1,18 @@
+#!/bin/bash
+
+. ${BASH_BIN}/bash-util.sh
+. ${INSTALLER_DIR}/lib/util-selectors.sh
+
+function stackList()
+{
+    logStart ${1}"stackList"
+
+    for ENV in "${APPLICATION_LIST[@]}"
+    do 
+        runOption "$(incInt ${1]})" ${STACK_ACTION} ${STACK_PROJECT}
+
+    done
+    logFinished ${1} "stackList"
+}
+
+stackList 1

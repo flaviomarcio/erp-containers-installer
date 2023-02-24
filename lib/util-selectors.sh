@@ -71,3 +71,17 @@ function selectEnviroment()
   done
   return 1;
 }
+
+function runOption()
+{
+  logStart ${1} "runOption"
+  logMethod ${1} "action: ${STACK_ACTION}"
+  logMethod ${1} "project: ${STACK_PROJECT}"
+  
+  export STACK_ACTION=${2}
+  export STACK_PROJECT=${3}
+
+  RUN_FILE=${STACK_INSTALLER_BIN_DIR}/${STACK_ACTION}
+  runSource "$(incInt ${1})" ${RUN_FILE} 
+  logFinished ${1} "runOption"
+}
