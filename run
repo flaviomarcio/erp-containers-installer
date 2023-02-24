@@ -1,5 +1,6 @@
 #!/bin/bash
 
+export BASH_BIN=${PWD}/bash-bin
 . ${PWD}/bash-bin/bash-util.sh
 . ${INSTALLER_DIR}/lib/util-prepare.sh
 . ${INSTALLER_DIR}/lib/util-selectors.sh
