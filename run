@@ -23,7 +23,6 @@ function runOption()
 function main()
 {
   echo $(u-env Potiguar)>&/dev/null
-  utilInitialize "$@"
 
   export STACK_ARGS=${1}
   export STACK_ENVIRONMENT=${2}
@@ -73,4 +72,5 @@ function main()
   fi
 }
 
+utilInitialize "$@"
 main "$@"
