@@ -22,6 +22,7 @@ function __privateEnvsPublic()
   if ! [ "$?" -eq 1 ]; then
     return 0
   fi
+
   logFinished ${1} "__privateEnvsPublic"
   return 1
 }
@@ -68,11 +69,12 @@ function __privateEnvsDir()
   #APPLICATIONS DIR
   export STACK_APPLICATIONS_DIR=${ROOT_DIR}/applications
   export STACK_APPLICATIONS_PROJECT_DIR=${STACK_APPLICATIONS_DIR}/projects
-  export STACK_APPLICATIONS_DB_DIR=${STACK_APPLICATIONS_DIR}/db  
   export STACK_APPLICATIONS_DATA_DIR=${STACK_APPLICATIONS_DIR}/data
-  export STACK_APPLICATIONS_ENV_DIR=${STACK_APPLICATIONS_DATA_DIR}/envs
-  export STACK_APPLICATIONS_CONFIG_DIR=${STACK_APPLICATIONS_DATA_DIR}/conf
-  export STACK_APPLICATIONS_SOURCE_DIR=${STACK_APPLICATIONS_DATA_DIR}/source
+  export STACK_APPLICATIONS_DATA_ENV_DIR=${STACK_APPLICATIONS_DATA_DIR}/envs
+  export STACK_APPLICATIONS_DATA_CONF_DIR=${STACK_APPLICATIONS_DATA_DIR}/conf
+  export STACK_APPLICATIONS_DATA_SRC_DIR=${STACK_APPLICATIONS_DATA_DIR}/source
+  export STACK_APPLICATIONS_DATA_DB_DIR=${STACK_APPLICATIONS_DATA_DIR}/db
+
 
   #INSTALLER DIR
   export STACK_INSTALLER_BIN_DIR=${INSTALLER_DIR}/bin
@@ -210,10 +212,7 @@ function __utilPrepareStackEnvs()
   do
     echo "" >> ${BUILD_TEMP_APP_ENV_FILE}
     echo "" >> ${BUILD_TEMP_APP_ENV_FILE} 
-    echo "#env file ${ENV_NAME} to ${BUILD_TEMP_APP_ENV_FILE}" >> ${BUILD_TEMP_APP_ENV_FILE} 
-    echo "" >> ${BUILD_TEMP_APP_ENV_FILE} 
-    echo "" >> ${BUILD_TEMP_APP_ENV_FILE} 
-    ENV_FILE=${STACK_APPLICATIONS_ENV_DIR}/${ENV_NAME}
+    ENV_FILE=${STACK_APPLICATIONS_DATA_ENV_DIR}/${ENV_NAME}
     if ! [[ -f ${ENV_FILE} ]]; then
       logWarning ${1} "${ENV_FILE} not found"
       continue;
@@ -222,18 +221,12 @@ function __utilPrepareStackEnvs()
     logMethod "$(incInt ${1})" "info: append ${ENV_FILE}"
     cat ${ENV_FILE} >> ${BUILD_TEMP_APP_ENV_FILE} 
   done
-
-  logMethod ${1} "info: parser info"
-  envsParserFile 2 ${BUILD_TEMP_APP_ENV_FILE}
-
-  # echo "#join envs: ${APPLICATION_EXPORT_ENVS}" > ${BUILD_TEMP_APP_ENV_FILE}
-  # ENV_LIST=(${APPLICATION_EXPORT_ENVS})
-  # for ENV_NAME in "${ENV_LIST[@]}"
-  # do
-  #   env | grep "^${ENV_NAME}">>${BUILD_TEMP_APP_ENV_FILE}
-  # done
+  envsParserFile ${1} ${BUILD_TEMP_APP_ENV_FILE}
+  runSource ${1} ${BUILD_TEMP_APP_ENV_FILE}
+  envsToSimpleEnvs ${1} ${BUILD_TEMP_APP_ENV_FILE}
   logFinished ${1} "__utilPrepareStackEnvs"
 }
+
 
 function utilPrepareStack()
 {

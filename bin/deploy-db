@@ -1,39 +1,10 @@
 #!/bin/bash
 
-. ${BASH_BIN}/bash-util.sh
-
-function run()
-{
-  DIR=${STACK_APPLICATIONS_SOURCE_DIR}/${STACK_PROJECT}
-  if ! [[ -d ${DIR} ]]; then
-      echo "Invalid db for stack ${STACK_PROJECT}"
-      return 0;
-  fi
-  RUN_FILE=${DIR}/${STACK_ACTION}
-  log -lv "call ${RUN_FILE}"
-  ${RUN_FILE} ${DIR}
-}
-
-function select_data()
-{
-  echo ""
-  
-  OPTDIR=${STACK_APPLICATIONS_DB_DIR}
-  options=(back container storage)    
-  PS3='Please select a local data: '
-  select opt in "${options[@]}"
-  do
-    if [[ ${opt} == "back" ]]; then
-      return 0;
-    fi
-    run
-    return 0;
-  done
-}
+. ${INSTALLER_DIR}/lib/util-deploy-db.sh
 
 function main()
 {
-  run
+  deployDb 1
 }
 
 main

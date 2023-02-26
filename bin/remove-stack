@@ -1,20 +1,3 @@
 #!/bin/bash
 
 . ${BASH_BIN}/bash-util.sh
-
-function call()
-{
-    echo ""    
-    log -lv "Removing ${APPLICATION_CONTAINER_NAME}"
-    log -lv "docker stack rm $(docker stack rm $(docker stack ls | grep ${APPLICATION_CONTAINER_NAME} | awk '{print $1}'))"        
-    echo $(docker stack rm $(docker stack rm $(docker stack ls | grep ${APPLICATION_CONTAINER_NAME} | awk '{print $1}')))&>/dev/null
-}
-
-function main()
-{
-    selectEnviroment
-    selectProject
-    call
-}
-
-main

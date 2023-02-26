@@ -7,7 +7,7 @@ function selectProject()
 {
   echo ""  
   if [[ ${STACK_ACTION} == "deploy-db" || ${STACK_ACTION} == "deploy-db-drop"  ]]; then
-    OPTDIR=${STACK_APPLICATIONS_DB_DIR}
+    OPTDIR=${STACK_APPLICATIONS_DATA_DB_DIR}
   else
     OPTDIR=${STACK_APPLICATIONS_PROJECT_DIR}
   fi
