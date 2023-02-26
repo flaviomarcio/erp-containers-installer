@@ -6,6 +6,7 @@
 
 function deployPG_prepare()
 {
+    logFinished ${1} "deployPG_prepare"
     APPLICATION_DB_HOST_FIX=localhost
     ERP_SQL_FILE_SCRIPT_TEMP="/tmp/tmp_scrpt.sql"
     ERP_SQL_FILE_SCRIPT_TEMP_FULL="/tmp/tmp_scrpt-log.sql"
@@ -33,10 +34,12 @@ function deployPG_prepare()
         log "Invalid env: APPLICATION_DB_PORT=${APPLICATION_DB_PORT}"
         exit 0;
     fi
+    logFinished ${1} "deployPG_prepare"
 }
 
 function deployPG_pgpassCheck()
 {
+    logStart ${1} "deployPG_pgpassCheck"
     POSTGRES_PGPASS=${HOME}/.pgpass
     POSTGRES_SERVER=localhost
     AUTH="${APPLICATION_DB_HOST_FIX}:${APPLICATION_DB_PORT}:${APPLICATION_DB_DATABASE}:${APPLICATION_DB_USER}:${APPLICATION_DB_PASSWORD}">${POSTGRES_PGPASS}
@@ -45,29 +48,30 @@ function deployPG_pgpassCheck()
         echo ${AUTH} >> ${POSTGRES_PGPASS}
     fi
     chmod 0600 ${POSTGRES_PGPASS};
+    logFinished ${1} "deployPG_pgpassCheck"
 }
 
 
 function deployPG_runScripts()
 {
     logStart ${1} "deployPG_runScripts"
-    #cd ${DEPLOY_DB_PG_DDL_DIR};
-    SCRIPTS_STEP_DIR=$1
-    #SCRIPTS_STEP_FILES=($2)
+    SCRIPTS_STEP_DIR=${2}
 
     for SCRIPT_STEP_FILENAME in "${SCRIPTS_STEP_FILES[@]}"
     do
         FILTER="${SCRIPT_STEP_FILENAME}*.sql"
         log "              Upgrade [${FILTER}] in [./$(basename ${SCRIPTS_STEP_DIR})]";      
-        for FILENAME_SCRIPT in $(find ${SCRIPTS_STEP_DIR} -iname ${FILTER} | sort)
+        FILELIST=($(find ${SCRIPTS_STEP_DIR} -iname ${FILTER} | sort))
+        for FILE in "${FILELIST[@]}"
         do
-            FILENAME=$(basename ${FILENAME_SCRIPT})
-            DIRNAME=$(dirname ${FILENAME_SCRIPT}) 
+            FILENAME=$(basename ${FILE})
+            DIRNAME=$(dirname ${FILE}) 
             DIRNAME=$(basename ${DIRNAME})
             DIRNAME=$(basename ${DIRNAME})
-            log "                  executing [./${DIRNAME}], ${FILENAME}";            
+            log "                  executing [./${DIRNAME}], ${FILENAME} to ${ERP_SQL_FILE_SCRIPT_TEMP}";            
             echo "set client_min_messages to WARNING; ">${ERP_SQL_FILE_SCRIPT_TEMP};
-            cat ${FILENAME_SCRIPT} >> ${ERP_SQL_FILE_SCRIPT_TEMP};
+            cat ${FILE} >> ${ERP_SQL_FILE_SCRIPT_TEMP};
+            logCommand ${1} "psql -h ${APPLICATION_DB_HOST_FIX} -U ${APPLICATION_DB_USER} -p ${APPLICATION_DB_PORT} -d ${APPLICATION_DB_DATABASE} -a -f ${ERP_SQL_FILE_SCRIPT_TEMP}"
             echo $(psql -h ${APPLICATION_DB_HOST_FIX} -U ${APPLICATION_DB_USER} -p ${APPLICATION_DB_PORT} -d ${APPLICATION_DB_DATABASE} -a -f ${ERP_SQL_FILE_SCRIPT_TEMP})#>/dev/null;
         done
     done
@@ -77,14 +81,6 @@ function deployPG_runScripts()
 function deployPG_paramCheck()
 {
     logStart ${1} "deployPG_paramCheck"
-    FLAG_ADDRESS="0"
-
-    for PARAM in "$@" 
-    do
-        if [[ "${PARAM}" == "-addr" ]]; then
-            FLAG_ADDRESS="1";
-        fi; 
-    done
     logFinished ${1} "deployPG_paramCheck"
 }
 
@@ -97,41 +93,35 @@ function deployPG_scriptScan()
         return 1;
     fi
 
-    if [[ ${FLAG_ADDRESS} == "1" ]];then
-        #cd ${DEPLOY_DB_PG_DDL_DIR_ADDRESS};
-        echo $'\n'"     UpdateDB Fdw files uncompress";
-        echo "$'\n'         Postgres erp-address-database";
-        echo $(unzip -qq ${DEPLOY_DB_PG_DDL_DIR_ADDRESS_FILE})>/dev/null;
-    fi
-
     cd $ERP_ROOT;
     echo $'\n'"      UpdateDB upgrade steps";
     echo $'\n'"         UpdateDB erp-services-database step 1";
 
     SCRIPTS_STEP_DIR=${DEPLOY_DB_PG_DDL_DIR_SERVICE}
     SCRIPTS_STEP_FILES=(schemas databases)
-    deployPG_runScripts ${DEPLOY_DB_PG_DDL_DIR}
+    deployPG_runScripts ${1} ${DEPLOY_DB_PG_DDL_DIR}
 
     echo $'\n'"         UpdateDB erp-database";
     SCRIPTS_STEP_DIR=${DEPLOY_DB_PG_DDL_DIR}
     SCRIPTS_STEP_FILES=(schemas tables constraints view_00 view_01 view_02 view_03 indexes dblink initdata fakedata fakedata)
-    deployPG_runScripts ${SCRIPTS_STEP_DIR}
+    deployPG_runScripts ${1} ${SCRIPTS_STEP_DIR}
 
 
     echo $'\n'"         UpdateDB erp-database";
     SCRIPTS_STEP_DIR=${DEPLOY_DB_PG_DDL_DIR}
     SCRIPTS_STEP_FILES=(maintenance)
-    deployPG_runScripts ${SCRIPTS_STEP_DIR}
+    deployPG_runScripts ${1} ${SCRIPTS_STEP_DIR}
     logFinished ${1} "deployPG_scriptScan"
 }
 
 function deployPG()
 {
+    idt="$(incInt ${1})"
     export DEPLOY_DB_PG_DDL_DIR=${2}
-    deployPG_prepare
-    deployPG_pgpassCheck
-    deployPG_paramCheck
-    deployPG_scriptScan
+    deployPG_prepare ${idt}
+    deployPG_pgpassCheck ${idt}
+    deployPG_paramCheck ${idt}
+    deployPG_scriptScan ${idt}
     return 1
 }
 
