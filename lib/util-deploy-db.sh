@@ -6,7 +6,7 @@
 
 function deployPG_prepare()
 {
-    DB_HOST_FIX=localhost
+    APPLICATION_DB_HOST_FIX=localhost
     ERP_SQL_FILE_SCRIPT_TEMP="/tmp/tmp_scrpt.sql"
     ERP_SQL_FILE_SCRIPT_TEMP_FULL="/tmp/tmp_scrpt-log.sql"
 
