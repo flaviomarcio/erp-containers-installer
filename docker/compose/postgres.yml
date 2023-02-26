@@ -6,7 +6,7 @@ networks:
     external: true
     
 services:
-  postgres:
+  pg:
     image: ${APPLICATION_DEPLOY_IMAGE}
     hostname: ${APPLICATION_DEPLOY_HOSTNAME}
     volumes:
