@@ -76,9 +76,15 @@ function buildProjectSource()
   logStart ${1} "buildProjectSource"
   logTarget ${1} ${BUILD_TEMP_SOURCE_DIR}
 
+  if [[ ${GIT_REPOSITORY} == "" ]]; then
+    logInfo ${1} "ignored: ${BUILD_TEMP_SOURCE_DIR}"
+    logMessage ${1} "No git repository"
+    return 1
+  fi
+
   cdDir 2 ${BUILD_TEMP_SOURCE_DIR}
   if ! [ "$?" -eq 1 ]; then
-    logError "dir not found, fileName: ${BUILD_TEMP_SOURCE_DIR}"
+    logError ${1} "dir not found, fileName: ${BUILD_TEMP_SOURCE_DIR}"
     return 0;
   fi
 
@@ -180,6 +186,11 @@ function buildRegistryImage()
   if ! [ "$?" -eq 1 ]; then
     return 0;
   fi
+
+  echo " buildDockerFile ${1} ${BUILD_DEPLOY_IMAGE_NAME} ${DOCKER_FILE_SRC} ${DOCKER_FILE_DST}"
+  echo " buildDockerFile ${1} ${BUILD_DEPLOY_IMAGE_NAME} ${DOCKER_FILE_SRC} ${DOCKER_FILE_DST}"
+  echo " buildDockerFile ${1} ${BUILD_DEPLOY_IMAGE_NAME} ${DOCKER_FILE_SRC} ${DOCKER_FILE_DST}"
+  echo " buildDockerFile ${1} ${BUILD_DEPLOY_IMAGE_NAME} ${DOCKER_FILE_SRC} ${DOCKER_FILE_DST}"
 
   buildDockerFile "$(incInt ${1})" ${BUILD_DEPLOY_IMAGE_NAME} ${DOCKER_FILE_SRC} ${DOCKER_FILE_DST}
   buildRegistryPush "$(incInt ${1})" ${BUILD_DEPLOY_IMAGE_NAME}

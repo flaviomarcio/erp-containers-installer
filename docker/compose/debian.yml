@@ -9,8 +9,8 @@ services:
   debian:
     image: ${APPLICATION_DEPLOY_IMAGE}
     hostname: ${APPLICATION_DEPLOY_HOSTNAME}
-    env_file:
-      - ${APPLICATION_DEPLOY_ENV_FILE}
+    # env_file:
+    #   - ${APPLICATION_DEPLOY_ENV_FILE}
     environment:
       - SERVER_CONTEXT_PATH=${APPLICATION_DEPLOY_CONTEXT_PATH}
     volumes:

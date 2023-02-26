@@ -13,9 +13,9 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - ${APPLICATION_DEPLOY_DATA_DIR}:/postgresql/pg/data
       - ${APPLICATION_DEPLOY_BACKUP_DIR}:/postgresql/pg/backup
-      - ${STACK_APPLICATIONS_CONFIG_DIR}/postgres/pg_hba.conf:/etc/postgresql/pg_hba.conf
-    env_file:
-     - ${APPLICATION_DEPLOY_ENV_FILE}
+    #   - ${STACK_APPLICATIONS_CONFIG_DIR}/postgres/pg_hba.conf:/etc/postgresql/pg_hba.conf
+    # env_file:
+    #  - ${APPLICATION_DEPLOY_ENV_FILE}
     environment:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}

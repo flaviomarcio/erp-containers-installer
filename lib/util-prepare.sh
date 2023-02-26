@@ -130,6 +130,8 @@ function __utilPrepareStackEnvsDefault()
 
   export DOCKER_FILE_NAME=${APPLICATION_STACK}.dockerfile
   export DOCKER_STACK_FILE_NAME=${APPLICATION_STACK}.yml
+  export DOCKER_FILE_SRC=${STACK_INSTALLER_DOCKER_FILE_DIR}/${DOCKER_FILE_NAME}
+  export DOCKER_FILE_DST=${BUILD_TEMP_DIR}/Dockerfile
   
   if [[ ${APPLICATION_DEPLOY_PORT} == "" ]]; then
     export APPLICATION_DEPLOY_PORT=${BUILD_DEPLOY_PORT}
@@ -199,16 +201,21 @@ function __utilPrepareStackEnvsDefault()
 function __utilPrepareStackEnvs()
 {
   logStart ${1} "__utilPrepareStackEnvs"
-  logTarget ${1} "target" ${BUILD_TEMP_APP_ENV_FILE}
+  logTarget ${1} ${BUILD_TEMP_APP_ENV_FILE}
 
   echo "#!/bin/bash" > ${BUILD_TEMP_APP_ENV_FILE} 
 
   ENV_LIST=(default.env ${APPLICATION_ENV_FILES})
   for ENV_NAME in "${ENV_LIST[@]}"
   do
+    echo "" >> ${BUILD_TEMP_APP_ENV_FILE}
+    echo "" >> ${BUILD_TEMP_APP_ENV_FILE} 
+    echo "#env file ${ENV_NAME} to ${BUILD_TEMP_APP_ENV_FILE}" >> ${BUILD_TEMP_APP_ENV_FILE} 
+    echo "" >> ${BUILD_TEMP_APP_ENV_FILE} 
+    echo "" >> ${BUILD_TEMP_APP_ENV_FILE} 
     ENV_FILE=${STACK_APPLICATIONS_ENV_DIR}/${ENV_NAME}
     if ! [[ -f ${ENV_FILE} ]]; then
-      logMethod 2 "warning: ${ENV_FILE} not found"
+      logWarning ${1} "${ENV_FILE} not found"
       continue;
     fi  
     runSource "$(incInt ${1})" ${ENV_FILE} 
@@ -219,12 +226,12 @@ function __utilPrepareStackEnvs()
   logMethod ${1} "info: parser info"
   envsParserFile 2 ${BUILD_TEMP_APP_ENV_FILE}
 
-  echo "#join envs: ${APPLICATION_EXPORT_ENVS}" > ${BUILD_TEMP_APP_ENV_FILE}
-  ENV_LIST=(${APPLICATION_EXPORT_ENVS})
-  for ENV_NAME in "${ENV_LIST[@]}"
-  do
-    env | grep "^${ENV_NAME}">>${BUILD_TEMP_APP_ENV_FILE}
-  done
+  # echo "#join envs: ${APPLICATION_EXPORT_ENVS}" > ${BUILD_TEMP_APP_ENV_FILE}
+  # ENV_LIST=(${APPLICATION_EXPORT_ENVS})
+  # for ENV_NAME in "${ENV_LIST[@]}"
+  # do
+  #   env | grep "^${ENV_NAME}">>${BUILD_TEMP_APP_ENV_FILE}
+  # done
   logFinished ${1} "__utilPrepareStackEnvs"
 }
 

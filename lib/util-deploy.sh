@@ -31,8 +31,6 @@ function deployImage()
     makeDir "$(incInt ${1})" ${BUILD_TEMP_APP_DIR} 777
     
     export APPLICATION_FILTER=app*.jar
-    export DOCKER_FILE_SRC=${STACK_INSTALLER_DOCKER_FILE_DIR}/${DOCKER_FILE_NAME}
-    export DOCKER_FILE_DST=${BUILD_TEMP_DIR}/Dockerfile
   fi
 
   logFinished ${1} "deployImage"
