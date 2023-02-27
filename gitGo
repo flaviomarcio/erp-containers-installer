@@ -1,0 +1,10 @@
+#!/bin/bash
+
+LOCALDIR=${PWD}
+
+cd ${LOCALDIR}/bash-bin
+./gitGo "$@"
+
+cd ${LOCALDIR}
+u-env Person
+u-git-send "$@"
