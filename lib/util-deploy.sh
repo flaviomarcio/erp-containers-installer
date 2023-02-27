@@ -66,13 +66,13 @@ function deployApp()
 
     logInfo ${1} "build-dir" ${PWD}
 
-    CHECK=$(docker stack ls | grep ${APPLICATION_CONTAINER_NAME})
+    CHECK=$(docker stack ls | grep ${APPLICATION_DEPLOY_CONTAINER_NAME})
     if [[ ${CHECK} != "" ]]; then
       if [[ ${STACK_LOG_VERBOSE} == 1 ]]; then
-        logCommand ${1} "docker stack rm ${APPLICATION_CONTAINER_NAME}"
-        docker stack rm ${APPLICATION_CONTAINER_NAME}
+        logCommand ${1} "docker stack rm ${APPLICATION_DEPLOY_CONTAINER_NAME}"
+        docker stack rm ${APPLICATION_DEPLOY_CONTAINER_NAME}
       else
-        echo $(docker stack rm ${APPLICATION_CONTAINER_NAME})&>/dev/null&>/dev/null
+        echo $(docker stack rm ${APPLICATION_DEPLOY_CONTAINER_NAME})&>/dev/null&>/dev/null
       fi    
     fi
 
@@ -89,13 +89,13 @@ function deployApp()
       rm -rf ${COMPOSE_DST}
       cp -r ${COMPOSE_SRC} ${COMPOSE_DST}
 
-      logCommand ${1} "docker stack deploy -c ${COMPOSE_DST} ${APPLICATION_CONTAINER_NAME}"
+      logCommand ${1} "docker stack deploy -c ${COMPOSE_DST} ${APPLICATION_DEPLOY_CONTAINER_NAME}"
       logInfo ${1} "docker-image-name" "${APPLICATION_DEPLOY_IMAGE}"
 
       if [[ ${STACK_LOG_VERBOSE} == 1 ]]; then
-        docker stack deploy -c ${COMPOSE_DST} ${APPLICATION_CONTAINER_NAME}
+        docker stack deploy -c ${COMPOSE_DST} ${APPLICATION_DEPLOY_CONTAINER_NAME}
       else
-        echo $(docker stack deploy -c ${COMPOSE_DST} ${APPLICATION_CONTAINER_NAME})&>/dev/null
+        echo $(docker stack deploy -c ${COMPOSE_DST} ${APPLICATION_DEPLOY_CONTAINER_NAME})&>/dev/null
       fi
     fi
 

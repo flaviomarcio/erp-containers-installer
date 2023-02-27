@@ -2,6 +2,40 @@
 
 . ${BASH_BIN}/bash-util.sh
 
+
+function _privateEnvsPrepareClear()
+{
+  logStart ${1} "_privateEnvsPrepareClear"
+  export APPLICATION_STACK=
+  export APPLICATION_NAME=
+  export APPLICATION_GIT=
+  export APPLICATION_GIT_BRANCH=
+  export APPLICATION_VERSION=
+  export APPLICATION_DEPLOY_CONTAINER_NAME=
+  export APPLICATION_DEPLOY_PORT=
+  export APPLICATION_DEPLOY_CONTEXT_PATH=
+  export APPLICATION_DEPLOY_DNS=
+  export APPLICATION_DEPLOY_IMAGE=
+  export APPLICATION_DEPLOY_HOSTNAME=
+  export APPLICATION_DEPLOY_NODE=
+  export APPLICATION_DEPLOY_MODE=
+  export APPLICATION_DEPLOY_REPLICAS=
+  export APPLICATION_DEPLOY_NETWORK=
+  export APPLICATION_DEPLOY_DATA_DIR=
+  export APPLICATION_DEPLOY_BACKUP_DIR=
+  export APPLICATION_DEPLOY_NETWORK_NAME=
+  export APPLICATION_DB_DRIVER=
+  export APPLICATION_DB_HOST=
+  export APPLICATION_DB_PORT=
+  export APPLICATION_DB_USER=
+  export APPLICATION_DB_PASSWORD=
+  export APPLICATION_DB_SCHEMA=
+  export APPLICATION_DB_DATABASE=
+  export APPLICATION_ENV_FILE=
+  export APPLICATION_ENV_FILES=
+  logFinished ${1} "_privateEnvsPrepareClear"
+}
+
 function __privateEnvsPrepare()
 {    
   logStart ${1} "__privateEnvsPrepare"
@@ -86,9 +120,17 @@ function __privateEnvsDir()
 }
 
 
+function utilPrepareClear()
+{
+  logStart ${1} "utilPrepareClear"
+  _privateEnvsPrepareClear "$(incInt ${1})"  
+  logFinished ${1} "utilPrepareClear"
+}
+
 function utilPrepareInit()
 {
   logStart ${1} "utilPrepareInit"
+  _privateEnvsPrepareClear "$(incInt ${1})"
   __privateEnvsPrepare "$(incInt ${1})"
   __privateEnvsPublic "$(incInt ${1})"
   if [ "$?" -eq 1 ]; then
@@ -151,18 +193,18 @@ function __utilPrepareStackEnvsDefault()
     export APPLICATION_DEPLOY_IMAGE=${BUILD_DEPLOY_IMAGE_DNS}
   fi  
 
-  if [[ ${APPLICATION_DEPLOY_IMAGE} == "" ]]; then
-    export APPLICATION_DEPLOY_IMAGE=${BUILD_TEMP_APP_ENV_FILE}
+  if [[ ${APPLICATION_DEPLOY_ENV_FILE} == "" ]]; then
+    export APPLICATION_DEPLOY_ENV_FILE=${BUILD_TEMP_APP_ENV_FILE}
   fi  
 
-  if [[ ${APPLICATION_CONTAINER_NAME} == "" ]]; then
-    export APPLICATION_CONTAINER_NAME=${BUILD_DEPLOY_CONTAINER_NAME}
+  if [[ ${APPLICATION_DEPLOY_CONTAINER_NAME} == "" ]]; then
+    export APPLICATION_DEPLOY_CONTAINER_NAME=${BUILD_DEPLOY_CONTAINER_NAME}
   fi
 
   if [[ ${APPLICATION_DEPLOY_HOSTNAME} == "" ]]; then
     export APPLICATION_DEPLOY_HOSTNAME=${BUILD_DEPLOY_CONTAINER_NAME}
   fi
- 
+
   if [[ ${APPLICATION_DEPLOY_MODE} == "" ]]; then
     export APPLICATION_DEPLOY_MODE=${BUILD_DEPLOY_MODE}
   fi

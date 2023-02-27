@@ -96,7 +96,7 @@ function buildProjectSource()
 
   log "Building source [${BUILD_DEPLOY_IMAGE_NAME}]"
   
-  logCommand 1 "mvn_clean_install_-DskipTests"
+  logCommand 1 "mvn clean install -DskipTests"
   if [[ ${STACK_LOG_VERBOSE} == 1 ]]; then
     mvn clean install -DskipTests
   else
@@ -147,13 +147,13 @@ function buildRegistryPush()
   TAG_URL=${STACK_REGISTRY_DNS}/${IMAGE_NAME}
   echo $'\n'"Sending docker image [${IMAGE_NAME}] to registry"
   logCommand ${1} "docker image tag ${IMAGE_NAME} ${TAG_URL}"
-  if [[ ${STACK_LOG_VERBOSE_SUPER} == 1 ]]; then
+  if [[ ${STACK_LOG_VERBOSE} == 1 ]]; then
     docker image tag ${IMAGE_NAME} ${TAG_URL}
   else
     echo $(docker image tag ${IMAGE_NAME} ${TAG_URL})&>/dev/null
   fi
   logCommand ${1} "docker push ${TAG_URL}"
-  if [[ ${STACK_LOG_VERBOSE_SUPER} == 1 ]]; then
+  if [[ ${STACK_LOG_VERBOSE} == 1 ]]; then
     docker push ${TAG_URL}
   else
     echo $(docker push ${TAG_URL})&>/dev/null
@@ -186,11 +186,6 @@ function buildRegistryImage()
   if ! [ "$?" -eq 1 ]; then
     return 0;
   fi
-
-  echo " buildDockerFile ${1} ${BUILD_DEPLOY_IMAGE_NAME} ${DOCKER_FILE_SRC} ${DOCKER_FILE_DST}"
-  echo " buildDockerFile ${1} ${BUILD_DEPLOY_IMAGE_NAME} ${DOCKER_FILE_SRC} ${DOCKER_FILE_DST}"
-  echo " buildDockerFile ${1} ${BUILD_DEPLOY_IMAGE_NAME} ${DOCKER_FILE_SRC} ${DOCKER_FILE_DST}"
-  echo " buildDockerFile ${1} ${BUILD_DEPLOY_IMAGE_NAME} ${DOCKER_FILE_SRC} ${DOCKER_FILE_DST}"
 
   buildDockerFile "$(incInt ${1})" ${BUILD_DEPLOY_IMAGE_NAME} ${DOCKER_FILE_SRC} ${DOCKER_FILE_DST}
   buildRegistryPush "$(incInt ${1})" ${BUILD_DEPLOY_IMAGE_NAME}

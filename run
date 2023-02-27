@@ -38,6 +38,7 @@ function main()
     
     while :
     do
+      utilPrepareClear
       cd ${ROOT_DIR}
       export STACK_ACTION=
       export STACK_PROJECT=
