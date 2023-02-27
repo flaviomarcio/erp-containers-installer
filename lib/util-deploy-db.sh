@@ -44,7 +44,6 @@ function deployPG_pgpassCheck()
     POSTGRES_SERVER=localhost
     AUTH="${APPLICATION_DB_HOST_FIX}:${APPLICATION_DB_PORT}:${APPLICATION_DB_DATABASE}:${APPLICATION_DB_USER}:${APPLICATION_DB_PASSWORD}">${POSTGRES_PGPASS}
     if [[ -f ${POSTGRES_PGPASS} ]];then
-        sed -i "/${AUTH}/d" ${POSTGRES_PGPASS}
         echo ${AUTH} >> ${POSTGRES_PGPASS}
     fi
     chmod 0600 ${POSTGRES_PGPASS};
