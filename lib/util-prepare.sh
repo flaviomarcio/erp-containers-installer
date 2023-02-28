@@ -182,6 +182,8 @@ function __utilPrepareStackEnvsDefault()
   export DOCKER_FILE_SRC=${STACK_INSTALLER_DOCKER_FILE_DIR}/${DOCKER_FILE_NAME}
   export DOCKER_FILE_DST=${BUILD_TEMP_DIR}/Dockerfile
   
+  export APPLICATION_BUILD_APP_DIR=${BUILD_TEMP_APP_DIR}
+
   if [[ ${APPLICATION_DEPLOY_PORT} == "" ]]; then
     export APPLICATION_DEPLOY_PORT=${BUILD_DEPLOY_PORT}
   fi
