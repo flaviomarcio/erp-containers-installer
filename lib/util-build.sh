@@ -39,26 +39,15 @@ function buildProjectCopy()
     cp -r ${BUILD_TEMP_APP_BIN_SRC_DIR} ${DESTINE_DIR}
   fi
 
-  echo "BUILD_TEMP_APP_CONF_DIR==${BUILD_TEMP_APP_CONF_DIR}"
-  echo "BUILD_TEMP_APP_CONF_DIR==${BUILD_TEMP_APP_CONF_DIR}"
-  echo "BUILD_TEMP_APP_CONF_DIR==${BUILD_TEMP_APP_CONF_DIR}"
-  echo "BUILD_TEMP_APP_CONF_DIR==${BUILD_TEMP_APP_CONF_DIR}"
-  echo "BUILD_TEMP_APP_CONF_DIR==${BUILD_TEMP_APP_CONF_DIR}"
-  echo "BUILD_TEMP_APP_CONF_DIR==${BUILD_TEMP_APP_CONF_DIR}"
+  export LOCAL_STACK_CONF_DIR=${STACK_APPLICATIONS_DATA_CONF_DIR}/${STACK_PROJECT}
+  if [[ -d ${LOCAL_STACK_CONF_DIR} ]]; then
 
-  if [[ -d ${APPLICATION_DEPLOY_CONF_DIR} ]]; then
-    cp -r ${INSTALLER_DIR}/lib/util-call.sh ${DESTINE_DIR}/util-call.sh
-
-    FILELIST=($(find ${APPLICATION_DEPLOY_CONF_DIR} -name '*.*'))
-    for FILE_SRC in "${FILELIST[@]}"
+    FILELIST=($(find ${STACK_CONF} -name '*.*'))
+    for FILE in "${FILELIST[@]}"
     do
-      FILE_DST=$(sed "s/.git//g" <<< "${FILE_SRC}")
-      FILE_DST="${DESTINE_DIR}${FILE_DST}"
+      FILE_SRC=${FILE}
+      FILE_DST="${DESTINE_DIR}$(basename ${FILE})"
 
-      echo "rm -rf ${FILE_DST}"
-      echo "rm -rf ${FILE_DST}"
-      echo "rm -rf ${FILE_DST}"
-      echo "rm -rf ${FILE_DST}"
       echo "rm -rf ${FILE_DST}"
       echo "cp -r ${FILE_SRC} ${FILE_DST}"
       echo "cp -r ${FILE_SRC} ${FILE_DST}"
