@@ -31,4 +31,4 @@ LABEL maintainer "FlavioPortela <fmspx@hotmail.com>"
 
 #WORKDIR ${WORK}
 #CMD ["./startRun"]
-CMD ["sleep","infinity"]
+#CMD ["sleep","infinity"]
