@@ -33,7 +33,7 @@ services:
         protocol: tcp
         mode: ingress
     deploy:
-      #mode: ${APPLICATION_DEPLOY_MODE}
+      mode: ${APPLICATION_DEPLOY_MODE}
       replicas: ${APPLICATION_DEPLOY_REPLICAS}
       # placement:
       #   constraints:
