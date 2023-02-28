@@ -23,9 +23,9 @@ services:
     volumes:
       - ${APPLICATION_DEPLOY_ENV_FILE}:/home/debian/env_file.env
       - ${PUBLIC_LIB_QT_DIR}:/home/debian/qt
-      - ${APPLICATION_BUILD_APP_DIR}:/home/debian/app
-      - ${STACK_APPLICATIONS_DATA_CONF_DIR}/qt-api/startBin:/home/debian/app/startBin
-      - ${STACK_APPLICATIONS_DATA_CONF_DIR}/qt-api/startRun:/home/debian/app/startRun
+      - ${APPLICATION_DEPLOY_DATA_DIR}:/home/debian/app
+      - ${APPLICATION_DEPLOY_CONF_DIR}/startBin:/home/debian/app/startBin
+      - ${APPLICATION_DEPLOY_CONF_DIR}/startRun:/home/debian/app/startRun
       - ${APPLICATION_DEPLOY_DATA_DIR}:/app/data
       - ${APPLICATION_DEPLOY_BACKUP_DIR}:/app/backup
     ports:
@@ -48,8 +48,8 @@ services:
         - "traefik.http.routers.${APPLICATION_NAME}.service=${APPLICATION_NAME}"
         - "traefik.http.services.${APPLICATION_NAME}.loadbalancer.server.port=${APPLICATION_DEPLOY_PORT}"
         - "traefik.docker.network=${APPLICATION_DEPLOY_NETWORK_NAME}"
-      entrypoint: 
-        - sh /home/debian/app/startBin
+      #entrypoint: 
+      #  - sh /home/debian/app/startBin
       #entrypoint: sleep infinity  
     networks:
       - stack-inbound

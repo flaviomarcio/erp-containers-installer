@@ -16,7 +16,7 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ${HOME}:/home-host
-      - ${STACK_APPLICATIONS_DATA_CONF_DIR}/debian/run:/opt/run
+      - ${APPLICATION_DEPLOY_CONF_DIR}/run:/opt/run
       - ${APPLICATION_DEPLOY_DATA_DIR}:/app/data
       - ${APPLICATION_DEPLOY_BACKUP_DIR}:/app/backup
     ports:

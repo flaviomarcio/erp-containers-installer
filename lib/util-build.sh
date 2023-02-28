@@ -24,9 +24,57 @@ function buildProjectPrepare()
   return 1;
 }
 
+function buildProjectCopy()
+{
+  logStart ${1} "buildProjectPull"
+
+  DESTINE_DIR=${BUILD_TEMP_APP_DATA_DIR}
+
+  rm -rf ${DESTINE_DIR}
+  mkdir -p ${DESTINE_DIR}
+  cp -r ${INSTALLER_DIR}/lib/util-call.sh ${DESTINE_DIR}
+
+  if [[ -d ${BUILD_TEMP_APP_BIN_SRC_DIR} ]]; then
+    rm -rf ${DESTINE_DIRR}
+    cp -r ${BUILD_TEMP_APP_BIN_SRC_DIR} ${DESTINE_DIR}
+  fi
+
+  echo "BUILD_TEMP_APP_CONF_DIR==${BUILD_TEMP_APP_CONF_DIR}"
+  echo "BUILD_TEMP_APP_CONF_DIR==${BUILD_TEMP_APP_CONF_DIR}"
+  echo "BUILD_TEMP_APP_CONF_DIR==${BUILD_TEMP_APP_CONF_DIR}"
+  echo "BUILD_TEMP_APP_CONF_DIR==${BUILD_TEMP_APP_CONF_DIR}"
+  echo "BUILD_TEMP_APP_CONF_DIR==${BUILD_TEMP_APP_CONF_DIR}"
+  echo "BUILD_TEMP_APP_CONF_DIR==${BUILD_TEMP_APP_CONF_DIR}"
+
+  if [[ -d ${APPLICATION_DEPLOY_CONF_DIR} ]]; then
+    cp -r ${INSTALLER_DIR}/lib/util-call.sh ${DESTINE_DIR}/util-call.sh
+
+    FILELIST=($(find ${APPLICATION_DEPLOY_CONF_DIR} -name '*.*'))
+    for FILE_SRC in "${FILELIST[@]}"
+    do
+      FILE_DST=$(sed "s/.git//g" <<< "${FILE_SRC}")
+      FILE_DST="${DESTINE_DIR}${FILE_DST}"
+
+      echo "rm -rf ${FILE_DST}"
+      echo "rm -rf ${FILE_DST}"
+      echo "rm -rf ${FILE_DST}"
+      echo "rm -rf ${FILE_DST}"
+      echo "rm -rf ${FILE_DST}"
+      echo "cp -r ${FILE_SRC} ${FILE_DST}"
+      echo "cp -r ${FILE_SRC} ${FILE_DST}"
+      echo "cp -r ${FILE_SRC} ${FILE_DST}"
+      echo "cp -r ${FILE_SRC} ${FILE_DST}"
+      echo "cp -r ${FILE_SRC} ${FILE_DST}"
+      echo "cp -r ${FILE_SRC} ${FILE_DST}"
+
+    done     
+  fi
+}
+
 function buildProjectPull()
 {
   logStart ${1} "buildProjectPull"
+
   GIT_REPOSITORY=${APPLICATION_GIT}
   GIT_BRANCH=${APPLICATION_GIT_BRANCH}
 
@@ -103,10 +151,10 @@ function buildProjectSource()
     echo $(mvn clean install -DskipTests)>/dev/null
   fi
   cd ${ROOT_DIR}
-  rm -rf ${BUILD_TEMP_APP_JAR};
+  rm -rf ${BUILD_TEMP_APP_DATA_SOURCE_JAR};
   export APPLICATION_JAR=$(find ${BUILD_TEMP_SOURCE_DIR} -name 'app*.jar')
-  logCommand ${1} "cp -r ${APPLICATION_JAR} ${BUILD_TEMP_APP_JAR}"      
-  cp -r ${APPLICATION_JAR} ${BUILD_TEMP_APP_JAR}
+  logCommand ${1} "cp -r ${APPLICATION_JAR} ${BUILD_TEMP_APP_DATA_SOURCE_JAR}"      
+  cp -r ${APPLICATION_JAR} ${BUILD_TEMP_APP_DATA_SOURCE_JAR}
 
   logSuccess ${1} "success"
   logFinished ${1} "buildProjectSource"
@@ -172,12 +220,9 @@ function buildRegistryPush()
 function buildRegistryImage()
 {
   logStart ${1} "buildRegistryImage"
-  if [[ -d ${BUILD_TEMP_APP_BIN_SRC_DIR} ]]; then
-    rm -rf ${BUILD_TEMP_APP_DIR}
-    cp -r ${BUILD_TEMP_APP_BIN_SRC_DIR} ${BUILD_TEMP_APP_DIR}
-  fi
 
   buildProjectPull "$(incInt ${1})"
+  buildProjectCopy "$(incInt ${1})"
   if ! [ "$?" -eq 1 ]; then
     return 0;
   fi

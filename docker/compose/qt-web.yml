@@ -12,7 +12,7 @@ services:
     env_file:
       - ${APPLICATION_DEPLOY_ENV_FILE}
     volumes:
-      - ${STACK_APPLICATION_CONFIG_DIR}/qt-web/nginx.conf:/etc/nginx/nginx.conf
+      - ${APPLICATION_DEPLOY_CONF_DIR}/nginx.conf:/etc/nginx/nginx.conf
     ports:
       - target: ${APPLICATION_DEPLOY_PORT}
         protocol: tcp

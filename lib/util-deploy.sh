@@ -28,7 +28,7 @@ function deployImage()
 
     rm -rf ${BUILD_TEMP_DIR}
     makeDir "$(incInt ${1})" ${BUILD_TEMP_DIR} 777
-    makeDir "$(incInt ${1})" ${BUILD_TEMP_APP_DIR} 777
+    makeDir "$(incInt ${1})" ${BUILD_TEMP_APP_DATA_DIR} 777
     
     export APPLICATION_FILTER=app*.jar
   fi
