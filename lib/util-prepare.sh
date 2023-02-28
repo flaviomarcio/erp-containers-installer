@@ -6,11 +6,13 @@
 function _privateEnvsPrepareClear()
 {
   logStart ${1} "_privateEnvsPrepareClear"
+  export APPLICATION_PROTOCOL=
   export APPLICATION_STACK=
   export APPLICATION_NAME=
   export APPLICATION_GIT=
   export APPLICATION_GIT_BRANCH=
   export APPLICATION_VERSION=
+  export APPLICATION_AUTH=
   export APPLICATION_DEPLOY_CONTAINER_NAME=
   export APPLICATION_DEPLOY_PORT=
   export APPLICATION_DEPLOY_CONTEXT_PATH=
@@ -24,6 +26,7 @@ function _privateEnvsPrepareClear()
   export APPLICATION_DEPLOY_DATA_DIR=
   export APPLICATION_DEPLOY_BACKUP_DIR=
   export APPLICATION_DEPLOY_NETWORK_NAME=
+  export APPLICATION_DB_TYPE=
   export APPLICATION_DB_DRIVER=
   export APPLICATION_DB_HOST=
   export APPLICATION_DB_PORT=
@@ -42,6 +45,7 @@ function __privateEnvsPrepare()
   export PUBLIC_APPLICATIONS_DIR=${HOME}/applications
   export PUBLIC_STORAGE_DIR=${PUBLIC_APPLICATIONS_DIR}/storage
   export PUBLIC_LIB_DIR=${PUBLIC_APPLICATIONS_DIR}/lib
+  export PUBLIC_LIB_QT_DIR=${PUBLIC_LIB_DIR}/${QT_VERSION}
 
   export STACK_DB_DROP=0
   export STACK_DOMAIN=portela-professional.com.br
@@ -152,6 +156,7 @@ function __utilPrepareStackEnvsDefault()
   fi
 
   BUILD_DEPLOY_APP_NAME=${STACK_PREFIX}-${APPLICATION_NAME}
+  BUILD_DEPLOY_PROTOCOL=http
   BUILD_DEPLOY_MODE=replicated
   BUILD_DEPLOY_CONTEXT_PATH=/
   BUILD_DEPLOY_PORT=8080
@@ -220,6 +225,10 @@ function __utilPrepareStackEnvsDefault()
   if [[ ${APPLICATION_DEPLOY_NETWORK_NAME} == "" ]]; then
     export APPLICATION_DEPLOY_NETWORK_NAME=${STACK_NETWORK_INBOUND}
   fi  
+
+  if [[ ${APPLICATION_PROTOCOL} == "" ]]; then
+    export APPLICATION_PROTOCOL=${BUILD_DEPLOY_PROTOCOL}
+  fi
 
   export APPLICATION_STORAGE_TARGET=${PUBLIC_STORAGE_DIR}/${STACK_PREFIX}
   makeDir "$(incInt ${1})" ${BUILD_TEMP_DIR} 777

@@ -140,10 +140,10 @@ function deployDb()
       return 0;
   fi
 
-  if [[ ${APPLICATION_DB_DRIVER} == "postgres" ]]; then
+  if [[ ${APPLICATION_DB_TYPE} == "postgres" ]]; then
     deployPG ${1} ${DIR}
   else
-    logError ${1} "Invalid database driver, APPLICATION_DB_DRIVER:[${APPLICATION_DB_DRIVER}]"
+    logError ${1} "Invalid database driver, APPLICATION_DB_TYPE:[${APPLICATION_DB_TYPE}]"
   fi
 
   logFinished ${1} "deployDb"

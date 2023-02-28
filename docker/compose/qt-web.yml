@@ -1,0 +1,33 @@
+version: '3.9'
+   
+networks:
+  stack-inbound:
+    name: inbound
+    external: true
+
+services:
+  app:
+    image: ${BUILD_IMAGE_DNS}
+    hostname: ${BUILD_DEPLOY_HOSTNAME}
+    env_file:
+      - ${BUILD_APP_ENV_FILE}
+    volumes:
+      - ${STACK_APPLICATION_CONFIG_DIR}/qt-web/nginx.conf:/etc/nginx/nginx.conf
+    deploy:
+      mode: ${BUILD_DEPLOY_MODE}
+      replicas: ${BUILD_DEPLOY_REPLICAS}
+      placement:
+        constraints:
+          - ${BUILD_DEPLOY_NODE}
+      update_config:
+        parallelism: 1
+        delay: 10s
+      restart_policy:
+        condition: on-failure
+      labels:
+          - "traefik.http.routers.${APPLICATION_NAME}.rule=Host(`${BUILD_DEPLOY_DNS}`)"
+          - "traefik.http.routers.${APPLICATION_NAME}.service=${BUILD_DEPLOY_APP_NAME}"
+          - "traefik.http.services.${APPLICATION_NAME}.loadbalancer.server.port=${BUILD_APP_EXPOSE_PORT}"
+          - "traefik.docker.network=${BUILD_DEPLOY_NETWORK}"
+    networks:
+      - stack-inbound
