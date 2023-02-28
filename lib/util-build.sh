@@ -26,38 +26,49 @@ function buildProjectPrepare()
 
 function buildProjectCopy()
 {
-  logStart ${1} "buildProjectPull"
+  logStart ${1} "buildProjectCopy"
 
   DESTINE_DIR=${BUILD_TEMP_APP_DATA_DIR}
 
   rm -rf ${DESTINE_DIR}
-  mkdir -p ${DESTINE_DIR}
-  cp -r ${INSTALLER_DIR}/lib/util-call.sh ${DESTINE_DIR}
 
   if [[ -d ${BUILD_TEMP_APP_BIN_SRC_DIR} ]]; then
-    rm -rf ${DESTINE_DIRR}
+    logCommand ${1} "cp -r ${BUILD_TEMP_APP_BIN_SRC_DIR} ${DESTINE_DIR}"
     cp -r ${BUILD_TEMP_APP_BIN_SRC_DIR} ${DESTINE_DIR}
   fi
 
-  export LOCAL_STACK_CONF_DIR=${STACK_APPLICATIONS_DATA_CONF_DIR}/${STACK_PROJECT}
-  if [[ -d ${LOCAL_STACK_CONF_DIR} ]]; then
+  if ! [[ -d ${DESTINE_DIR} ]]; then
+    mkdir -p ${DESTINE_DIR}
+  fi
+  
+  TARGET_DIR_LIST=()
+  if [[ ${APPLICATION_STACK} != "" ]]; then
+    TARGET_DIR_LIST+=("${STACK_APPLICATIONS_DATA_CONF_DIR}/${APPLICATION_STACK}")
+  fi
+  TARGET_DIR_LIST+=("${STACK_APPLICATIONS_DATA_CONF_DIR}/${STACK_PROJECT}")
 
-    FILELIST=($(find ${STACK_CONF} -name '*.*'))
+  for TARGET_DIR in "${TARGET_DIR_LIST[@]}"
+  do
+    if ! [[ -d ${TARGET_DIR} ]]; then
+      continue;
+    fi
+    FILELIST=($(find ${TARGET_DIR} -name '*.sh'))
+    FILELIST+=($(find ${TARGET_DIR} -type f -name '*'))
     for FILE in "${FILELIST[@]}"
     do
+      if [[ ${FILE} == ${TARGET_DIR} ]]; then
+        continue;
+      fi
+      FILE=$(realpath ${FILE})
       FILE_SRC=${FILE}
-      FILE_DST="${DESTINE_DIR}$(basename ${FILE})"
-
-      echo "rm -rf ${FILE_DST}"
-      echo "cp -r ${FILE_SRC} ${FILE_DST}"
-      echo "cp -r ${FILE_SRC} ${FILE_DST}"
-      echo "cp -r ${FILE_SRC} ${FILE_DST}"
-      echo "cp -r ${FILE_SRC} ${FILE_DST}"
-      echo "cp -r ${FILE_SRC} ${FILE_DST}"
-      echo "cp -r ${FILE_SRC} ${FILE_DST}"
-
+      FILE_DST="${DESTINE_DIR}/$(basename ${FILE})"
+      if ! [[ -f ${FILE_DST} ]]; then
+        logCommand ${1} "cp -r ${FILE_SRC} ${FILE_DST}"
+        cp -r ${FILE_SRC} ${FILE_DST}
+      fi
     done     
-  fi
+  done
+  logFinished ${1} "buildProjectCopy"
 }
 
 function buildProjectPull()
