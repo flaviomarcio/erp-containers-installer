@@ -45,6 +45,7 @@ function __privateEnvsPrepare()
   export PUBLIC_APPLICATIONS_DIR=${HOME}/applications
   export PUBLIC_STORAGE_DIR=${PUBLIC_APPLICATIONS_DIR}/storage
   export PUBLIC_LIB_DIR=${PUBLIC_APPLICATIONS_DIR}/lib
+  export PUBLIC_LIB_QT_DIR=${PUBLIC_LIB_DIR}/${QT_VERSION}
 
   export STACK_DB_DROP=0
   export STACK_DOMAIN=portela-professional.com.br
