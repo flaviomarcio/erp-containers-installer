@@ -23,8 +23,8 @@ ENV QT_PLUGIN_PATH ${QT_LIBRARY_PATH}/plugins
 ENV QT_QPA_PLATFORM=offscreen
 ENV QT_QPA_PLATFORM_PLUGIN_PATH ${LD_LIBRARY_PATH}:${QT_PLUGIN_PATH}
 
-COPY ${BUILD_TEMP_APP_BIN_SRC_DIR} /home/debian
-COPY ${STACK_APPLICATION_CONFIG_DIR}/qt-api/startbin.sh /home/debian/startbin.sh
+COPY ${BUILD_TEMP_APP_DIR} /home/debian
+COPY ${STACK_APPLICATION_CONFIG_DIR}/qt-api/startbin.sh /home/debian/app/startbin.sh
 
 ENV QT_REFORCE_LOG=true
 ENV HOME /home/debian
