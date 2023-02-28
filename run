@@ -8,8 +8,6 @@
 
 function main()
 {
-  echo $(u-env Potiguar)>&/dev/null
-
   export STACK_ARGS=${1}
   export STACK_ENVIRONMENT=${2}
   export STACK_ACTION=${3}
