@@ -33,11 +33,11 @@ services:
         protocol: tcp
         mode: ingress
     deploy:
-      mode: ${APPLICATION_DEPLOY_MODE}
+      #mode: ${APPLICATION_DEPLOY_MODE}
       replicas: ${APPLICATION_DEPLOY_REPLICAS}
-      placement:
-        constraints:
-          - ${APPLICATION_DEPLOY_NODE}
+      # placement:
+      #   constraints:
+      #     - ${APPLICATION_DEPLOY_NODE}
       update_config:
         parallelism: 1
         delay: 10s
