@@ -23,13 +23,13 @@ ENV QT_PLUGIN_PATH ${QT_LIBRARY_PATH}/plugins
 ENV QT_QPA_PLATFORM=offscreen
 ENV QT_QPA_PLATFORM_PLUGIN_PATH ${LD_LIBRARY_PATH}:${QT_PLUGIN_PATH}
 
-COPY ${BUILD_APP_DIR} /home/debian
+#COPY ${BUILD_APP_DIR} /home/debian
 #COPY ${STACK_APPLICATION_CONFIG_DIR}/qt-api/startbin.sh /home/debian/startbin.sh
 
 ENV QT_REFORCE_LOG=true
 ENV HOME /home/debian
 ENV WORK /home/debian/app
 
-WORKDIR $WORK
-CMD ["./startRun"]
+WORKDIR ${WORK}
+#CMD ["./startRun"]
 #CMD ["sleep","infinity"]

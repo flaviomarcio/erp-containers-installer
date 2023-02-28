@@ -47,6 +47,7 @@ services:
         - "traefik.http.routers.${APPLICATION_NAME}.service=${APPLICATION_NAME}"
         - "traefik.http.services.${APPLICATION_NAME}.loadbalancer.server.port=${APPLICATION_DEPLOY_PORT}"
         - "traefik.docker.network=${APPLICATION_DEPLOY_NETWORK_NAME}"
-      entrypoint: sh /home/debian/app/startRun
+      #entrypoint: sh /home/debian/app/startRun
+      entrypoint: sleep infinity  
     networks:
       - stack-inbound
