@@ -67,8 +67,8 @@ function __privateEnvsPublic()
 function __privateEnvsDefault()
 {
   logStart ${1} "__privateEnvsDefault"
-  if [[ ${QT_VERSION_DEFAULT} == "" ]]; then
-      export QT_VERSION_DEFAULT=6.4.2
+  if [[ ${QT_VERSION} == "" ]]; then
+      export QT_VERSION=6.4.2
   fi
 
   if [[ ${STACK_CPU_DEFAULT} == "" ]]; then
@@ -270,20 +270,32 @@ function __utilPrepareStackEnvs()
 
   echo "#!/bin/bash" > ${BUILD_TEMP_APP_ENV_FILE} 
 
-  ENV_LIST=(default.env ${APPLICATION_ENV_FILES})
-  for ENV_NAME in "${ENV_LIST[@]}"
+  IMAGE_ENVS=${APPLICATION_STACK}.env
+
+  #ENV_DIR_LIST=(${STACK_APPLICATIONS_DATA_ENV_DIR} ${STACK_INSTALLER_DOCKER_FILE_DIR})
+  ENV_DIR_LIST=(${STACK_APPLICATIONS_DATA_ENV_DIR} ${STACK_INSTALLER_DOCKER_FILE_DIR})
+  ENV_LIST=(default.env ${IMAGE_ENVS} ${APPLICATION_ENV_FILES} ${APPLICATION_ENV_FILES})
+  
+  for ENV_DIR in "${ENV_DIR_LIST[@]}"
   do
-    echo "" >> ${BUILD_TEMP_APP_ENV_FILE}
-    echo "" >> ${BUILD_TEMP_APP_ENV_FILE} 
-    ENV_FILE=${STACK_APPLICATIONS_DATA_ENV_DIR}/${ENV_NAME}
-    if ! [[ -f ${ENV_FILE} ]]; then
-      logWarning ${1} "${ENV_FILE} not found"
-      continue;
-    fi  
-    runSource "$(incInt ${1})" ${ENV_FILE} 
-    logMethod "$(incInt ${1})" "info: append ${ENV_FILE}"
-    cat ${ENV_FILE} >> ${BUILD_TEMP_APP_ENV_FILE} 
+    for ENV_NAME in "${ENV_LIST[@]}"
+    do
+      echo "" >> ${BUILD_TEMP_APP_ENV_FILE}
+      echo "" >> ${BUILD_TEMP_APP_ENV_FILE} 
+
+      echo "ENV_NAME == ${ENV_DIR}/${ENV_NAME}"
+
+      ENV_FILE=${ENV_DIR}/${ENV_NAME}
+      if ! [[ -f ${ENV_FILE} ]]; then
+        logWarning ${1} "${ENV_FILE} not found"
+        continue;
+      fi  
+      runSource "$(incInt ${1})" ${ENV_FILE} 
+      logMethod "$(incInt ${1})" "info: append ${ENV_FILE}"
+      cat ${ENV_FILE} >> ${BUILD_TEMP_APP_ENV_FILE} 
+    done
   done
+  
   envsParserFile ${1} ${BUILD_TEMP_APP_ENV_FILE}
   runSource ${1} ${BUILD_TEMP_APP_ENV_FILE}
   envsToSimpleEnvs ${1} ${BUILD_TEMP_APP_ENV_FILE}

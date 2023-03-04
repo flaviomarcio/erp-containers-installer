@@ -20,12 +20,15 @@ ENV XDG_RUNTIME_DIR /run/user/debian
 ENV PUBLIC_LIB_DIR /home/debian/lib 
 
 ENV HOME /home/debian
-ENV INSTALER_PATH ${HOME}/isntaller
+ENV LIB_PATH ${PUBLIC_LIB_DIR}
+ENV INSTALER_PATH ${HOME}/installer
 ENV WORK_PATH ${HOME}/app
 ENV BASHRC_FILE ${WORK_PATH}/bashrc.sh
 
-RUN echo "#load application envs" >> ${BASHRC_FILE} 
-RUN echo "${BASHRC_FILE}" >> ${BASHRC_FILE} 
+RUN echo "#load application envs" >> ${HOME}/.bashrc
+RUN echo "if [[ -f ${BASHRC_FILE} ]]; then" >> ${HOME}/.bashrc
+RUN echo "  source ${BASHRC_FILE}" >> ${HOME}/.bashrc
+RUN echo "fi" >> ${HOME}/.bashrc
 
 #ADD ${STACK_INSTALLER_DOCKER_SSH_KEYS_DIR} /home/ssh
 ADD ${STACK_INSTALLER_DIR} ${HOME}

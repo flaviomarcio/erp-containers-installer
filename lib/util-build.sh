@@ -46,7 +46,9 @@ function buildProjectCopy()
     mkdir -p ${DESTINE_DIR}
   fi
  
-  TARGET_DIR_LIST=( ${STACK_INSTALLER_DOCKER_CONF_DIR} ${BUILD_TEMP_APP_SOURCE_CONF_DIR} )
+  echo "#!/bin/bash" > ${APPLICATION_DEPLOY_BASHRC_FILE} 
+
+  TARGET_DIR_LIST=( ${STACK_INSTALLER_DOCKER_CONF_DIR} ${STACK_INSTALLER_DOCKER_FILE_DIR} )
   TARGET_LIST=( ${APPLICATION_STACK} ${STACK_PROJECT} )
 
   for TARGET_ITEM in "${TARGET_LIST[@]}"
@@ -58,7 +60,6 @@ function buildProjectCopy()
         logCommand ${1} "cp -r -T ${TARGET_DIR} ${APPLICATION_DEPLOY_APP_DIR}"
         cp -r -T ${TARGET_DIR} ${APPLICATION_DEPLOY_APP_DIR}
 
-        echo "#!/bin/bash" > ${APPLICATION_DEPLOY_BASHRC_FILE} 
         BASHRC_LIST=$(find ${TARGET_DIR} -iname '*bashrc.sh');
         for BASHRC_FILE in "${BASHRC_LIST[@]}"
         do 
@@ -72,6 +73,7 @@ function buildProjectCopy()
       fi
     done
   done
+  echo "" >> ${APPLICATION_DEPLOY_BASHRC_FILE} 
 
   logFinished ${1} "buildProjectCopy"
   return 1;

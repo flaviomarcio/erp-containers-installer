@@ -14,7 +14,12 @@ services:
       - ${APPLICATION_DEPLOY_ENV_FILE}
     environment:
       - ENV_FILE=/home/debian/env_file.env
-    #   - QT_VERSION=${QT_VERSION_DEFAULT}
+      - QT_VERSION=${QT_VERSION}
+      - QT_DIR=${QT_DIR}
+      - QT_LIBRARY_PATH=${QT_LIBRARY_PATH}
+      - LD_LIBRARY_PATH=${LD_LIBRARY_PATH}
+      - QT_PLUGIN_PATH=${QT_PLUGIN_PATH}
+      - QT_QPA_PLATFORM_PLUGIN_PATH=${QT_QPA_PLATFORM_PLUGIN_PATH}
     #   - QT_LOG_ENABLED=${QT_LOG_ENABLED}
     #   - QT_LOG_DEBUG=${QT_LOG_DEBUG}
     #   - QT_LOG_INFO=${QT_LOG_INFO}
