@@ -14,45 +14,33 @@ services:
       - ${APPLICATION_DEPLOY_ENV_FILE}
     environment:
       - ENV_FILE=/home/debian/env_file.env
-      - QT_VERSION=${QT_VERSION}
-      - QT_DIR=${QT_DIR}
-      - QT_LIBRARY_PATH=${QT_LIBRARY_PATH}
-      - LD_LIBRARY_PATH=${LD_LIBRARY_PATH}
-      - QT_PLUGIN_PATH=${QT_PLUGIN_PATH}
-      - QT_QPA_PLATFORM_PLUGIN_PATH=${QT_QPA_PLATFORM_PLUGIN_PATH}
-    #   - QT_LOG_ENABLED=${QT_LOG_ENABLED}
-    #   - QT_LOG_DEBUG=${QT_LOG_DEBUG}
-    #   - QT_LOG_INFO=${QT_LOG_INFO}
-    #   - QT_LOG_WARNING=${QT_LOG_WARNING}
-    #   - QT_LOG_CRITICAL=${QT_LOG_CRITICAL}
-    #   - QT_LOG_SSL_WARNING=${QT_LOG_SSL_WARNING}
+      # - QT_VERSION=${QT_VERSION}
+      # - QT_DIR=${QT_DIR}
+      # - QT_LIBRARY_PATH=${QT_LIBRARY_PATH}
+      # - LD_LIBRARY_PATH=${LD_LIBRARY_PATH}
+      # - QT_PLUGIN_PATH=${QT_PLUGIN_PATH}
+      # - QT_QPA_PLATFORM_PLUGIN_PATH=${QT_QPA_PLATFORM_PLUGIN_PATH}
     volumes:
-      #- ${STACK_INSTALLER_DOCKER_SSH_KEYS_DIR}:/home/debian/.ssh
       - ${PUBLIC_LIB_DIR}:/home/debian/lib
       - ${APPLICATION_DEPLOY_ENV_FILE}:/home/debian/env_file.env
-      #- ${APPLICATION_DEPLOY_APP_DIR}:/home/debian/app
       - ${APPLICATION_DEPLOY_DATA_DIR}:/app/data
       - ${APPLICATION_DEPLOY_BACKUP_DIR}:/app/backup
-    # ports:
-    #   - target: ${APPLICATION_DEPLOY_PORT}
-    #     protocol: tcp
-    #     mode: ingress
-    # deploy:
-    #   mode: ${APPLICATION_DEPLOY_MODE}
-    #   replicas: ${APPLICATION_DEPLOY_REPLICAS}
-    #   # placement:
-    #   #   constraints:
-    #   #     - ${APPLICATION_DEPLOY_NODE}
-    #   update_config:
-    #     parallelism: 1
-    #     delay: 10s
-    #   restart_policy:
-    #     condition: on-failure
-    #   labels:
-    #     - "traefik.http.routers.${APPLICATION_NAME}.rule=Host(`${APPLICATION_DEPLOY_DNS}`)"
-    #     - "traefik.http.routers.${APPLICATION_NAME}.service=${APPLICATION_NAME}"
-    #     - "traefik.http.services.${APPLICATION_NAME}.loadbalancer.server.port=${APPLICATION_DEPLOY_PORT}"
-    #     - "traefik.docker.network=${APPLICATION_DEPLOY_NETWORK_NAME}"
-    # entrypoint: ["sh", "/opt/run"]
+    ports:
+      - target: ${APPLICATION_DEPLOY_PORT}
+        protocol: tcp
+        mode: ingress
+    deploy:
+      mode: ${APPLICATION_DEPLOY_MODE}
+      replicas: ${APPLICATION_DEPLOY_REPLICAS}
+      update_config:
+        parallelism: 1
+        delay: 10s
+      restart_policy:
+        condition: on-failure
+      labels:
+        - "traefik.http.routers.${APPLICATION_NAME}.rule=Host(`${APPLICATION_DEPLOY_DNS}`)"
+        - "traefik.http.routers.${APPLICATION_NAME}.service=${APPLICATION_NAME}"
+        - "traefik.http.services.${APPLICATION_NAME}.loadbalancer.server.port=${APPLICATION_DEPLOY_PORT}"
+        - "traefik.docker.network=${APPLICATION_DEPLOY_NETWORK_NAME}"
     networks:
       - stack-inbound
