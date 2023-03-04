@@ -1,7 +1,7 @@
 #!/bin/bash
 
 . ${BASH_BIN}/bash-util.sh
-. ${INSTALLER_DIR}/lib/util-prepare.sh
+. ${STACK_INSTALLER_DIR}/lib/util-prepare.sh
 
 function buildProjectPrepare()
 {
@@ -166,11 +166,11 @@ function buildDockerFile()
   else
     cp -r ${FILE_SRC} ${FILE_DST}
     cd ${BUILD_TEMP_DIR}
-    logCommand "$(incInt ${1})" "docker build -t ${IMAGE_NAME} ."
+    logCommand "$(incInt ${1})" "docker build -t ${IMAGE_NAME} --no-cache=true ."
     if [[ ${STACK_LOG_VERBOSE} == 1 ]]; then
-      docker build -t ${IMAGE_NAME} .
+      docker build -t ${IMAGE_NAME} --no-cache=true .
     else
-      echo $(docker build -t ${IMAGE_NAME} .)>/dev/null
+      echo $(docker build -t ${IMAGE_NAME} --no-cache=true .)>/dev/null
     fi
     cd ${ROOT_DIR}
     __RETURN=1;
