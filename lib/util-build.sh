@@ -26,7 +26,6 @@ function buildProjectPrepare()
 
 function buildProjectCopy()
 {
-  export;
   logStart ${1} "buildProjectCopy"
 
   DESTINE_DIR=${BUILD_TEMP_APP_DATA_DIR}
@@ -54,12 +53,16 @@ function buildProjectCopy()
     for TARGET_PATH in "${TARGET_DIR_LIST[@]}"
     do
       TARGET_DIR="${TARGET_PATH}/${TARGET_ITEM}"
+      if [[ -d ${TARGET_DIR} ]]; then
+        logCommand ${1} "cp -r -T ${TARGET_DIR} ${APPLICATION_DEPLOY_CONF_DIR}"
+        cp -r -T ${TARGET_DIR} ${APPLICATION_DEPLOY_CONF_DIR}
+      fi
 
-      logCommand ${1} "cp -r -T ${TARGET_DIR} ${APPLICATION_DEPLOY_CONF_DIR}"
-      cp -r -T ${TARGET_DIR} ${APPLICATION_DEPLOY_CONF_DIR}
     done
   done
+
   logFinished ${1} "buildProjectCopy"
+  return 1;
 }
 
 function buildProjectPull()
@@ -206,6 +209,7 @@ function buildRegistryPush()
     echo $(docker image rm -f ${IMAGE_ID})&>/dev/null
   done
   logFinished ${1} "buildRegistryPush"
+  return 1
 }
 
 function buildRegistryImage()
@@ -213,13 +217,20 @@ function buildRegistryImage()
   logStart ${1} "buildRegistryImage"
 
   buildProjectPull "$(incInt ${1})"
+  if ! [ "$?" -eq 1 ]; then
+    logError ${1} "Error on buildProjectPull"
+    return 0;
+  fi
+
   buildProjectCopy "$(incInt ${1})"
   if ! [ "$?" -eq 1 ]; then
+    logError ${1} "Error on buildProjectCopy"
     return 0;
   fi
 
   buildProjectSource "$(incInt ${1})"
   if ! [ "$?" -eq 1 ]; then
+    logError ${1} "Error on buildProjectSource"
     return 0;
   fi
 
