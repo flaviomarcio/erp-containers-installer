@@ -1,4 +1,4 @@
-FROM debian:latest
+FROM debian:bullseye
 LABEL maintainer "FlavioPortela <fmspx@hotmail.com>"
 
 RUN apt update;

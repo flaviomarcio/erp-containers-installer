@@ -1,5 +1,16 @@
-FROM debian:latest
+FROM debian:bullseye
 LABEL maintainer "FlavioPortela <fmspx@hotmail.com>"
+
+USER root
+
+RUN apt-get update
+RUN apt-get upgrade -y
+RUN apt-get install -y \
+    sudo tar curl \
+    libglib2.0-0 libdw1 openssh-client postgresql-client libjemalloc2 \
+    unixodbc freetds-bin tdsodbc htop mcedit iputils-ping libnss3 libmemcached11 \
+    libegl1 libxcb-xinerama0 libgl1-mesa-glx libxkbcommon-tools libxcb-util1 xvfb \
+    imagemagick exiftool poppler-utils
 
 ENV QT_LIBRARY_PATH /home/debian/qt
 ENV QT_DIR /home/debian/qt
@@ -17,26 +28,11 @@ ENV QT_REFORCE_LOG=true
 
 RUN useradd -m debian -s /bin/bash
 RUN usermod -aG root debian
+RUN usermod -aG sudo debian
 RUN mkdir -p /home/debian
 
-USER debian
-
-# RUN apt update;
-# RUN apt install -y \
-#         sudo tar curl libglib2.0-0 libdw1 openssh-client postgresql-client libjemalloc2;
-
-# RUN apt install -y \
-#         unixodbc freetds-bin tdsodbc htop mcedit iputils-ping libnss3 libmemcached11;
-
-# RUN apt install -y \
-#         libegl1 libxcb-xinerama0 libgl1-mesa-glx libxkbcommon-tools libxcb-util1 xvfb;
-
-# RUN apt install -y \
-#         imagemagick exiftool poppler-utils;
-
-
 ADD --chown=debian:debian ${STACK_INSTALLER_DIR} /home/debian/installer
-ADD --chown=debian:debian ${STACK_INSTALLER_DOCKER_SSH_KEYS_DIR} ./ssh
+#ADD --chown=debian:debian ${STACK_INSTALLER_DOCKER_SSH_KEYS_DIR} ./ssh
 ADD --chown=debian:debian ${APPLICATION_DEPLOY_DATA_DIR} ${WORK_PATH}
 
 # COPY ${APPLICATION_DEPLOY_DATA_DIR} ${WORK}

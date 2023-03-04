@@ -175,9 +175,9 @@ function buildDockerFile()
     cd ${BUILD_TEMP_DIR}
     logCommand "$(incInt ${1})" "docker build -t ${IMAGE_NAME} ."
     if [[ ${STACK_LOG_VERBOSE} == 1 ]]; then
-      docker build -t ${IMAGE_NAME} .
+      docker build --network host -t ${IMAGE_NAME} .
     else
-      echo $(docker build -t ${IMAGE_NAME} .)>/dev/null
+      echo $(docker build --network host -t ${IMAGE_NAME} .)>/dev/null
     fi
     cd ${ROOT_DIR}
     __RETURN=1;
@@ -207,11 +207,11 @@ function buildRegistryPush()
 
   IMAGE_LIST_RM=($(docker image ls | grep ${IMAGE_NAME} | awk '{print $3}' | sort --unique ))
 
-  for IMAGE_ID in "${IMAGE_LIST_RM[@]}"
-  do
-    logCommand ${1} "docker image rm -f ${IMAGE_ID}"
-    echo $(docker image rm -f ${IMAGE_ID})&>/dev/null
-  done
+  #for IMAGE_ID in "${IMAGE_LIST_RM[@]}"
+  #do
+  #  logCommand ${1} "docker image rm -f ${IMAGE_ID}"
+  #  echo $(docker image rm -f ${IMAGE_ID})&>/dev/null
+  #done
   logFinished ${1} "buildRegistryPush"
   return 1
 }

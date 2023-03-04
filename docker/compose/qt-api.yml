@@ -9,26 +9,28 @@ services:
   app:
     image: ${APPLICATION_DEPLOY_IMAGE}
     hostname: ${APPLICATION_DEPLOY_HOSTNAME}
-    # env_file:
-    #   - ${APPLICATION_DEPLOY_ENV_FILE}
-    # environment:
-    #   - ENV_FILE=/home/debian/env_file.env
-    # #   - QT_VERSION=${QT_VERSION}
-    # #   - QT_LOG_ENABLED=${QT_LOG_ENABLED}
-    # #   - QT_LOG_DEBUG=${QT_LOG_DEBUG}
-    # #   - QT_LOG_INFO=${QT_LOG_INFO}
-    # #   - QT_LOG_WARNING=${QT_LOG_WARNING}
-    # #   - QT_LOG_CRITICAL=${QT_LOG_CRITICAL}
-    # #   - QT_LOG_SSL_WARNING=${QT_LOG_SSL_WARNING}
+    env_file:
+      - ${APPLICATION_DEPLOY_ENV_FILE}
+    environment:
+      - ENV_FILE=/home/debian/env_file.env
+    #   - QT_VERSION=${QT_VERSION}
+    #   - QT_LOG_ENABLED=${QT_LOG_ENABLED}
+    #   - QT_LOG_DEBUG=${QT_LOG_DEBUG}
+    #   - QT_LOG_INFO=${QT_LOG_INFO}
+    #   - QT_LOG_WARNING=${QT_LOG_WARNING}
+    #   - QT_LOG_CRITICAL=${QT_LOG_CRITICAL}
+    #   - QT_LOG_SSL_WARNING=${QT_LOG_SSL_WARNING}
     volumes:
+      - ${STACK_INSTALLER_DOCKER_SSH_KEYS_DIR}:/home/debian/.ssh
+      - ${PUBLIC_LIB_QT_DIR}:/home/debian/qt
+      
+      - ${APPLICATION_DEPLOY_ENV_FILE}:/home/debian/env_file.env
+      - ${APPLICATION_DEPLOY_DATA_DIR}:/home/debian/app
       - ${APPLICATION_DEPLOY_CONF_DIR}/run:/opt/run
-    #   - ${APPLICATION_DEPLOY_ENV_FILE}:/home/debian/env_file.env
-    #   - ${PUBLIC_LIB_QT_DIR}:/home/debian/qt
-    #   - ${APPLICATION_DEPLOY_DATA_DIR}:/home/debian/app
-    #   - ${APPLICATION_DEPLOY_CONF_DIR}/startBin:/home/debian/app/startBin
-    #   - ${APPLICATION_DEPLOY_CONF_DIR}/startRun:/home/debian/app/startRun
-    #   - ${APPLICATION_DEPLOY_DATA_DIR}:/app/data
-    #   - ${APPLICATION_DEPLOY_BACKUP_DIR}:/app/backup
+      - ${APPLICATION_DEPLOY_CONF_DIR}/startBin:/home/debian/app/startBin
+      - ${APPLICATION_DEPLOY_CONF_DIR}/startRun:/home/debian/app/startRun
+      - ${APPLICATION_DEPLOY_DATA_DIR}:/app/data
+      - ${APPLICATION_DEPLOY_BACKUP_DIR}:/app/backup
     # ports:
     #   - target: ${APPLICATION_DEPLOY_PORT}
     #     protocol: tcp
@@ -49,6 +51,6 @@ services:
     #     - "traefik.http.routers.${APPLICATION_NAME}.service=${APPLICATION_NAME}"
     #     - "traefik.http.services.${APPLICATION_NAME}.loadbalancer.server.port=${APPLICATION_DEPLOY_PORT}"
     #     - "traefik.docker.network=${APPLICATION_DEPLOY_NETWORK_NAME}"
-    entrypoint: ["sh", "/opt/run"]
+    # entrypoint: ["sh", "/opt/run"]
     networks:
       - stack-inbound
