@@ -15,18 +15,25 @@ ENV HOME /home/debian
 ENV WORK_PATH ${HOME}/app
 ENV QT_REFORCE_LOG=true
 
-RUN apt update;
-#RUN apt install -y \
-#         sudo tar curl libglib2.0-0 libdw1 openssh-client postgresql-client libjemalloc2 \
-#         unixodbc freetds-bin tdsodbc htop mcedit iputils-ping libnss3 libmemcached11 \
-#         #GUI #libgl1-mesa
-#         libegl1 libxcb-xinerama0 libgl1-mesa-glx libxkbcommon-tools libxcb-util1 xvfb \ 
+RUN useradd -m debian -s /bin/bash
+RUN usermod -aG root debian
+RUN mkdir -p /home/debian
+
+USER debian
+
+# RUN apt update;
+# RUN apt install -y \
+#         sudo tar curl libglib2.0-0 libdw1 openssh-client postgresql-client libjemalloc2;
+
+# RUN apt install -y \
+#         unixodbc freetds-bin tdsodbc htop mcedit iputils-ping libnss3 libmemcached11;
+
+# RUN apt install -y \
+#         libegl1 libxcb-xinerama0 libgl1-mesa-glx libxkbcommon-tools libxcb-util1 xvfb;
+
+# RUN apt install -y \
 #         imagemagick exiftool poppler-utils;
 
-
-RUN useradd -m debian -s /bin/bash
-RUN useradd -G root debian
-RUN mkdir -p /home/debian
 
 ADD --chown=debian:debian ${STACK_INSTALLER_DIR} /home/debian/installer
 ADD --chown=debian:debian ${STACK_INSTALLER_DOCKER_SSH_KEYS_DIR} ./ssh

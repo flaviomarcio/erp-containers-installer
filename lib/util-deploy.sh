@@ -92,8 +92,6 @@ function deployApp()
       logCommand ${1} "docker stack deploy -c ${COMPOSE_DST} ${APPLICATION_DEPLOY_CONTAINER_NAME}"
       logInfo ${1} "docker-image-name" "${APPLICATION_DEPLOY_IMAGE}"
 
-      echo "APPLICATION_DEPLOY_IMAGE = ${APPLICATION_DEPLOY_IMAGE}, run == ${APPLICATION_DEPLOY_CONF_DIR}/run"
-
       if [[ ${STACK_LOG_VERBOSE} == 1 ]]; then
         docker stack deploy -c ${COMPOSE_DST} ${APPLICATION_DEPLOY_CONTAINER_NAME}
       else

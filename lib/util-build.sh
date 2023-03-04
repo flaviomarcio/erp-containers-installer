@@ -28,6 +28,10 @@ function buildProjectCopy()
 {
   logStart ${1} "buildProjectCopy"
 
+  rm -rf ${BUILD_TEMP_DIR}
+  makeDir "$(incInt ${1})" ${BUILD_TEMP_DIR} 777
+  makeDir "$(incInt ${1})" ${BUILD_TEMP_APP_DATA_DIR} 777
+
   DESTINE_DIR=${BUILD_TEMP_APP_DATA_DIR}
 
   rm -rf ${DESTINE_DIR}
@@ -169,11 +173,11 @@ function buildDockerFile()
   else
     cp -r ${FILE_SRC} ${FILE_DST}
     cd ${BUILD_TEMP_DIR}
-    logCommand "$(incInt ${1})" "docker build -t ${IMAGE_NAME} --no-cache=true ."
+    logCommand "$(incInt ${1})" "docker build -t ${IMAGE_NAME} ."
     if [[ ${STACK_LOG_VERBOSE} == 1 ]]; then
-      docker build -t ${IMAGE_NAME} --no-cache=true .
+      docker build -t ${IMAGE_NAME} .
     else
-      echo $(docker build -t ${IMAGE_NAME} --no-cache=true .)>/dev/null
+      echo $(docker build -t ${IMAGE_NAME} .)>/dev/null
     fi
     cd ${ROOT_DIR}
     __RETURN=1;
