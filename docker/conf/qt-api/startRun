@@ -1,0 +1,5 @@
+#!/bin/bash
+
+. ${PWD}/util-call.sh
+
+callWithDisplay ${PWD}/run

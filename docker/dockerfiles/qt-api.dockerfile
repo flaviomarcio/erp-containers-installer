@@ -1,18 +1,19 @@
 FROM debian:latest
 LABEL maintainer "FlavioPortela <fmspx@hotmail.com>"
 
-# RUN apt update;
-# RUN apt install -y \
+RUN apt update;
+RUN apt install -y \
 #         sudo tar curl libglib2.0-0 libdw1 openssh-client postgresql-client libjemalloc2 \
 #         unixodbc freetds-bin tdsodbc htop mcedit iputils-ping libnss3 libmemcached11 \
-#         #GUI
+#         #GUI #libgl1-mesa
 #         libegl1 libxcb-xinerama0 libgl1-mesa-glx libxkbcommon-tools libxcb-util1 xvfb \ 
 #         imagemagick exiftool poppler-utils;
+          git
 
-#         #libgl1-mesa
 
 # RUN useradd -G root debian
 
+# ENV INSTALLER_DIR /home/debian/installer
 # ENV QT_LIBRARY_PATH /home/debian/qt
 # ENV QT_DIR /home/debian/qt
 # ENV QT_ACCESSIBILITY 1
@@ -26,7 +27,9 @@ LABEL maintainer "FlavioPortela <fmspx@hotmail.com>"
 # ENV WORK /home/debian/app
 # ENV QT_REFORCE_LOG=true
 
-# RUN mkdir -p /home/debian
+RUN mkdir -p /home/debian
+RUN git clone git@github.com:flaviomarcio/erp-containers-installer.git ${INSTALLER_DIR}
+RUN apt remove -y git
 # COPY ${APPLICATION_DEPLOY_DATA_DIR} ${WORK}
 
 #WORKDIR ${WORK}

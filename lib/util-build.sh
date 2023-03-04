@@ -26,6 +26,7 @@ function buildProjectPrepare()
 
 function buildProjectCopy()
 {
+  export;
   logStart ${1} "buildProjectCopy"
 
   DESTINE_DIR=${BUILD_TEMP_APP_DATA_DIR}
@@ -40,34 +41,51 @@ function buildProjectCopy()
   if ! [[ -d ${DESTINE_DIR} ]]; then
     mkdir -p ${DESTINE_DIR}
   fi
-  
-  TARGET_DIR_LIST=()
-  if [[ ${APPLICATION_STACK} != "" ]]; then
-    TARGET_DIR_LIST+=("${STACK_APPLICATIONS_DATA_CONF_DIR}/${APPLICATION_STACK}")
-  fi
-  TARGET_DIR_LIST+=("${STACK_APPLICATIONS_DATA_CONF_DIR}/${STACK_PROJECT}")
 
-  for TARGET_DIR in "${TARGET_DIR_LIST[@]}"
+  rm -rf ${APPLICATION_DEPLOY_CONF_DIR}
+  mkdir -p ${APPLICATION_DEPLOY_CONF_DIR}
+
+  echo "APPLICATION_DEPLOY_CONF_DIR== ${APPLICATION_DEPLOY_CONF_DIR}"
+  echo "APPLICATION_DEPLOY_CONF_DIR== ${APPLICATION_DEPLOY_CONF_DIR}"
+  echo "APPLICATION_DEPLOY_CONF_DIR== ${APPLICATION_DEPLOY_CONF_DIR}"
+  echo "APPLICATION_DEPLOY_CONF_DIR== ${APPLICATION_DEPLOY_CONF_DIR}"
+  ls -l ${APPLICATION_DEPLOY_CONF_DIR}
+  
+  TARGET_DIR_LIST=( ${STACK_INSTALLER_DOCKER_CONF_DIR} ${BUILD_TEMP_APP_SOURCE_CONF_DIR} )
+  TARGET_LIST=( ${APPLICATION_STACK} ${STACK_PROJECT} )
+
+  for TARGET_ITEM in "${TARGET_LIST[@]}"
   do
-    if ! [[ -d ${TARGET_DIR} ]]; then
-      continue;
-    fi
-    FILELIST=($(find ${TARGET_DIR} -name '*.sh'))
-    FILELIST+=($(find ${TARGET_DIR} -type f -name '*'))
-    for FILE in "${FILELIST[@]}"
+    for TARGET_PATH in "${TARGET_DIR_LIST[@]}"
     do
-      if [[ ${FILE} == ${TARGET_DIR} ]]; then
-        continue;
-      fi
-      FILE=$(realpath ${FILE})
-      FILE_SRC=${FILE}
-      FILE_DST="${DESTINE_DIR}/$(basename ${FILE})"
-      if ! [[ -f ${FILE_DST} ]]; then
-        logCommand ${1} "cp -r ${FILE_SRC} ${FILE_DST}"
-        cp -r ${FILE_SRC} ${FILE_DST}
-      fi
-    done     
+      TARGET_DIR="${TARGET_PATH}/${TARGET_ITEM}"
+
+      logCommand ${1} "cp -r -T ${TARGET_DIR} ${APPLICATION_DEPLOY_CONF_DIR}"
+      ls -l ${APPLICATION_DEPLOY_CONF_DIR}
+      cp -r -T ${TARGET_DIR} ${APPLICATION_DEPLOY_CONF_DIR}
+      ls -l ${APPLICATION_DEPLOY_CONF_DIR}
+
+      # if ! [[ -d ${TARGET_DIR} ]]; then
+      #   continue;
+      # fi
+      # FILELIST=($(find ${TARGET_DIR} -name '*.sh'))
+      # FILELIST+=($(find ${TARGET_DIR} -type f -name '*'))
+      # for FILE in "${FILELIST[@]}"
+      # do
+      #   if [[ ${FILE} == ${TARGET_DIR} ]]; then
+      #     continue;
+      #   fi
+      #   FILE=$(realpath ${FILE})
+      #   FILE_SRC=${FILE}
+      #   FILE_DST="${DESTINE_DIR}/$(basename ${FILE})"
+      #   if ! [[ -f ${FILE_DST} ]]; then
+      #     logCommand ${1} "cp -r ${FILE_SRC}/* ${FILE_DST}"
+      #     cp -r ${FILE_SRC} ${FILE_DST}
+      #   fi
+      # done     
+    done
   done
+  ls -l ${APPLICATION_DEPLOY_CONF_DIR}
   logFinished ${1} "buildProjectCopy"
 }
 

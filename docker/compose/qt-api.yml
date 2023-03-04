@@ -49,6 +49,6 @@ services:
     #     - "traefik.http.routers.${APPLICATION_NAME}.service=${APPLICATION_NAME}"
     #     - "traefik.http.services.${APPLICATION_NAME}.loadbalancer.server.port=${APPLICATION_DEPLOY_PORT}"
     #     - "traefik.docker.network=${APPLICATION_DEPLOY_NETWORK_NAME}"
-      entrypoint: ["sh", "/opt/run"]
+    entrypoint: ["sh", "/opt/run"]
     networks:
       - stack-inbound
