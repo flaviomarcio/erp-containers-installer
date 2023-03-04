@@ -1,9 +1,5 @@
 #!/bin/bash
 
-. ${BASH_BIN}/bash-util.sh
-. ${STACK_INSTALLER_DIR}/lib/util-prepare.sh
-
-
 function __privateCallWithDisplay()
 {
   SCRIPTPATH="$( cd "`dirname "$1"`" ; pwd -P )"

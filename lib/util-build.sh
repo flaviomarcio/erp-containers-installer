@@ -45,6 +45,9 @@ function buildProjectCopy()
   if ! [[ -d ${DESTINE_DIR} ]]; then
     mkdir -p ${DESTINE_DIR}
   fi
+
+  #copy installer
+  cp -r ${STACK_INSTALLER_DIR}/lib ${APPLICATION_DEPLOY_APP_DIR}/installer-lib
  
   echo "#!/bin/bash" > ${APPLICATION_DEPLOY_BASHRC_FILE} 
 

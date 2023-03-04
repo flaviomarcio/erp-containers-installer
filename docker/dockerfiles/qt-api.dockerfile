@@ -24,18 +24,17 @@ ENV LIB_PATH ${PUBLIC_LIB_DIR}
 ENV INSTALER_PATH ${HOME}/installer
 ENV WORK_PATH ${HOME}/app
 ENV BASHRC_FILE ${WORK_PATH}/bashrc.sh
+ENV INSTALLER_DIR=/home/debian/app/installer-lib
 
 RUN echo "#load application envs" >> ${HOME}/.bashrc
 RUN echo "if [[ -f ${BASHRC_FILE} ]]; then" >> ${HOME}/.bashrc
 RUN echo "  source ${BASHRC_FILE}" >> ${HOME}/.bashrc
 RUN echo "fi" >> ${HOME}/.bashrc
 
-#ADD ${STACK_INSTALLER_DOCKER_SSH_KEYS_DIR} /home/ssh
-ADD ${STACK_INSTALLER_DIR} ${HOME}
 ADD ${APPLICATION_DEPLOY_APP_DIR} ${HOME}
 
 # COPY ${APPLICATION_DEPLOY_APP_DIR} ${WORK}
 
 WORKDIR ${WORK_PATH}
-#CMD ["./startRun"]
-CMD ["sleep","infinity"]
+CMD ["./startRun"]
+#CMD ["sleep","infinity"]

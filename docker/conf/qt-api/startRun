@@ -1,5 +1,5 @@
 #!/bin/bash
 
-. ${PWD}/util-call.sh
+. ${PWD}/installer-lib/util-call.sh
 
 callWithDisplay ${PWD}/run
