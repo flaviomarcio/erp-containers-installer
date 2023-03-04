@@ -57,6 +57,18 @@ function buildProjectCopy()
       if [[ -d ${TARGET_DIR} ]]; then
         logCommand ${1} "cp -r -T ${TARGET_DIR} ${APPLICATION_DEPLOY_APP_DIR}"
         cp -r -T ${TARGET_DIR} ${APPLICATION_DEPLOY_APP_DIR}
+
+        echo "#!/bin/bash" > ${APPLICATION_DEPLOY_BASHRC_FILE} 
+        BASHRC_LIST=$(find ${TARGET_DIR} -iname '*bashrc.sh');
+        for BASHRC_FILE in "${BASHRC_LIST[@]}"
+        do 
+          if [[ -f ${BASHRC_FILE} ]]; then
+            echo "" >> ${APPLICATION_DEPLOY_BASHRC_FILE} 
+            echo "# source ${BASHRC_FILE}">>${APPLICATION_DEPLOY_BASHRC_FILE} 
+            echo "" >> ${APPLICATION_DEPLOY_BASHRC_FILE} 
+            cat ${BASHRC_FILE} >> ${APPLICATION_DEPLOY_BASHRC_FILE} 
+          fi
+        done
       fi
     done
   done

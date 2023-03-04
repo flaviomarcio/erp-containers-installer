@@ -15,18 +15,17 @@ RUN apt-get install -y \
     libegl1 libxcb-xinerama0 libgl1-mesa-glx libxkbcommon-tools libxcb-util1 xvfb \
     imagemagick exiftool poppler-utils
 
+
 ENV XDG_RUNTIME_DIR /run/user/debian
 ENV PUBLIC_LIB_DIR /home/debian/lib 
-
-ENV QT_QPA_PLATFORM=offscreen
-ENV QT_ACCESSIBILITY 1
-ENV QT_AUTO_SCREEN_SCALE_FACTOR 0
-ENV QT_REFORCE_LOG=true
 
 ENV HOME /home/debian
 ENV INSTALER_PATH ${HOME}/isntaller
 ENV WORK_PATH ${HOME}/app
+ENV BASHRC_FILE ${WORK_PATH}/bashrc.sh
 
+RUN echo "#load application envs" >> ${BASHRC_FILE} 
+RUN echo "${BASHRC_FILE}" >> ${BASHRC_FILE} 
 
 #ADD ${STACK_INSTALLER_DOCKER_SSH_KEYS_DIR} /home/ssh
 ADD ${STACK_INSTALLER_DIR} ${HOME}

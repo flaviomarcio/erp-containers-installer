@@ -189,6 +189,7 @@ function __utilPrepareStackEnvsDefault()
   export DOCKER_FILE_DST=${BUILD_TEMP_DIR}/Dockerfile
   
   export APPLICATION_DEPLOY_APP_DIR=${BUILD_TEMP_APP_DATA_DIR}
+  export APPLICATION_DEPLOY_BASHRC_FILE=${APPLICATION_DEPLOY_APP_DIR}/bashrc.sh
   
   if [[ ${APPLICATION_DEPLOY_PORT} == "" ]]; then
     export APPLICATION_DEPLOY_PORT=${BUILD_DEPLOY_PORT}
