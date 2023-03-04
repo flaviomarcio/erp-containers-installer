@@ -1,7 +1,11 @@
 FROM debian:bullseye
 LABEL maintainer "FlavioPortela <fmspx@hotmail.com>"
 
-USER root
+RUN useradd -m debian -s /bin/bash
+RUN usermod -aG root debian
+RUN usermod -aG sudo debian
+RUN mkdir -p /home/debian
+USER debian
 
 RUN apt-get update
 RUN apt-get upgrade -y
@@ -26,10 +30,7 @@ ENV HOME /home/debian
 ENV WORK_PATH ${HOME}/app
 ENV QT_REFORCE_LOG=true
 
-RUN useradd -m debian -s /bin/bash
-RUN usermod -aG root debian
-RUN usermod -aG sudo debian
-RUN mkdir -p /home/debian
+
 
 #ADD ${STACK_INSTALLER_DOCKER_SSH_KEYS_DIR} /home/ssh
 ADD ${STACK_INSTALLER_DIR} /home/debian/installer
