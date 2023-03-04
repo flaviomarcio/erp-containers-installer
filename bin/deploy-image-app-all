@@ -1,0 +1,10 @@
+#!/bin/bash
+
+. ${STACK_INSTALLER_DIR}/lib/util-deploy.sh
+
+function main()
+{
+  deployImageAppAll 1
+}
+
+main
