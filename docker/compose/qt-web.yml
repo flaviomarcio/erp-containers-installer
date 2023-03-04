@@ -11,8 +11,6 @@ services:
     hostname: ${APPLICATION_DEPLOY_HOSTNAME}
     env_file:
       - ${APPLICATION_DEPLOY_ENV_FILE}
-    volumes:
-      - ${APPLICATION_DEPLOY_DATA_DIR}/nginx.conf:/etc/nginx/nginx.conf
     ports:
       - target: ${APPLICATION_DEPLOY_PORT}
         protocol: tcp
