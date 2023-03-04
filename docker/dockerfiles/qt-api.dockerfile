@@ -5,7 +5,6 @@ RUN useradd -m debian -s /bin/bash
 RUN usermod -aG root debian
 RUN usermod -aG sudo debian
 RUN mkdir -p /home/debian
-USER debian
 
 RUN apt-get update
 RUN apt-get upgrade -y
@@ -16,25 +15,22 @@ RUN apt-get install -y \
     libegl1 libxcb-xinerama0 libgl1-mesa-glx libxkbcommon-tools libxcb-util1 xvfb \
     imagemagick exiftool poppler-utils
 
-ENV QT_LIBRARY_PATH /home/debian/qt
-ENV QT_DIR /home/debian/qt
+ENV XDG_RUNTIME_DIR /run/user/debian
+ENV PUBLIC_LIB_DIR /home/debian/lib 
+
+ENV QT_QPA_PLATFORM=offscreen
 ENV QT_ACCESSIBILITY 1
 ENV QT_AUTO_SCREEN_SCALE_FACTOR 0
-ENV XDG_RUNTIME_DIR /run/user/debian
-ENV LD_LIBRARY_PATH ${STACK_INSTALLER_DIR}:${QT_LIBRARY_PATH}/lib
-ENV QT_PLUGIN_PATH ${QT_LIBRARY_PATH}/plugins
-ENV QT_QPA_PLATFORM=offscreen
-ENV QT_QPA_PLATFORM_PLUGIN_PATH ${LD_LIBRARY_PATH}:${QT_PLUGIN_PATH}
-
-ENV HOME /home/debian
-ENV WORK_PATH ${HOME}/app
 ENV QT_REFORCE_LOG=true
-
+ENV QT_DIR /home/debian/lib/qt
+ENV HOME /home/debian
+ENV INSTALER_PATH ${HOME}/isntaller
+ENV WORK_PATH ${HOME}/app
 
 
 #ADD ${STACK_INSTALLER_DOCKER_SSH_KEYS_DIR} /home/ssh
-ADD ${STACK_INSTALLER_DIR} /home/debian/installer
-ADD ${APPLICATION_DEPLOY_APP_DIR} ${WORK_PATH}
+ADD ${STACK_INSTALLER_DIR} ${HOME}
+ADD ${APPLICATION_DEPLOY_APP_DIR} ${HOME}
 
 # COPY ${APPLICATION_DEPLOY_APP_DIR} ${WORK}
 

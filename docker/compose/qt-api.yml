@@ -7,13 +7,14 @@ networks:
 
 services:
   app:
+    user: debian
     image: ${APPLICATION_DEPLOY_IMAGE}
     hostname: ${APPLICATION_DEPLOY_HOSTNAME}
     env_file:
       - ${APPLICATION_DEPLOY_ENV_FILE}
     environment:
       - ENV_FILE=/home/debian/env_file.env
-    #   - QT_VERSION=${QT_VERSION}
+    #   - QT_VERSION=${QT_VERSION_DEFAULT}
     #   - QT_LOG_ENABLED=${QT_LOG_ENABLED}
     #   - QT_LOG_DEBUG=${QT_LOG_DEBUG}
     #   - QT_LOG_INFO=${QT_LOG_INFO}
@@ -22,8 +23,7 @@ services:
     #   - QT_LOG_SSL_WARNING=${QT_LOG_SSL_WARNING}
     volumes:
       #- ${STACK_INSTALLER_DOCKER_SSH_KEYS_DIR}:/home/debian/.ssh
-      - ${PUBLIC_LIB_QT_DIR}:/home/debian/qt
-
+      - ${PUBLIC_LIB_DIR}:/home/debian/lib
       - ${APPLICATION_DEPLOY_ENV_FILE}:/home/debian/env_file.env
       #- ${APPLICATION_DEPLOY_APP_DIR}:/home/debian/app
       - ${APPLICATION_DEPLOY_DATA_DIR}:/app/data

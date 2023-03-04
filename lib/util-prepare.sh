@@ -3,9 +3,9 @@
 . ${BASH_BIN}/bash-util.sh
 
 
-function _privateEnvsPrepareClear()
+function __privateEnvsPrepareClear()
 {
-  logStart ${1} "_privateEnvsPrepareClear"
+  logStart ${1} "__privateEnvsPrepareClear"
   export APPLICATION_PROTOCOL=
   export APPLICATION_STACK=
   export APPLICATION_NAME=
@@ -36,7 +36,7 @@ function _privateEnvsPrepareClear()
   export APPLICATION_DB_DATABASE=
   export APPLICATION_ENV_FILE=
   export APPLICATION_ENV_FILES=
-  logFinished ${1} "_privateEnvsPrepareClear"
+  logFinished ${1} "__privateEnvsPrepareClear"
 }
 
 function __privateEnvsPrepare()
@@ -45,7 +45,6 @@ function __privateEnvsPrepare()
   export PUBLIC_APPLICATIONS_DIR=${HOME}/applications
   export PUBLIC_STORAGE_DIR=${PUBLIC_APPLICATIONS_DIR}/storage
   export PUBLIC_LIB_DIR=${PUBLIC_APPLICATIONS_DIR}/lib
-  export PUBLIC_LIB_QT_DIR=${PUBLIC_LIB_DIR}/${QT_VERSION}
 
   export STACK_DB_DROP=0
   export STACK_DOMAIN=portela-professional.com.br
@@ -68,9 +67,10 @@ function __privateEnvsPublic()
 function __privateEnvsDefault()
 {
   logStart ${1} "__privateEnvsDefault"
-  if [[ ${QT_VERSION} == "" ]]; then
-      export QT_VERSION=6.4.2
+  if [[ ${QT_VERSION_DEFAULT} == "" ]]; then
+      export QT_VERSION_DEFAULT=6.4.2
   fi
+
   if [[ ${STACK_CPU_DEFAULT} == "" ]]; then
       export STACK_CPU_DEFAULT=1
   fi
@@ -131,14 +131,14 @@ function __privateEnvsDir()
 function utilPrepareClear()
 {
   logStart ${1} "utilPrepareClear"
-  _privateEnvsPrepareClear "$(incInt ${1})"  
+  __privateEnvsPrepareClear "$(incInt ${1})"  
   logFinished ${1} "utilPrepareClear"
 }
 
 function utilPrepareInit()
 {
   logStart ${1} "utilPrepareInit"
-  _privateEnvsPrepareClear "$(incInt ${1})"
+  __privateEnvsPrepareClear "$(incInt ${1})"
   __privateEnvsPrepare "$(incInt ${1})"
   __privateEnvsPublic "$(incInt ${1})"
   if [ "$?" -eq 1 ]; then

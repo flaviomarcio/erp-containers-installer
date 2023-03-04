@@ -61,8 +61,6 @@ function buildProjectCopy()
     done
   done
 
-  ls -l ${APPLICATION_DEPLOY_APP_DIR}
-
   logFinished ${1} "buildProjectCopy"
   return 1;
 }
