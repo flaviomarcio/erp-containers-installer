@@ -31,11 +31,11 @@ RUN usermod -aG root debian
 RUN usermod -aG sudo debian
 RUN mkdir -p /home/debian
 
-ADD --chown=debian:debian ${STACK_INSTALLER_DIR} /home/debian/installer
-#ADD --chown=debian:debian ${STACK_INSTALLER_DOCKER_SSH_KEYS_DIR} ./ssh
-ADD --chown=debian:debian ${APPLICATION_DEPLOY_DATA_DIR} ${WORK_PATH}
+#ADD ${STACK_INSTALLER_DOCKER_SSH_KEYS_DIR} /home/ssh
+ADD ${STACK_INSTALLER_DIR} /home/debian/installer
+ADD ${APPLICATION_DEPLOY_APP_DIR} ${WORK_PATH}
 
-# COPY ${APPLICATION_DEPLOY_DATA_DIR} ${WORK}
+# COPY ${APPLICATION_DEPLOY_APP_DIR} ${WORK}
 
 WORKDIR ${WORK_PATH}
 #CMD ["./startRun"]

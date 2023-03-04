@@ -31,6 +31,7 @@ function buildProjectCopy()
   rm -rf ${BUILD_TEMP_DIR}
   makeDir "$(incInt ${1})" ${BUILD_TEMP_DIR} 777
   makeDir "$(incInt ${1})" ${BUILD_TEMP_APP_DATA_DIR} 777
+  makeDir "$(incInt ${1})" ${APPLICATION_DEPLOY_APP_DIR} 777
 
   DESTINE_DIR=${BUILD_TEMP_APP_DATA_DIR}
 
@@ -44,10 +45,6 @@ function buildProjectCopy()
   if ! [[ -d ${DESTINE_DIR} ]]; then
     mkdir -p ${DESTINE_DIR}
   fi
-
-  rm -rf ${APPLICATION_DEPLOY_CONF_DIR}
-  mkdir -p ${APPLICATION_DEPLOY_CONF_DIR}
-
  
   TARGET_DIR_LIST=( ${STACK_INSTALLER_DOCKER_CONF_DIR} ${BUILD_TEMP_APP_SOURCE_CONF_DIR} )
   TARGET_LIST=( ${APPLICATION_STACK} ${STACK_PROJECT} )
@@ -58,12 +55,13 @@ function buildProjectCopy()
     do
       TARGET_DIR="${TARGET_PATH}/${TARGET_ITEM}"
       if [[ -d ${TARGET_DIR} ]]; then
-        logCommand ${1} "cp -r -T ${TARGET_DIR} ${APPLICATION_DEPLOY_CONF_DIR}"
-        cp -r -T ${TARGET_DIR} ${APPLICATION_DEPLOY_CONF_DIR}
+        logCommand ${1} "cp -r -T ${TARGET_DIR} ${APPLICATION_DEPLOY_APP_DIR}"
+        cp -r -T ${TARGET_DIR} ${APPLICATION_DEPLOY_APP_DIR}
       fi
-
     done
   done
+
+  ls -l ${APPLICATION_DEPLOY_APP_DIR}
 
   logFinished ${1} "buildProjectCopy"
   return 1;
@@ -205,8 +203,7 @@ function buildRegistryPush()
     echo $(docker push ${TAG_URL})&>/dev/null
   fi
 
-  IMAGE_LIST_RM=($(docker image ls | grep ${IMAGE_NAME} | awk '{print $3}' | sort --unique ))
-
+  #IMAGE_LIST_RM=($(docker image ls | grep ${IMAGE_NAME} | awk '{print $3}' | sort --unique ))
   #for IMAGE_ID in "${IMAGE_LIST_RM[@]}"
   #do
   #  logCommand ${1} "docker image rm -f ${IMAGE_ID}"

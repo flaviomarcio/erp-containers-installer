@@ -21,15 +21,11 @@ services:
     #   - QT_LOG_CRITICAL=${QT_LOG_CRITICAL}
     #   - QT_LOG_SSL_WARNING=${QT_LOG_SSL_WARNING}
     volumes:
-      - ${STACK_INSTALLER_DOCKER_SSH_KEYS_DIR}:/home/debian/.ssh
+      #- ${STACK_INSTALLER_DOCKER_SSH_KEYS_DIR}:/home/debian/.ssh
       - ${PUBLIC_LIB_QT_DIR}:/home/debian/qt
 
       - ${APPLICATION_DEPLOY_ENV_FILE}:/home/debian/env_file.env
-      #- ${APPLICATION_DEPLOY_DATA_DIR}:/home/debian/app
-      #- ${APPLICATION_DEPLOY_CONF_DIR}/run:/opt/run
-      #- ${APPLICATION_DEPLOY_CONF_DIR}/startBin:/home/debian/app/startBin
-      #- ${APPLICATION_DEPLOY_CONF_DIR}/startRun:/home/debian/app/startRun
-      - ${APPLICATION_DEPLOY_CONF_DIR}:/home/debian/app
+      #- ${APPLICATION_DEPLOY_APP_DIR}:/home/debian/app
       - ${APPLICATION_DEPLOY_DATA_DIR}:/app/data
       - ${APPLICATION_DEPLOY_BACKUP_DIR}:/app/backup
     # ports:
