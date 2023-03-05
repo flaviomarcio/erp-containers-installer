@@ -95,6 +95,8 @@ function buildProjectPull()
     return 1
   fi
 
+  logTarget ${1} "${APPLICATION_GIT}"
+
   log $'\n'"Cloning repository: [${GIT_REPOSITORY}:${GIT_BRANCH}]"
   cdDir ${1} ${BUILD_TEMP_DIR}
   if ! [ "$?" -eq 1 ]; then
@@ -115,7 +117,7 @@ function buildProjectPull()
   PROJECT_INIT=${BUILD_TEMP_SOURCE_DIR}/initrepository
   if [[ -f ${PROJECT_INIT} ]]; then
       cd ${BUILD_TEMP_SOURCE_DIR}
-      log $'\n'"Init repository: [${GIT_REPOSITORY}:${GIT_BRANCH}]"
+      logInfo ${1} $'\n'"Init repository: [${GIT_REPOSITORY}:${GIT_BRANCH}]"
       echo $( ${PROJECT_INIT} )&>/dev/null
   fi
 
@@ -134,21 +136,23 @@ function buildProjectPull()
     echo $(git pull origin ${GIT_BRANCH})>/dev/null
   fi
 
+  logFinished ${1} "buildProjectPull"
   if [[ -d ${BUILD_TEMP_SOURCE_DIR} ]]; then
     return 1;
   else
     return 0;
   fi   
-  logFinished ${1} "buildProjectPull"
 }
 
 function buildQtProject()
 {
+  RETURN=0
   logStart ${1} "buildQtProject"
   export GIT_REPOSITORY=git@github.com:flaviomarcio/qtreforce-sdk.git
   export GIT_BRANCH=master
 
   if ! [[ -d ${BUILD_TEMP_SOURCE_DIR} ]]; then
+    logFinished ${1} "buildQtProject"
     return 1;
   fi
 
@@ -157,10 +161,13 @@ function buildQtProject()
   QT_BIN_DIR=${PUBLIC_LIB_DIR}/qt/${QT_VERSION}/bin
   QT_QMAKE=${QT_BIN_DIR}/qmake
 
-  if [[ -f ${QT_QMAKE} ]]; then
+  if ! [[ -f ${QT_QMAKE} ]]; then
     logError ${1} "Invalid QMAKE: ${QT_QMAKE}"
+    logFinished ${1} "buildQtProject"
     return 0;
   fi
+
+  find ${BUILD_TEMP_SOURCE_DIR} -maxdepth 1 -name '*.pro'
 
   PROJECT_LIST=($(find ${BUILD_TEMP_SOURCE_DIR} -maxdepth 1 -name '*.pro'))
 
@@ -191,15 +198,24 @@ function buildQtProject()
 
       for FILE_SRC in "${BIN_LIST[@]}"
       do 
-          FILE_DST=${BUILD_TEMP_APP_DATA_DIR}/$(basename ${FILE_SRC})
+          if [[ ${APPLICATION_TEMPLATE} == "lib" ]]; then
+            FILE_DST=${PUBLIC_LIB_DIR}/$(basename ${FILE_SRC})
+          else
+            FILE_DST=${BUILD_TEMP_APP_DATA_DIR}/$(basename ${FILE_SRC})
+          fi
           if [[ -f ${FILE_DST} ]]; then
             rm -rf ${FILE_DST};
           fi
           logCommand ${1} "cp -r ${FILE_SRC} ${FILE_DST}"
           cp -r ${FILE_SRC} ${FILE_DST}
+          if [[ -f ${FILE_DST} ]]; then
+            RETURN=1
+          fi
       done
   done
   cd ${BUILD_TEMP_SOURCE_DIR}
+  logFinished ${1} "buildQtProject"
+  return ${RETURN}
 }
 
 function buildMavenJava()
@@ -237,29 +253,50 @@ function buildMavenJava()
   rm -rf ${BUILD_TEMP_APP_DATA_SOURCE_JAR};
   export APPLICATION_JAR=$(find ${BUILD_TEMP_SOURCE_DIR} -name 'app*.jar')
   logCommand ${1} "cp -r ${APPLICATION_JAR} ${BUILD_TEMP_APP_DATA_SOURCE_JAR}"      
-  cp -r ${APPLICATION_JAR} ${BUILD_TEMP_APP_DATA_SOURCE_JAR}
+
+  if [[ -f ${APPLICATION_JAR} ]]; then
+    cp -r ${APPLICATION_JAR} ${BUILD_TEMP_APP_DATA_SOURCE_JAR}
+  fi
 
   logSuccess ${1} "success"
   logFinished ${1} "buildMavenJava"
-  return 1;
+
+  if [[ -f ${BUILD_TEMP_APP_DATA_SOURCE_JAR} ]]; then
+    return 1;
+  fi
+  return 0;  
 }
 
 function buildProjectSource()
 {
+  idt="$(incInt ${1})"
+  logStart ${1} "buildProjectSource"
   if ! [[ -d ${BUILD_TEMP_SOURCE_DIR} ]]; then
+    logInfo ${1} "No source for build, source dir: ${BUILD_TEMP_SOURCE_DIR}"
     return 1;
   fi
 
   CHECK=$(find ${BUILD_TEMP_SOURCE_DIR} -name '*.pom')
   if [[ ${CHECK} != "" ]]; then
-    buildMavenJava "$@"
-    return 1;
+    logCommand ${1} "buildMavenJava ${idt}"
+    buildMavenJava ${idt}
+    if [ "$?" -eq 1 ]; then
+      return 1;
+    fi
+    return 0;
   fi
   
   CHECK=$(find ${BUILD_TEMP_SOURCE_DIR} -name '*.pro')
   if [[ ${CHECK} != "" ]]; then
-    buildQtProject "$@"
+    logCommand ${1} "buildQtProject ${idt}"
+    buildQtProject ${idt}
+    if [ "$?" -eq 1 ]; then
+      return 1;
+    fi
+    return 0;
   fi
+  logInfo ${1} "Indeterminate project type"
+  logFinished ${1} "buildProjectSource"
 }
 
 function buildDockerFile()
@@ -269,11 +306,11 @@ function buildDockerFile()
   FILE_SRC=${3}
   FILE_DST=${4}
   log "Building docker image [${IMAGE_NAME}]"
-  echo $(rm -rf ${FILE_DST})>/dev/null
   if ! [[ -f ${FILE_SRC} ]]; then
       logError ${1} "Docker file not found [${FILE_SRC}]"
     __RETURN=1;
   else
+    rm -rf ${FILE_DST};
     cp -r ${FILE_SRC} ${FILE_DST}
     cd ${BUILD_TEMP_DIR}
     logCommand "$(incInt ${1})" "docker build -t ${IMAGE_NAME} ."
@@ -322,21 +359,21 @@ function buildRegistryImage()
 {
   logStart ${1} "buildRegistryImage"
 
-  buildProjectPull "$(incInt ${1})"
-  if ! [ "$?" -eq 1 ]; then
-    logError ${1} "Error on buildProjectPull"
-    return 0;
-  fi
-
   buildProjectCopy "$(incInt ${1})"
   if ! [ "$?" -eq 1 ]; then
     logError ${1} "Error on buildProjectCopy"
     return 0;
   fi
 
+  buildProjectPull "$(incInt ${1})"
+  if ! [ "$?" -eq 1 ]; then
+    logError ${1} "Error on buildProjectPull"
+    return 0;
+  fi
+
   buildProjectSource "$(incInt ${1})"
   if ! [ "$?" -eq 1 ]; then
-    logError ${1} "Error on buildMavenJava"
+    logError ${1} "Error on buildProjectSource"
     return 0;
   fi
 

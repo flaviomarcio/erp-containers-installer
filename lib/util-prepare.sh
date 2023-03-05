@@ -289,8 +289,6 @@ function __utilPrepareStackEnvs()
       echo "" >> ${BUILD_TEMP_APP_ENV_FILE}
       echo "" >> ${BUILD_TEMP_APP_ENV_FILE} 
 
-      echo "ENV_NAME == ${ENV_DIR}/${ENV_NAME}"
-
       ENV_FILE=${ENV_DIR}/${ENV_NAME}
       if ! [[ -f ${ENV_FILE} ]]; then
         logWarning ${1} "${ENV_FILE} not found"
