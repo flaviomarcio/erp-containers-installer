@@ -340,8 +340,10 @@ function buildRegistryImage()
     return 0;
   fi
 
-  buildDockerFile "$(incInt ${1})" ${BUILD_DEPLOY_IMAGE_NAME} ${DOCKER_FILE_SRC} ${DOCKER_FILE_DST}
-  buildRegistryPush "$(incInt ${1})" ${BUILD_DEPLOY_IMAGE_NAME}
+  if [[ ${APPLICATION_TEMPLATE} == "app" || ${APPLICATION_TEMPLATE} == "web" || ${APPLICATION_TEMPLATE} == "db" ]]; then
+    buildDockerFile "$(incInt ${1})" ${BUILD_DEPLOY_IMAGE_NAME} ${DOCKER_FILE_SRC} ${DOCKER_FILE_DST}
+    buildRegistryPush "$(incInt ${1})" ${BUILD_DEPLOY_IMAGE_NAME}
+  fi
   logFinished ${1} "buildRegistryImage"
   return ${1};   
 }

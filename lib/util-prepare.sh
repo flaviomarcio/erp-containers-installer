@@ -6,6 +6,7 @@
 function __privateEnvsPrepareClear()
 {
   logStart ${1} "__privateEnvsPrepareClear"
+  export APPLICATION_TEMPLATE=
   export APPLICATION_PROTOCOL=
   export APPLICATION_STACK=
   export APPLICATION_NAME=
@@ -160,6 +161,7 @@ function __utilPrepareStackEnvsDefault()
   fi
 
   BUILD_DEPLOY_APP_NAME=${STACK_PREFIX}-${APPLICATION_NAME}
+  BUILD_DEPLOY_TEMPLATE=app
   BUILD_DEPLOY_PROTOCOL=http
   BUILD_DEPLOY_MODE=replicated
   BUILD_DEPLOY_CONTEXT_PATH=/
@@ -234,6 +236,10 @@ function __utilPrepareStackEnvsDefault()
   if [[ ${APPLICATION_DEPLOY_NETWORK_NAME} == "" ]]; then
     export APPLICATION_DEPLOY_NETWORK_NAME=${STACK_NETWORK_INBOUND}
   fi  
+
+  if [[ ${APPLICATION_TEMPLATE} == "" ]]; then
+    export APPLICATION_TEMPLATE=${BUILD_DEPLOY_TEMPLATE}
+  fi
 
   if [[ ${APPLICATION_PROTOCOL} == "" ]]; then
     export APPLICATION_PROTOCOL=${BUILD_DEPLOY_PROTOCOL}
