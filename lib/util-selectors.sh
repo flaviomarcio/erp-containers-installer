@@ -10,7 +10,7 @@ function getProjects()
   else
     OPTDIR=${STACK_APPLICATIONS_PROJECT_DIR}
   fi
-  echo -n $(ls ${OPTDIR})
+  echo -n $(ls ${OPTDIR} | sort)
 }
 
 function selectProject()
@@ -31,7 +31,7 @@ function selectProject()
 
 function getActions()
 {
-  echo -n $(ls ${STACK_INSTALLER_BIN_DIR})
+  echo -n $(ls ${STACK_INSTALLER_BIN_DIR} | sort)
 }
 
 function selectAction()
