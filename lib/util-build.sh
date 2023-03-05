@@ -107,7 +107,19 @@ function buildProjectPull()
     echo $(git clone ${GIT_REPOSITORY} src)>/dev/null    
   fi
 
-  cdDir ${1} ${BUILD_TEMP_SOURCE_DIR};
+  cdDir ${1} ${BUILD_TEMP_SOURCE_DIR}
+  if ! [ "$?" -eq 1 ]; then
+    return 0;
+  fi
+
+  PROJECT_INIT=${BUILD_TEMP_SOURCE_DIR}/initrepository
+  if [[ -f ${PROJECT_INIT} ]]; then
+      cd ${BUILD_TEMP_SOURCE_DIR}
+      log $'\n'"Init repository: [${GIT_REPOSITORY}:${GIT_BRANCH}]"
+      echo $( ${PROJECT_INIT} )&>/dev/null
+  fi
+
+  cdDir ${1} ${BUILD_TEMP_SOURCE_DIR}
   if ! [ "$?" -eq 1 ]; then
     return 0;
   fi
@@ -130,9 +142,69 @@ function buildProjectPull()
   logFinished ${1} "buildProjectPull"
 }
 
-function buildProjectSource()
+function buildQtProject()
 {
-  logStart ${1} "buildProjectSource"
+  logStart ${1} "buildQtProject"
+  export GIT_REPOSITORY=git@github.com:flaviomarcio/qtreforce-sdk.git
+  export GIT_BRANCH=master
+
+  if ! [[ -d ${BUILD_TEMP_SOURCE_DIR} ]]; then
+    return 1;
+  fi
+
+  BUILD_TEMP_BUILD_DIR=${BUILD_TEMP_DIR}/build-temp
+
+  QT_BIN_DIR=${PUBLIC_LIB_DIR}/qt/${QT_VERSION}/bin
+  QT_QMAKE=${QT_BIN_DIR}/qmake
+
+  if [[ -f ${QT_QMAKE} ]]; then
+    logError ${1} "Invalid QMAKE: ${QT_QMAKE}"
+    return 0;
+  fi
+
+  PROJECT_LIST=($(find ${BUILD_TEMP_SOURCE_DIR} -maxdepth 1 -name '*.pro'))
+
+  mkdir -p ${BUILD_TEMP_BUILD_DIR}
+
+  for PROJECT_FILE in "${PROJECT_LIST[@]}"
+  do
+      PROJECT_DIR=$(dirname ${PROJECT_FILE})
+      PROJECT_NAME=$(basename ${PROJECT_FILE})
+      PROJECT_BUILD_DIR=${BUILD_TEMP_BUILD_DIR}/${PROJECT_NAME}
+      mkdir -p ${PROJECT_BUILD_DIR}
+      cd ${PROJECT_BUILD_DIR}
+
+      logTarget ${1} ${PROJECT_FILE}
+      logCommand ${1} "${QT_QMAKE} -spec linux-g++ CONFIG+=realease CONFIG-=qml_debug ${PROJECT_FILE}"
+      logCommand ${1} "make -j12"
+      
+
+      if [[ ${STACK_LOG_VERBOSE} == 1 ]]; then
+        ${QT_QMAKE} -spec linux-g++ CONFIG+=realease CONFIG-=qml_debug ${PROJECT_FILE}
+        make -j12
+      else
+        echo $(${QT_QMAKE} -spec linux-g++ CONFIG+=realease CONFIG-=qml_debug ${PROJECT_FILE})&>/dev/null
+        echo $(make -j12)&>/dev/null
+      fi
+
+      BIN_LIST=($(find ${PROJECT_BUILD_DIR} -executable -type f))
+
+      for FILE_SRC in "${BIN_LIST[@]}"
+      do 
+          FILE_DST=${BUILD_TEMP_APP_DATA_DIR}/$(basename ${FILE_SRC})
+          if [[ -f ${FILE_DST} ]]; then
+            rm -rf ${FILE_DST};
+          fi
+          logCommand ${1} "cp -r ${FILE_SRC} ${FILE_DST}"
+          cp -r ${FILE_SRC} ${FILE_DST}
+      done
+  done
+  cd ${BUILD_TEMP_SOURCE_DIR}
+}
+
+function buildMavenJava()
+{
+  logStart ${1} "buildMavenJava"
   logTarget ${1} ${BUILD_TEMP_SOURCE_DIR}
 
   if [[ ${GIT_REPOSITORY} == "" ]]; then
@@ -168,8 +240,26 @@ function buildProjectSource()
   cp -r ${APPLICATION_JAR} ${BUILD_TEMP_APP_DATA_SOURCE_JAR}
 
   logSuccess ${1} "success"
-  logFinished ${1} "buildProjectSource"
+  logFinished ${1} "buildMavenJava"
   return 1;
+}
+
+function buildProjectSource()
+{
+  if ! [[ -d ${BUILD_TEMP_SOURCE_DIR} ]]; then
+    return 1;
+  fi
+
+  CHECK=$(find ${BUILD_TEMP_SOURCE_DIR} -name '*.pom')
+  if [[ ${CHECK} != "" ]]; then
+    buildMavenJava "$@"
+    return 1;
+  fi
+  
+  CHECK=$(find ${BUILD_TEMP_SOURCE_DIR} -name '*.pro')
+  if [[ ${CHECK} != "" ]]; then
+    buildQtProject "$@"
+  fi
 }
 
 function buildDockerFile()
@@ -246,7 +336,7 @@ function buildRegistryImage()
 
   buildProjectSource "$(incInt ${1})"
   if ! [ "$?" -eq 1 ]; then
-    logError ${1} "Error on buildProjectSource"
+    logError ${1} "Error on buildMavenJava"
     return 0;
   fi
 
