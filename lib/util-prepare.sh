@@ -271,6 +271,7 @@ function __utilPrepareStackEnvsDefault()
 
 function __utilPrepareStackEnvs()
 {
+  idt=$(incInt ${1})
   logStart ${1} "__utilPrepareStackEnvs"
   logTarget ${1} ${BUILD_TEMP_APP_ENV_FILE}
 
@@ -281,22 +282,25 @@ function __utilPrepareStackEnvs()
   #ENV_DIR_LIST=(${STACK_APPLICATIONS_DATA_ENV_DIR} ${STACK_INSTALLER_DOCKER_FILE_DIR})
   ENV_DIR_LIST=(${STACK_APPLICATIONS_DATA_ENV_DIR} ${STACK_INSTALLER_DOCKER_FILE_DIR})
   ENV_LIST=(default.env ${IMAGE_ENVS} ${APPLICATION_ENV_FILES} ${APPLICATION_ENV_FILES})
-  
+
   for ENV_DIR in "${ENV_DIR_LIST[@]}"
   do
     for ENV_NAME in "${ENV_LIST[@]}"
     do
-      echo "" >> ${BUILD_TEMP_APP_ENV_FILE}
-      echo "" >> ${BUILD_TEMP_APP_ENV_FILE} 
-
       ENV_FILE=${ENV_DIR}/${ENV_NAME}
       if ! [[ -f ${ENV_FILE} ]]; then
         logWarning ${1} "${ENV_FILE} not found"
         continue;
       fi  
-      runSource "$(incInt ${1})" ${ENV_FILE} 
-      logMethod "$(incInt ${1})" "info: append ${ENV_FILE}"
-      cat ${ENV_FILE} >> ${BUILD_TEMP_APP_ENV_FILE} 
+      logTarget ${idt} "info: append ${ENV_FILE}"
+      runSource ${idt} ${ENV_FILE} 
+      if ! [ "$?" -eq 1 ]; then
+        continue;
+      else
+        echo "" >> ${BUILD_TEMP_APP_ENV_FILE}
+        cat ${ENV_FILE} >> ${BUILD_TEMP_APP_ENV_FILE}
+        echo "" >> ${BUILD_TEMP_APP_ENV_FILE}
+      fi      
     done
   done
   
