@@ -10,21 +10,15 @@ services:
     user: debian
     image: ${APPLICATION_DEPLOY_IMAGE}
     hostname: ${APPLICATION_DEPLOY_HOSTNAME}
-    env_file:
-      - ${APPLICATION_DEPLOY_ENV_FILE}
-    environment:
-      - ENV_FILE=/home/debian/env_file.env
-      # - QT_VERSION=${QT_VERSION}
-      # - QT_DIR=${QT_DIR}
-      # - QT_LIBRARY_PATH=${QT_LIBRARY_PATH}
-      # - LD_LIBRARY_PATH=${LD_LIBRARY_PATH}
-      # - QT_PLUGIN_PATH=${QT_PLUGIN_PATH}
-      # - QT_QPA_PLATFORM_PLUGIN_PATH=${QT_QPA_PLATFORM_PLUGIN_PATH}
     volumes:
       - ${PUBLIC_LIB_DIR}:/home/debian/lib
       - ${APPLICATION_DEPLOY_ENV_FILE}:/home/debian/env_file.env
       - ${APPLICATION_DEPLOY_DATA_DIR}:/app/data
       - ${APPLICATION_DEPLOY_BACKUP_DIR}:/app/backup
+    env_file:
+      - ${APPLICATION_DEPLOY_ENV_FILE}
+    environment:
+      - ENV_FILE=/home/debian/env_file.env
     ports:
       - target: ${APPLICATION_DEPLOY_PORT}
         protocol: tcp
