@@ -1,9 +1,9 @@
 #!/bin/bash
 
 . ${BASH_BIN}/bash-util.sh
-. ${STACK_INSTALLER_DIR}/lib/util-prepare.sh
-. ${STACK_INSTALLER_DIR}/lib/util-selectors.sh
-. ${STACK_INSTALLER_DIR}/lib/util-build.sh
+. ${PWD}/lib/util-prepare.sh
+. ${PWD}/lib/util-selectors.sh
+. ${PWD}/lib/util-build.sh
 
 
 function main()
@@ -31,9 +31,9 @@ function main()
   export STACK_ACTION=
   export STACK_PROJECT=
 
-  selectEnviroment
+  selectEnvironment 1
   if ! [ "$?" -eq 1 ]; then
-    log "Invalid call selectEnviroment"
+    log "Invalid call selectEnvironment"
   else
     utilPrepareInit 1
     if ! [ "$?" -eq 1 ]; then

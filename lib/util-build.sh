@@ -1,7 +1,7 @@
 #!/bin/bash
 
 . ${BASH_BIN}/bash-util.sh
-. ${STACK_INSTALLER_DIR}/lib/util-prepare.sh
+. ${INSTALLER_DIR}/lib/util-prepare.sh
 
 function buildProjectPrepare()
 {
@@ -47,7 +47,7 @@ function buildProjectCopy()
   fi
 
   #copy installer
-  cp -r ${STACK_INSTALLER_DIR}/lib ${APPLICATION_DEPLOY_APP_DIR}/installer-lib
+  cp -r ${INSTALLER_DIR}/lib ${APPLICATION_DEPLOY_APP_DIR}/installer-lib
  
   echo "#!/bin/bash" > ${APPLICATION_DEPLOY_BASHRC_FILE} 
 

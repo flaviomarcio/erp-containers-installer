@@ -1,7 +1,7 @@
 #!/bin/bash
 
 . ${BASH_BIN}/bash-util.sh
-. ${STACK_INSTALLER_DIR}/lib/util-prepare.sh
+. ${INSTALLER_DIR}/lib/util-prepare.sh
 
 function getProjects()
 {
@@ -50,7 +50,7 @@ function selectAction()
   return 1;  
 }
 
-function selectEnviroment()
+function selectEnvironment()
 {
   echo $'\n'"Environment menu"$'\n'
   PS3="Choose a environment: "
