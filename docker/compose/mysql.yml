@@ -11,14 +11,11 @@ services:
     hostname: ${APPLICATION_DEPLOY_HOSTNAME}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ${APPLICATION_DEPLOY_DATA_DIR}:/postgresql/pg/data
-      - ${APPLICATION_DEPLOY_BACKUP_DIR}:/postgresql/pg/backup
-    #   - ${STACK_APPLICATIONS_DATA_CONF_DIR}/postgres/pg_hba.conf:/etc/postgresql/pg_hba.conf
-    # env_file:
-    #  - ${APPLICATION_DEPLOY_ENV_FILE}
     environment:
-      - POSTGRES_USER=${APPLICATION_DB_USER}
-      - POSTGRES_PASSWORD=${APPLICATION_DB_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=${APPLICATION_DB_PASSWORD}
+      - MYSQL_DATABASE=${APPLICATION_DB_DATABASE}
+      - MYSQL_USER=${APPLICATION_DB_USER}
+      - MYSQL_PASSWORD=${APPLICATION_DB_PASSWORD}
     ports:
       - target: ${APPLICATION_DEPLOY_PORT}
         published: ${APPLICATION_DEPLOY_PORT}
