@@ -1,6 +1,6 @@
 #!/bin/bash
 
-. ${INSTALLER_DIR}/lib/util-deploy-db.sh
+. ${STACK_INSTALLER_DIR}/lib/util-deploy-db.sh
 
 function main()
 {

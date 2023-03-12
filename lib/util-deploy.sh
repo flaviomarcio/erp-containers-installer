@@ -1,8 +1,9 @@
 #!/bin/bash
 
 . ${BASH_BIN}/bash-util.sh
-. ${INSTALLER_DIR}/lib/util-build.sh
-. ${INSTALLER_DIR}/lib/util-prepare.sh
+. ${STACK_INSTALLER_DIR}/lib/util-build.sh
+. ${STACK_INSTALLER_DIR}/lib/util-prepare.sh
+. ${STACK_INSTALLER_DIR}/lib/util-selectors.sh
 
 
 function deployImage()
@@ -28,7 +29,7 @@ function deployImage()
 
     rm -rf ${BUILD_TEMP_DIR}
     makeDir "$(incInt ${1})" ${BUILD_TEMP_DIR} 777
-    makeDir "$(incInt ${1})" ${BUILD_TEMP_APP_DIR} 777
+    makeDir "$(incInt ${1})" ${BUILD_TEMP_APP_DATA_DIR} 777
     
     export APPLICATION_FILTER=app*.jar
   fi
@@ -115,4 +116,24 @@ function deployImageApp()
   deployImage "$(incInt ${1})" ${STACK_ACTION} ${STACK_PROJECT}
   deployApp "$(incInt ${1})" ${STACK_ACTION} ${STACK_PROJECT}
   logFinished ${1} "deployImageApp"
+}
+
+
+function deployImageAppAll()
+{
+  idt="$(incInt ${1})"
+  logStart ${idt} "deployImageAppAll"
+  if [[ ${2} != "" && ${3} != "" ]]; then
+    export STACK_ACTION=${2}
+    export STACK_PROJECT=${3}
+  fi
+
+  PROJECT_LIST=("$(getProjects)")
+  for PROJECT in "${FILENAME_STEP_LIST[@]}"
+  do
+    export STACK_PROJECT=${PROJECT}
+    deployImageApp ${idt} ${STACK_ACTION} ${STACK_PROJECT}
+  done
+
+  logFinished ${idt} "deployImageAppAll"
 }

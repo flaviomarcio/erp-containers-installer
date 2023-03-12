@@ -1,18 +1,23 @@
 #!/bin/bash
 
 . ${BASH_BIN}/bash-util.sh
-. ${INSTALLER_DIR}/lib/util-prepare.sh
+. ${STACK_INSTALLER_DIR}/lib/util-prepare.sh
 
-function selectProject()
+function getProjects()
 {
-  echo ""  
   if [[ ${STACK_ACTION} == "deploy-db" || ${STACK_ACTION} == "deploy-db-drop"  ]]; then
     OPTDIR=${STACK_APPLICATIONS_DATA_DB_DIR}
   else
     OPTDIR=${STACK_APPLICATIONS_PROJECT_DIR}
   fi
-  options=(back $(ls ${OPTDIR}))    
+  echo -n $(ls ${OPTDIR} | sort)
+}
+
+function selectProject()
+{
+  echo ""  
   PS3='Please select a project: '
+  options=(quit $(getProjects))
   select opt in "${options[@]}"
   do
     if [[ ${opt} == "back" ]]; then
@@ -24,10 +29,15 @@ function selectProject()
   return 1;
 }
 
+function getActions()
+{
+  echo -n $(ls ${STACK_INSTALLER_BIN_DIR} | sort)
+}
+
 function selectAction()
 {
   echo ""
-  options=(quit $(ls ${STACK_INSTALLER_BIN_DIR}))
+  options=(quit $(getActions))
   PS3='Please select a action: '
   select opt in "${options[@]}"
   do

@@ -3,9 +3,10 @@
 . ${BASH_BIN}/bash-util.sh
 
 
-function _privateEnvsPrepareClear()
+function __privateEnvsPrepareClear()
 {
-  logStart ${1} "_privateEnvsPrepareClear"
+  logStart ${1} "__privateEnvsPrepareClear"
+  export APPLICATION_TEMPLATE=
   export APPLICATION_PROTOCOL=
   export APPLICATION_STACK=
   export APPLICATION_NAME=
@@ -16,6 +17,7 @@ function _privateEnvsPrepareClear()
   export APPLICATION_DEPLOY_CONTAINER_NAME=
   export APPLICATION_DEPLOY_PORT=
   export APPLICATION_DEPLOY_CONTEXT_PATH=
+  export APPLICATION_DEPLOY_DNS_PUBLIC=
   export APPLICATION_DEPLOY_DNS=
   export APPLICATION_DEPLOY_IMAGE=
   export APPLICATION_DEPLOY_HOSTNAME=
@@ -36,7 +38,7 @@ function _privateEnvsPrepareClear()
   export APPLICATION_DB_DATABASE=
   export APPLICATION_ENV_FILE=
   export APPLICATION_ENV_FILES=
-  logFinished ${1} "_privateEnvsPrepareClear"
+  logFinished ${1} "__privateEnvsPrepareClear"
 }
 
 function __privateEnvsPrepare()
@@ -45,7 +47,6 @@ function __privateEnvsPrepare()
   export PUBLIC_APPLICATIONS_DIR=${HOME}/applications
   export PUBLIC_STORAGE_DIR=${PUBLIC_APPLICATIONS_DIR}/storage
   export PUBLIC_LIB_DIR=${PUBLIC_APPLICATIONS_DIR}/lib
-  export PUBLIC_LIB_QT_DIR=${PUBLIC_LIB_DIR}/${QT_VERSION}
 
   export STACK_DB_DROP=0
   export STACK_DOMAIN=portela-professional.com.br
@@ -71,6 +72,7 @@ function __privateEnvsDefault()
   if [[ ${QT_VERSION} == "" ]]; then
       export QT_VERSION=6.4.2
   fi
+
   if [[ ${STACK_CPU_DEFAULT} == "" ]]; then
       export STACK_CPU_DEFAULT=1
   fi
@@ -115,10 +117,14 @@ function __privateEnvsDir()
 
 
   #INSTALLER DIR
-  export STACK_INSTALLER_BIN_DIR=${INSTALLER_DIR}/bin
-  export STACK_INSTALLER_LIB_DIR=${INSTALLER_DIR}/lib
-  export STACK_INSTALLER_DOCKER_DIR=${INSTALLER_DIR}/docker
+  export STACK_INSTALLER_DIR=${ROOT_DIR}/installer
+  export STACK_INSTALLER_BIN_DIR=${STACK_INSTALLER_DIR}/bin
+  export STACK_INSTALLER_BIN_DIR=${STACK_INSTALLER_DIR}/bin
+  export STACK_INSTALLER_LIB_DIR=${STACK_INSTALLER_DIR}/lib
+  export STACK_INSTALLER_DOCKER_DIR=${STACK_INSTALLER_DIR}/docker
+  export STACK_INSTALLER_DOCKER_CONF_DIR=${STACK_INSTALLER_DOCKER_DIR}/conf
   export STACK_INSTALLER_DOCKER_FILE_DIR=${STACK_INSTALLER_DOCKER_DIR}/dockerfiles
+  export STACK_INSTALLER_DOCKER_SSH_KEYS_DIR=${STACK_INSTALLER_DOCKER_DIR}/ssh-keys
   export STACK_INSTALLER_DOCKER_COMPOSE_DIR=${STACK_INSTALLER_DOCKER_DIR}/compose
   logFinished ${1} "__privateEnvsDir"
 }
@@ -127,14 +133,14 @@ function __privateEnvsDir()
 function utilPrepareClear()
 {
   logStart ${1} "utilPrepareClear"
-  _privateEnvsPrepareClear "$(incInt ${1})"  
+  __privateEnvsPrepareClear "$(incInt ${1})"  
   logFinished ${1} "utilPrepareClear"
 }
 
 function utilPrepareInit()
 {
   logStart ${1} "utilPrepareInit"
-  _privateEnvsPrepareClear "$(incInt ${1})"
+  __privateEnvsPrepareClear "$(incInt ${1})"
   __privateEnvsPrepare "$(incInt ${1})"
   __privateEnvsPublic "$(incInt ${1})"
   if [ "$?" -eq 1 ]; then
@@ -156,35 +162,39 @@ function __utilPrepareStackEnvsDefault()
   fi
 
   BUILD_DEPLOY_APP_NAME=${STACK_PREFIX}-${APPLICATION_NAME}
+  BUILD_DEPLOY_TEMPLATE=app
   BUILD_DEPLOY_PROTOCOL=http
   BUILD_DEPLOY_MODE=replicated
   BUILD_DEPLOY_CONTEXT_PATH=/
   BUILD_DEPLOY_PORT=8080
   BUILD_DEPLOY_CONTAINER_NAME=${BUILD_DEPLOY_APP_NAME}
-  BUILD_DEPLOY_DNS=${BUILD_DEPLOY_APP_NAME}.${STACK_DOMAIN}
+  BUILD_DEPLOY_DNS_PRIVATE=${BUILD_DEPLOY_APP_NAME}
+  BUILD_DEPLOY_DNS_PUBLIC=${BUILD_DEPLOY_DNS_PRIVATE}.${STACK_DOMAIN}
   BUILD_DEPLOY_NODE="node.role==manager"
   BUILD_DEPLOY_REPLICAS=${STACK_DEPLOY_REPLICAS}
-  BUILD_DEPLOY_MODE=global
   BUILD_DEPLOY_IMAGE_NAME=${BUILD_DEPLOY_APP_NAME}
   BUILD_DEPLOY_IMAGE_DNS=${STACK_REGISTRY_DNS}/${BUILD_DEPLOY_IMAGE_NAME}
 
   export BUILD_TEMP_DIR=${HOME}/build/${BUILD_DEPLOY_APP_NAME}
   export BUILD_TEMP_SOURCE_DIR=${BUILD_TEMP_DIR}/src
-  export BUILD_TEMP_APP_DIR=${BUILD_TEMP_DIR}/app
-  export BUILD_TEMP_APP_JAR=${BUILD_TEMP_DIR}/app/app.jar
+  export BUILD_TEMP_APP_DATA_DIR=${BUILD_TEMP_DIR}/app
+  export BUILD_TEMP_APP_SOURCE_CONF_DIR=${STACK_APPLICATIONS_DATA_CONF_DIR}/${STACK_PROJECT}
+  export BUILD_TEMP_APP_DATA_SOURCE_JAR=${BUILD_TEMP_DIR}/app/app.jar
   export BUILD_TEMP_APP_ENV_FILE=${BUILD_TEMP_DIR}/env_file.env
-  export BUILD_TEMP_APP_BIN_SRC_DIR=${STACK_APPLICATIONS_SOURCE_DIR}/${STACK_PROJECT}
-
+  export BUILD_TEMP_APP_BIN_SRC_DIR=${STACK_APPLICATIONS_DATA_SRC_DIR}/${STACK_PROJECT}
+  
+  
   makeDir "$(incInt ${1})" ${BUILD_TEMP_DIR} 777
-  makeDir "$(incInt ${1})" ${BUILD_TEMP_APP_DIR} 777
+  makeDir "$(incInt ${1})" ${BUILD_TEMP_APP_DATA_DIR} 777
 
   export DOCKER_FILE_NAME=${APPLICATION_STACK}.dockerfile
   export DOCKER_STACK_FILE_NAME=${APPLICATION_STACK}.yml
   export DOCKER_FILE_SRC=${STACK_INSTALLER_DOCKER_FILE_DIR}/${DOCKER_FILE_NAME}
   export DOCKER_FILE_DST=${BUILD_TEMP_DIR}/Dockerfile
   
-  export APPLICATION_BUILD_APP_DIR=${BUILD_TEMP_APP_DIR}
-
+  export APPLICATION_DEPLOY_APP_DIR=${BUILD_TEMP_APP_DATA_DIR}
+  export APPLICATION_DEPLOY_BASHRC_FILE=${APPLICATION_DEPLOY_APP_DIR}/bashrc.sh
+  
   if [[ ${APPLICATION_DEPLOY_PORT} == "" ]]; then
     export APPLICATION_DEPLOY_PORT=${BUILD_DEPLOY_PORT}
   fi
@@ -193,8 +203,16 @@ function __utilPrepareStackEnvsDefault()
     export APPLICATION_DEPLOY_CONTEXT_PATH=${BUILD_DEPLOY_CONTEXT_PATH}
   fi
 
+  if [[ ${APPLICATION_DEPLOY_DNS_PUBLIC} == "" ]]; then
+    export APPLICATION_DEPLOY_DNS_PUBLIC=false
+  fi  
+
   if [[ ${APPLICATION_DEPLOY_DNS} == "" ]]; then
-    export APPLICATION_DEPLOY_DNS=${BUILD_DEPLOY_DNS}
+    if [[ ${APPLICATION_DEPLOY_DNS_PUBLIC} == "true" ]]; then
+      export APPLICATION_DEPLOY_DNS=${BUILD_DEPLOY_DNS_PUBLIC}
+    else
+      export APPLICATION_DEPLOY_DNS=${BUILD_DEPLOY_DNS_PRIVATE}
+    fi
   fi
 
   if [[ ${APPLICATION_DEPLOY_IMAGE} == "" ]]; then
@@ -229,6 +247,10 @@ function __utilPrepareStackEnvsDefault()
     export APPLICATION_DEPLOY_NETWORK_NAME=${STACK_NETWORK_INBOUND}
   fi  
 
+  if [[ ${APPLICATION_TEMPLATE} == "" ]]; then
+    export APPLICATION_TEMPLATE=${BUILD_DEPLOY_TEMPLATE}
+  fi
+
   if [[ ${APPLICATION_PROTOCOL} == "" ]]; then
     export APPLICATION_PROTOCOL=${BUILD_DEPLOY_PROTOCOL}
   fi
@@ -239,8 +261,11 @@ function __utilPrepareStackEnvsDefault()
   export BUILD_DEPLOY_DATA_DIR=${APPLICATION_STORAGE_TARGET}/${APPLICATION_NAME}
   export BUILD_DEPLOY_DATA_APP_DIR=${BUILD_DEPLOY_DATA_DIR}/data
   export BUILD_DEPLOY_DATA_BACKUP_DIR=${BUILD_DEPLOY_DATA_DIR}/backup
+  
   if [[ ${APPLICATION_DEPLOY_DATA_DIR} == "" ]]; then
     export APPLICATION_DEPLOY_DATA_DIR=${BUILD_DEPLOY_DATA_APP_DIR}
+  fi
+  if [[ ${APPLICATION_DEPLOY_BACKUP_DIR} == "" ]]; then
     export APPLICATION_DEPLOY_BACKUP_DIR=${BUILD_DEPLOY_DATA_BACKUP_DIR}
   fi
   
@@ -256,25 +281,39 @@ function __utilPrepareStackEnvsDefault()
 
 function __utilPrepareStackEnvs()
 {
+  idt=$(incInt ${1})
   logStart ${1} "__utilPrepareStackEnvs"
   logTarget ${1} ${BUILD_TEMP_APP_ENV_FILE}
 
   echo "#!/bin/bash" > ${BUILD_TEMP_APP_ENV_FILE} 
 
-  ENV_LIST=(default.env ${APPLICATION_ENV_FILES})
-  for ENV_NAME in "${ENV_LIST[@]}"
+  IMAGE_ENVS=${APPLICATION_STACK}.env
+
+  #ENV_DIR_LIST=(${STACK_APPLICATIONS_DATA_ENV_DIR} ${STACK_INSTALLER_DOCKER_FILE_DIR})
+  ENV_DIR_LIST=(${STACK_APPLICATIONS_DATA_ENV_DIR} ${STACK_INSTALLER_DOCKER_FILE_DIR})
+  ENV_LIST=(default.env ${IMAGE_ENVS} ${APPLICATION_ENV_FILES} ${APPLICATION_ENV_FILES})
+
+  for ENV_DIR in "${ENV_DIR_LIST[@]}"
   do
-    echo "" >> ${BUILD_TEMP_APP_ENV_FILE}
-    echo "" >> ${BUILD_TEMP_APP_ENV_FILE} 
-    ENV_FILE=${STACK_APPLICATIONS_DATA_ENV_DIR}/${ENV_NAME}
-    if ! [[ -f ${ENV_FILE} ]]; then
-      logWarning ${1} "${ENV_FILE} not found"
-      continue;
-    fi  
-    runSource "$(incInt ${1})" ${ENV_FILE} 
-    logMethod "$(incInt ${1})" "info: append ${ENV_FILE}"
-    cat ${ENV_FILE} >> ${BUILD_TEMP_APP_ENV_FILE} 
+    for ENV_NAME in "${ENV_LIST[@]}"
+    do
+      ENV_FILE=${ENV_DIR}/${ENV_NAME}
+      if ! [[ -f ${ENV_FILE} ]]; then
+        logWarning ${1} "${ENV_FILE} not found"
+        continue;
+      fi  
+      logTarget ${idt} "info: append ${ENV_FILE}"
+      runSource ${idt} ${ENV_FILE} 
+      if ! [ "$?" -eq 1 ]; then
+        continue;
+      else
+        echo "" >> ${BUILD_TEMP_APP_ENV_FILE}
+        cat ${ENV_FILE} >> ${BUILD_TEMP_APP_ENV_FILE}
+        echo "" >> ${BUILD_TEMP_APP_ENV_FILE}
+      fi      
+    done
   done
+  
   envsParserFile ${1} ${BUILD_TEMP_APP_ENV_FILE}
   runSource ${1} ${BUILD_TEMP_APP_ENV_FILE}
   envsToSimpleEnvs ${1} ${BUILD_TEMP_APP_ENV_FILE}
