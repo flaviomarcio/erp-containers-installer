@@ -276,7 +276,7 @@ function buildProjectSource()
     return 1;
   fi
 
-  CHECK=$(find ${BUILD_TEMP_SOURCE_DIR} -name '*.pom')
+  CHECK=$(find ${BUILD_TEMP_SOURCE_DIR} -name 'pom.xml')
   if [[ ${CHECK} != "" ]]; then
     logCommand ${1} "buildMavenJava ${idt}"
     buildMavenJava ${idt}
@@ -295,7 +295,7 @@ function buildProjectSource()
     fi
     return 0;
   fi
-  logInfo ${1} "Indeterminate project type"
+  logError ${1} "Indeterminate project type"
   logFinished ${1} "buildProjectSource"
 }
 
