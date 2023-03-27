@@ -11,6 +11,8 @@ services:
     hostname: ${APPLICATION_DEPLOY_HOSTNAME}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+    #  - ${APPLICATION_DEPLOY_APP_DIR}/config-file.cnf:/etc/mysql/conf.d/config-file.cnf
+    #  - ${APPLICATION_DEPLOY_DATA_DIR}:/var/lib/mysql
     command:
       - --default-authentication-plugin=mysql_native_password
     environment:

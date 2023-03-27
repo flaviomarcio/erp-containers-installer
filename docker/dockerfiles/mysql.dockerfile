@@ -1,6 +1,9 @@
 FROM mysql
 LABEL maintainer "FlavioPortela <fmspx@hotmail.com>"
 
+ADD ./config-file.cnf /etc/mysql/conf.d/config-file.cnf
+
+
 # ENV MYSQL_ALLOW_EMPTY_PASSWORD yes
 # ENV MYSQL_ROOT_PASSWORD ${APPLICATION_DB_PASSWORD}
 # ENV MYSQL_DATABASE ${APPLICATION_DB_DATABASE}

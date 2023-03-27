@@ -305,6 +305,18 @@ function buildDockerFile()
   IMAGE_NAME=${2}
   FILE_SRC=${3}
   FILE_DST=${4}
+
+  ls -l ${DOCKER_CONF_DIR}
+  ls -l ${DOCKER_CONF_DIR}
+  ls -l ${DOCKER_CONF_DIR}
+  echo "cp -r -T ${DOCKER_CONF_DIR} ${BUILD_TEMP_DIR}"
+  cp -r -T ${DOCKER_CONF_DIR} ${BUILD_TEMP_DIR}
+  ls -l ${DOCKER_CONF_DIR}
+  ls -l ${DOCKER_CONF_DIR}
+  ls -l ${DOCKER_CONF_DIR}
+  cp -r -T ${DOCKER_CONF_DIR} ${BUILD_TEMP_DIR}
+
+
   log "Building docker image [${IMAGE_NAME}]"
   if ! [[ -f ${FILE_SRC} ]]; then
       logError ${1} "Docker file not found [${FILE_SRC}]"
