@@ -1,6 +1,10 @@
 FROM mysql
 LABEL maintainer "FlavioPortela <fmspx@hotmail.com>"
 
+ENV TZ=America/Sao_Paulo
+#RUN apt update;
+#RUN apt install -y tzdata;
+
 ADD ./config-file.cnf /etc/mysql/conf.d/config-file.cnf
 
 

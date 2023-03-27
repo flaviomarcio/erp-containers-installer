@@ -1,6 +1,10 @@
 FROM debian:bullseye
 LABEL maintainer "FlavioPortela <fmspx@hotmail.com>"
 
+ENV TZ=America/Sao_Paulo
+RUN apt update;
+RUN apt install -y tzdata;
+
 RUN useradd -m debian -s /bin/bash
 RUN usermod -aG root debian
 RUN usermod -aG sudo debian
