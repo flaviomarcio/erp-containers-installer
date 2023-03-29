@@ -45,8 +45,8 @@ function __privateEnvsPrepare()
 {    
   logStart ${1} "__privateEnvsPrepare"
   export PUBLIC_APPLICATIONS_DIR=${HOME}/applications
-  export PUBLIC_STORAGE_DIR=${PUBLIC_APPLICATIONS_DIR}/storage
-  export PUBLIC_LIB_DIR=${PUBLIC_APPLICATIONS_DIR}/lib
+  export PUBLIC_STORAGE_DIR=$(realpath ${PUBLIC_APPLICATIONS_DIR}/storage)
+  export PUBLIC_LIB_DIR=$(realpath ${PUBLIC_APPLICATIONS_DIR}/lib)
 
   export STACK_DB_DROP=0
   export STACK_DOMAIN=portela-professional.com.br
