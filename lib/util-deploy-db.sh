@@ -7,8 +7,7 @@
 function deployPG_prepare()
 {
     logFinished ${1} "deployPG_prepare"
-    APPLICATION_DB_HOST_FIX=localhost
-    ERP_SQL_FILE_SCRIPT_TEMP="/tmp/tmp_scrpt.sql"
+        ERP_SQL_FILE_SCRIPT_TEMP="/tmp/tmp_scrpt.sql"
     ERP_SQL_FILE_SCRIPT_TEMP_FULL="/tmp/tmp_scrpt-log.sql"
 
     rm -rf ${ERP_SQL_FILE_SCRIPT_TEMP_FULL};
@@ -34,6 +33,11 @@ function deployPG_prepare()
         log "Invalid env: APPLICATION_DB_PORT=${APPLICATION_DB_PORT}"
         exit 0;
     fi
+    POSTGRES_SERVER=${APPLICATION_DB_HOST}
+    POSTGRES_USER=${APPLICATION_DB_USER}
+    POSTGRES_PASS=${APPLICATION_DB_PASSWORD}
+    POSTGRES_DB=${APPLICATION_DB_DATABASE}
+    POSTGRES_PORT=${APPLICATION_DB_PORT}
     logFinished ${1} "deployPG_prepare"
 }
 
@@ -42,7 +46,7 @@ function deployPG_pgpassCheck()
     logStart ${1} "deployPG_pgpassCheck"
     POSTGRES_PGPASS=${HOME}/.pgpass
     POSTGRES_SERVER=localhost
-    AUTH="${APPLICATION_DB_HOST_FIX}:${APPLICATION_DB_PORT}:${APPLICATION_DB_DATABASE}:${APPLICATION_DB_USER}:${APPLICATION_DB_PASSWORD}">${POSTGRES_PGPASS}
+    AUTH="${APPLICATION_DB_HOST}:${APPLICATION_DB_PORT}:${APPLICATION_DB_DATABASE}:${APPLICATION_DB_USER}:${APPLICATION_DB_PASSWORD}">${POSTGRES_PGPASS}
     if [[ -f ${POSTGRES_PGPASS} ]];then
         echo ${AUTH} >> ${POSTGRES_PGPASS}
     fi
@@ -70,8 +74,8 @@ function deployPG_runScripts()
             log "                  executing [./${DIRNAME}], ${FILENAME} to ${ERP_SQL_FILE_SCRIPT_TEMP}";            
             echo "set client_min_messages to WARNING; ">${ERP_SQL_FILE_SCRIPT_TEMP};
             cat ${FILE} >> ${ERP_SQL_FILE_SCRIPT_TEMP};
-            logCommand ${1} "psql -h ${APPLICATION_DB_HOST_FIX} -U ${APPLICATION_DB_USER} -p ${APPLICATION_DB_PORT} -d ${APPLICATION_DB_DATABASE} -a -f ${ERP_SQL_FILE_SCRIPT_TEMP}"
-            echo $(psql -h ${APPLICATION_DB_HOST_FIX} -U ${APPLICATION_DB_USER} -p ${APPLICATION_DB_PORT} -d ${APPLICATION_DB_DATABASE} -a -f ${ERP_SQL_FILE_SCRIPT_TEMP})#>/dev/null;
+            logCommand ${1} "psql -h ${APPLICATION_DB_HOST} -U ${APPLICATION_DB_USER} -p ${APPLICATION_DB_PORT} -d ${APPLICATION_DB_DATABASE} -a -f ${ERP_SQL_FILE_SCRIPT_TEMP}"
+            echo $(psql -h ${APPLICATION_DB_HOST} -U ${APPLICATION_DB_USER} -p ${APPLICATION_DB_PORT} -d ${APPLICATION_DB_DATABASE} -a -f ${ERP_SQL_FILE_SCRIPT_TEMP})#>/dev/null;
         done
     done
     logFinished ${1} "deployPG_runScripts"
