@@ -31,36 +31,42 @@ function main()
   export STACK_ACTION=
   export STACK_PROJECT=
 
+  selectCustomer 1
+  if ! [ "$?" -eq 1 ]; then
+    log "Invalid call selectCustomer"
+  fi
+
   selectEnvironment 1
   if ! [ "$?" -eq 1 ]; then
     log "Invalid call selectEnvironment"
-  else
-    utilPrepareInit 1
-    if ! [ "$?" -eq 1 ]; then
-      exit 0;
-    fi
-    
-    while :
-    do
-      utilPrepareClear
-      cd ${ROOT_DIR}
-      export STACK_ACTION=
-      export STACK_PROJECT=
-      
-      selectAction
-      if ! [ "$?" -eq 1 ]; then
-        log "Invalid selectAction"
-        break
-      fi
-
-      selectProject;
-      if ! [ "$?" -eq 1 ]; then
-        log "Invalid selectProject"
-        continue;
-      fi
-      runOption 1 ${STACK_ACTION} ${STACK_PROJECT}
-    done
   fi
+
+  utilPrepareInit 1
+  if ! [ "$?" -eq 1 ]; then
+    exit 0;
+  fi
+  
+  while :
+  do
+    utilPrepareClear
+    cd ${ROOT_DIR}
+    export STACK_ACTION=
+    export STACK_PROJECT=
+    
+    selectAction
+    if ! [ "$?" -eq 1 ]; then
+      log "Invalid selectAction"
+      break
+    fi
+
+    selectProject;
+    if ! [ "$?" -eq 1 ]; then
+      log "Invalid selectProject"
+      continue;
+    fi
+    runOption 1 ${STACK_ACTION} ${STACK_PROJECT}
+  done
+
 }
 
 main "$@"

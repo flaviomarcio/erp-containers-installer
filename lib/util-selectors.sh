@@ -50,6 +50,30 @@ function selectAction()
   return 1;  
 }
 
+function selectCustomer()
+{
+  export PUBLIC_STACK_TARGET_FILE=${HOME}/applications/stack_targets.env
+  if [[ -f ${PUBLIC_STACK_TARGET_FILE} ]]; then
+    options=$(cat ${PUBLIC_STACK_TARGET_FILE})
+    options="company ${options}"
+  else
+    options="company"
+  fi
+  options=(${options})
+
+  echo $'\n'"Customer menu"$'\n'
+  PS3="Choose a customer: "
+  select opt in "${options[@]}"
+  do
+    if [[ ${opt} == "quit" ]]; then
+      return 0
+    fi
+    export STACK_TARGET=${opt}
+    break;
+  done
+  return 1;
+}
+
 function selectEnvironment()
 {
   echo $'\n'"Environment menu"$'\n'

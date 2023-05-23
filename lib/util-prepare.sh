@@ -57,6 +57,7 @@ function __privateEnvsPublic()
 {
   logStart ${1} "__privateEnvsPublic"
   export PUBLIC_ENVIRONMENT_FILE=${PUBLIC_APPLICATIONS_DIR}/${STACK_ENVIRONMENT}/stack_envs.env
+
   runSource ${1} ${PUBLIC_ENVIRONMENT_FILE} 
   if ! [ "$?" -eq 1 ]; then
     return 0
