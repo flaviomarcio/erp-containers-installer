@@ -13,19 +13,15 @@ services:
     image: ${APPLICATION_DEPLOY_IMAGE}
     hostname: ${APPLICATION_DEPLOY_HOSTNAME}
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
+      # - /var/run/docker.sock:/var/run/docker.sock
       - ${APPLICATION_DEPLOY_DATA_DIR}:/postgresql/pg/data
       - ${APPLICATION_DEPLOY_BACKUP_DIR}:/postgresql/pg/backup
-    #   - ${BUILD_TEMP_APP_DATA_SOURCE}/postgres/pg_hba.conf:/etc/postgresql/pg_hba.conf
-    # env_file:
-    #  - ${APPLICATION_DEPLOY_ENV_FILE}
     environment:
       - POSTGRES_USER=${APPLICATION_DB_USER}
       - POSTGRES_PASSWORD=${APPLICATION_DB_PASSWORD}
       - PGDATA=/postgresql/pg/data
     ports:
       - target: ${APPLICATION_DEPLOY_PORT}
-        published: ${APPLICATION_DEPLOY_PORT}
         protocol: tcp
         mode: ingress
     deploy:
@@ -42,21 +38,10 @@ services:
       labels:
         - "traefik.enable=true"
         - "traefik.docker.network=${APPLICATION_DEPLOY_NETWORK_NAME}"
-
-        #- "traefik.http.routers.${APPLICATION_NAME}.rule=Host(`${APPLICATION_DEPLOY_DNS}`)"
-        #- "traefik.http.routers.${APPLICATION_NAME}.service=${APPLICATION_NAME}"
-        #- "traefik.http.services.${APPLICATION_NAME}.loadbalancer.server.port=${APPLICATION_DEPLOY_PORT}"
-
-        # - "traefik.tcp.routers.${APPLICATION_NAME}.entrypoints=${APPLICATION_STACK}"
-        # - "traefik.tcp.routers.${APPLICATION_NAME}.rule=Host(`${APPLICATION_DEPLOY_DNS}`)"
-        # - "traefik.tcp.routers.${APPLICATION_NAME}.service=${APPLICATION_NAME}"
-        # - "traefic.tcp.routers.${APPLICATION_NAME}.tls=false"
-        # - "traefik.tcp.services.${APPLICATION_NAME}.loadbalancer.server.port=${APPLICATION_DEPLOY_PORT}"
-
-        - "traefik.tcp.routers.${APPLICATION_NAME}.rule=Host(`${APPLICATION_DEPLOY_DNS}`)"
-        - "traefik.tcp.routers.${APPLICATION_NAME}.service=${APPLICATION_NAME}"
-        - "traefik.tcp.routers.${APPLICATION_NAME}.entryPoints=postgres"
-        - "traefik.tcp.services.${APPLICATION_NAME}.loadbalancer.server.port=5432"
+        - "traefik.tcp.routers.postgres.rule=HostSNI(`*`)"
+        - "traefik.tcp.routers.postgres.entryPoints=postgres"
+        - "traefik.tcp.routers.postgres.service=${APPLICATION_NAME}"
+        - "traefik.tcp.services.postgres.loadbalancer.server.port=${APPLICATION_DEPLOY_PORT}"
 
     networks:
       - stack-inbound
