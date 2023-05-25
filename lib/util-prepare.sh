@@ -71,7 +71,7 @@ function __privateEnvsDefault()
 {
   logStart ${1} "__privateEnvsDefault"
   if [[ ${QT_VERSION} == "" ]]; then
-      export QT_VERSION=6.4.2
+      export QT_VERSION=6.5.0
   fi
 
   if [[ ${STACK_CPU_DEFAULT} == "" ]]; then
