@@ -34,6 +34,7 @@ function main()
   selectCustomer 1
   if ! [ "$?" -eq 1 ]; then
     log "Invalid call selectCustomer"
+    exit 0
   fi
 
   selectEnvironment 1
@@ -45,10 +46,11 @@ function main()
   if ! [ "$?" -eq 1 ]; then
     exit 0;
   fi
+
+  utilPrepareClear
   
   while :
   do
-    utilPrepareClear
     cd ${ROOT_DIR}
     export STACK_ACTION=
     export STACK_PROJECT=
@@ -59,12 +61,34 @@ function main()
       break
     fi
 
-    selectProject;
-    if ! [ "$?" -eq 1 ]; then
-      log "Invalid selectProject"
-      continue;
-    fi
-    runOption 1 ${STACK_ACTION} ${STACK_PROJECT}
+    while : 
+    do
+      selectDeployOpt
+      if [ "$?" -eq 0 ]; then
+        continue;
+      elif [ "$?" -eq 2 ]; then
+        break;
+      else
+        while : 
+        do
+          utilPrepareClear
+          selectProject
+          if [ "$?" -eq 0 ]; then
+            continue;
+          elif [ "$?" -eq 2 ]; then
+            break;
+          else
+            LIST=(${STACK_PROJECT})
+            for ENV in "${LIST[@]}"
+            do
+              utilPrepareClear
+              export STACK_PROJECT=${ENV}
+              runOption 1 ${STACK_ACTION} ${STACK_PROJECT}
+            done
+          fi
+        done
+      fi
+    done
   done
 
 }

@@ -1,10 +1,11 @@
 #!/bin/bash
 
 . ${INSTALLER_DIR}/lib/util-deploy.sh
+. ${INSTALLER_DIR}/lib/util-selectors.sh
 
 function main()
 {
-  deployApp 1
+  deployAppRun ${1}
 }
 
 main

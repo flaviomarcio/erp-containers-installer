@@ -23,7 +23,7 @@ function deployImage()
 
   buildProjectPrepare "$(incInt ${1})" ${STACK_ACTION} ${STACK_PROJECT}
   if ! [ "$?" -eq 1 ]; then
-    logError ${1} "deployApp: buildProjectPrepare ${1} ${STACK_ACTION} ${STACK_PROJECT}"
+    logError ${1} "deployImage: buildProjectPrepare ${1} ${STACK_ACTION} ${STACK_PROJECT}"
   else
     buildRegistryImage "$(incInt ${1})"
 
@@ -37,7 +37,6 @@ function deployImage()
   logFinished ${1} "deployImage"
   return 1
 }
-
 
 function deployApp()
 {
@@ -73,7 +72,7 @@ function deployApp()
         logCommand ${1} "docker stack rm ${APPLICATION_DEPLOY_CONTAINER_NAME}"
         docker stack rm ${APPLICATION_DEPLOY_CONTAINER_NAME}
       else
-        echo $(docker stack rm ${APPLICATION_DEPLOY_CONTAINER_NAME})&>/dev/null&>/dev/null
+        echo $(docker --quiet --log-level ERROR stack rm ${APPLICATION_DEPLOY_CONTAINER_NAME})&>/dev/null&>/dev/null
       fi    
     fi
 
@@ -96,7 +95,7 @@ function deployApp()
       if [[ ${STACK_LOG_VERBOSE} == 1 ]]; then
         docker stack deploy -c ${COMPOSE_DST} ${APPLICATION_DEPLOY_CONTAINER_NAME}
       else
-        echo $(docker stack deploy -c ${COMPOSE_DST} ${APPLICATION_DEPLOY_CONTAINER_NAME})&>/dev/null
+        echo $(docker --quiet --log-level ERROR stack deploy -c ${COMPOSE_DST} ${APPLICATION_DEPLOY_CONTAINER_NAME})&>/dev/null
       fi
     fi
 
@@ -104,20 +103,21 @@ function deployApp()
   logFinished ${1} "deployApp"
 }
 
-function deployImageApp()
+function deployAppRun()
 {
-  logStart ${1} "deployImageApp"
-  if [[ ${2} != "" && ${3} != "" ]]; then
-    export STACK_ACTION=${2}
-    export STACK_PROJECT=${3}
+  logStart ${1} "deployAppRun"
+  if [[ ${STACK_DEPLOY_MODE} == "deploy" ]]; then
+    deployImage "$(incInt ${1})" ${STACK_ACTION} ${STACK_PROJECT}
+  elif [[ ${STACK_DEPLOY_MODE} == "build" ]]; then
+    deployApp "$(incInt ${1})" ${STACK_ACTION} ${STACK_PROJECT}
+  else 
+    # all
+    deployImage "$(incInt ${1})" ${STACK_ACTION} ${STACK_PROJECT}
+    deployApp "$(incInt ${1})" ${STACK_ACTION} ${STACK_PROJECT}
   fi
-  logInfo ${1} "action" ${STACK_ACTION}
-  logInfo ${1} "project" ${STACK_PROJECT}
-  deployImage "$(incInt ${1})" ${STACK_ACTION} ${STACK_PROJECT}
-  deployApp "$(incInt ${1})" ${STACK_ACTION} ${STACK_PROJECT}
-  logFinished ${1} "deployImageApp"
+  logFinished ${1} "deployAppRun"
+  return 1;
 }
-
 
 function deployImageAppAll()
 {

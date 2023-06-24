@@ -13,20 +13,43 @@ function getProjects()
   echo -n $(ls ${OPTDIR} | sort)
 }
 
-function selectProject()
+function selectDeployOpt()
 {
-  echo ""  
-  PS3='Please select a project: '
-  options=(quit $(getProjects))
+  clearTerm
+  echo $'\n'"Deploy mode menu"$'\n'
+  export STACK_DEPLOY_MODE=all
+  PS3='Please select a deploy mode: '
+  options=(Back all build deploy)
   select opt in "${options[@]}"
   do
     if [[ ${opt} == "back" ]]; then
-      return 0;
-    fi
-    STACK_PROJECT=${opt}
-    break;
+      return 2;
+    else
+      export STACK_DEPLOY_MODE=${opt}
+      return 1;
+    fi    
   done
-  return 1;
+  return 0;
+}
+
+function selectProject()
+{
+  clearTerm
+  echo $'\n'"Project menu"$'\n'
+  PS3='Please select a project: '
+  options=(back all $(getProjects))
+  select opt in "${options[@]}"
+  do
+    if [[ ${opt} == "back" ]]; then
+      return 2;
+    elif [[ ${opt} == "all" ]]; then
+      STACK_PROJECT=$(getProjects)
+    else
+      STACK_PROJECT=${opt}
+    fi    
+    return 1;
+  done
+  return 0;
 }
 
 function getActions()
@@ -36,18 +59,20 @@ function getActions()
 
 function selectAction()
 {
-  echo ""
-  options=(quit $(getActions))
+  clearTerm
+  echo $'\n'"Action menu"$'\n'
   PS3='Please select a action: '
+  options=(quit $(getActions))
   select opt in "${options[@]}"
   do
     if [[ ${opt} == "quit" ]]; then
-      return 0
+      return 2
+    else
+      export STACK_ACTION=${opt}
+      return 1
     fi
-    export STACK_ACTION=${opt}
-    break
   done
-  return 1;  
+  return 0;  
 }
 
 function selectCustomer()
@@ -55,27 +80,30 @@ function selectCustomer()
   export PUBLIC_STACK_TARGET_FILE=${HOME}/applications/stack_targets.env
   if [[ -f ${PUBLIC_STACK_TARGET_FILE} ]]; then
     options=$(cat ${PUBLIC_STACK_TARGET_FILE})
-    options="company ${options}"
+    options="quit company ${options}"
   else
-    options="company"
+    options="quit company"
   fi
   options=(${options})
 
+  clearTerm
   echo $'\n'"Customer menu"$'\n'
   PS3="Choose a customer: "
   select opt in "${options[@]}"
   do
     if [[ ${opt} == "quit" ]]; then
-      return 0
+      return 2
+    else
+      export STACK_TARGET=${opt}
+      return 1
     fi
-    export STACK_TARGET=${opt}
-    break;
   done
-  return 1;
+  return 0;
 }
 
 function selectEnvironment()
 {
+  clearTerm
   echo $'\n'"Environment menu"$'\n'
   PS3="Choose a environment: "
   

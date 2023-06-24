@@ -322,7 +322,7 @@ function buildDockerFile()
     if [[ ${STACK_LOG_VERBOSE} == 1 ]]; then
       docker build --network host -t ${IMAGE_NAME} .
     else
-      echo $(docker build --network host -t ${IMAGE_NAME} .)>/dev/null
+      echo $(docker --quiet --log-level ERROR build --network host -t ${IMAGE_NAME} .)>/dev/null
     fi
     cd ${ROOT_DIR}
     __RETURN=1;
@@ -341,21 +341,15 @@ function buildRegistryPush()
   if [[ ${STACK_LOG_VERBOSE} == 1 ]]; then
     docker image tag ${IMAGE_NAME} ${TAG_URL}
   else
-    echo $(docker image tag ${IMAGE_NAME} ${TAG_URL})&>/dev/null
+    echo $(docker --quiet --log-level ERROR image tag ${IMAGE_NAME} ${TAG_URL})&>/dev/null
   fi
   logCommand ${1} "docker push ${TAG_URL}"
   if [[ ${STACK_LOG_VERBOSE} == 1 ]]; then
     docker push ${TAG_URL}
   else
-    echo $(docker push ${TAG_URL})&>/dev/null
+    echo $(docker --quiet --log-level ERROR push ${TAG_URL})&>/dev/null
   fi
 
-  #IMAGE_LIST_RM=($(docker image ls | grep ${IMAGE_NAME} | awk '{print $3}' | sort --unique ))
-  #for IMAGE_ID in "${IMAGE_LIST_RM[@]}"
-  #do
-  #  logCommand ${1} "docker image rm -f ${IMAGE_ID}"
-  #  echo $(docker image rm -f ${IMAGE_ID})&>/dev/null
-  #done
   logFinished ${1} "buildRegistryPush"
   return 1
 }
