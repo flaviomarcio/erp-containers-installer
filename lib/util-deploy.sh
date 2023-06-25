@@ -68,12 +68,9 @@ function deployApp()
 
     CHECK=$(docker stack ls | grep ${APPLICATION_DEPLOY_CONTAINER_NAME})
     if [[ ${CHECK} != "" ]]; then
-      if [[ ${STACK_LOG_VERBOSE} == 1 ]]; then
-        logCommand ${1} "docker stack rm ${APPLICATION_DEPLOY_CONTAINER_NAME}"
-        docker stack rm ${APPLICATION_DEPLOY_CONTAINER_NAME}
-      else
-        echo $(docker --quiet --log-level ERROR stack rm ${APPLICATION_DEPLOY_CONTAINER_NAME})&>/dev/null&>/dev/null
-      fi    
+      CMD="docker ${DOCKER_ARGS_DEFAULT} stack rm ${APPLICATION_DEPLOY_CONTAINER_NAME}"
+      logCommand "$(incInt ${1})" "${CMD}"
+      echo $(${CMD})&>/dev/null        
     fi
 
     COMPOSE_SRC=${STACK_INSTALLER_DOCKER_COMPOSE_DIR}/${DOCKER_STACK_FILE_NAME}
@@ -89,14 +86,10 @@ function deployApp()
       rm -rf ${COMPOSE_DST}
       cp -r ${COMPOSE_SRC} ${COMPOSE_DST}
 
-      logCommand ${1} "docker stack deploy -c ${COMPOSE_DST} ${APPLICATION_DEPLOY_CONTAINER_NAME}"
+      CMD="${DOCKER_ARGS_DEFAULT} stack deploy -c ${COMPOSE_DST} ${APPLICATION_DEPLOY_CONTAINER_NAME}"
       logInfo ${1} "docker-image-name" "${APPLICATION_DEPLOY_IMAGE}"
-
-      if [[ ${STACK_LOG_VERBOSE} == 1 ]]; then
-        docker stack deploy -c ${COMPOSE_DST} ${APPLICATION_DEPLOY_CONTAINER_NAME}
-      else
-        echo $(docker --quiet --log-level ERROR stack deploy -c ${COMPOSE_DST} ${APPLICATION_DEPLOY_CONTAINER_NAME})&>/dev/null
-      fi
+      logCommand ${1} "${CMD}"
+      echo $(${CMD})&>/dev/null
     fi
 
   fi

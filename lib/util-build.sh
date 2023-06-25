@@ -97,17 +97,15 @@ function buildProjectPull()
 
   logTarget ${1} "${APPLICATION_GIT}"
 
-  log $'\n'"Cloning repository: [${GIT_REPOSITORY}:${GIT_BRANCH}]"
+  log "Cloning repository: [${GIT_REPOSITORY}:${GIT_BRANCH}]"
   cdDir ${1} ${BUILD_TEMP_DIR}
   if ! [ "$?" -eq 1 ]; then
     return 0;
   fi
 
-  if [[ ${STACK_LOG_VERBOSE} == 1 ]]; then
-    git clone ${GIT_REPOSITORY} src
-  else
-    echo $(git clone ${GIT_REPOSITORY} src)>/dev/null    
-  fi
+  CMD="git clone ${GIT_REPOSITORY} src ${GIT_ARGS_DEFAULT}"
+  logCommand ${1} "${CMD}"
+  echo $(${CMD})&>/dev/null    
 
   cdDir ${1} ${BUILD_TEMP_SOURCE_DIR}
   if ! [ "$?" -eq 1 ]; then
@@ -126,15 +124,16 @@ function buildProjectPull()
     return 0;
   fi
 
-  if [[ ${STACK_LOG_VERBOSE} == 1 ]]; then
-    git config pull.rebase false
-    git checkout ${GIT_BRANCH}
-    git pull origin ${GIT_BRANCH}
-  else
-    echo $(git config pull.rebase false)>/dev/null
-    echo $(git checkout ${GIT_BRANCH})>/dev/null
-    echo $(git pull origin ${GIT_BRANCH})>/dev/null
-  fi
+  CMD1="git config pull.rebase false ${GIT_ARGS_DEFAULT}"
+  CMD2="git checkout ${GIT_BRANCH}  ${GIT_ARGS_DEFAULT}"
+  CMD3="git pull origin ${GIT_BRANCH}  ${GIT_ARGS_DEFAULT}"
+  logCommand ${1} "${CMD1}"
+  logCommand ${1} "${CMD2}"
+  logCommand ${1} "${CMD3}"
+
+  echo $(${CMD1})&>/dev/null
+  echo $(${CMD2})&>/dev/null
+  echo $(${CMD3})&>/dev/null
 
   logFinished ${1} "buildProjectPull"
   if [[ -d ${BUILD_TEMP_SOURCE_DIR} ]]; then
@@ -241,14 +240,11 @@ function buildMavenJava()
     return 1;
   fi
 
-  log "Building source [${BUILD_DEPLOY_IMAGE_NAME}]"
-  
-  logCommand 1 "mvn clean install -DskipTests"
-  if [[ ${STACK_LOG_VERBOSE} == 1 ]]; then
-    mvn clean install -DskipTests
-  else
-    echo $(mvn clean install -DskipTests)>/dev/null
-  fi
+  log "Building source [${BUILD_DEPLOY_IMAGE_NAME}]"  
+  CMD="mvn clean install -DskipTests ${MAVEN_ARGS_DEFAULT}"
+  logCommand ${1} "${CMD}"
+  echo $(${CMD})&>/dev/null
+
   cd ${ROOT_DIR}
   rm -rf ${BUILD_TEMP_APP_DATA_SOURCE_JAR};
   export APPLICATION_JAR=$(find ${BUILD_TEMP_SOURCE_DIR} -name 'app*.jar')
@@ -318,12 +314,10 @@ function buildDockerFile()
     rm -rf ${FILE_DST};
     cp -r ${FILE_SRC} ${FILE_DST}
     cd ${BUILD_TEMP_DIR}
-    logCommand "$(incInt ${1})" "docker build -t ${IMAGE_NAME} ."
-    if [[ ${STACK_LOG_VERBOSE} == 1 ]]; then
-      docker build --network host -t ${IMAGE_NAME} .
-    else
-      echo $(docker --quiet --log-level ERROR build --network host -t ${IMAGE_NAME} .)>/dev/null
-    fi
+    CMD="docker --log-level ERROR build --quiet --network host -t ${IMAGE_NAME} ."
+    logCommand "$(incInt ${1})" "${CMD}"
+    echo $(${CMD})&>/dev/null
+
     cd ${ROOT_DIR}
     __RETURN=1;
   fi
@@ -336,19 +330,18 @@ function buildRegistryPush()
   logStart ${1} "buildRegistryPush"
   IMAGE_NAME=${2}
   TAG_URL=${STACK_REGISTRY_DNS}/${IMAGE_NAME}
-  echo $'\n'"Sending docker image [${IMAGE_NAME}] to registry"
-  logCommand ${1} "docker image tag ${IMAGE_NAME} ${TAG_URL}"
-  if [[ ${STACK_LOG_VERBOSE} == 1 ]]; then
-    docker image tag ${IMAGE_NAME} ${TAG_URL}
-  else
-    echo $(docker --quiet --log-level ERROR image tag ${IMAGE_NAME} ${TAG_URL})&>/dev/null
-  fi
-  logCommand ${1} "docker push ${TAG_URL}"
-  if [[ ${STACK_LOG_VERBOSE} == 1 ]]; then
-    docker push ${TAG_URL}
-  else
-    echo $(docker --quiet --log-level ERROR push ${TAG_URL})&>/dev/null
-  fi
+  
+  log "Tagging docker image [${IMAGE_NAME}] to [${TAG_URL}]"
+  CMD="docker --log-level ERROR image tag ${IMAGE_NAME} ${TAG_URL}"
+  logCommand "$(incInt ${1})" "${CMD}"
+  echo $(${CMD})&>/dev/null
+
+  log "Pushing docker image [${IMAGE_NAME}] to [${TAG_URL}]"
+  CMD="docker --log-level ERROR push ${TAG_URL}"
+  logCommand "$(incInt ${1})" "${CMD}"
+  echo $(${CMD})&>/dev/null
+
+  exit 0
 
   logFinished ${1} "buildRegistryPush"
   return 1

@@ -39,10 +39,5 @@ function configureDNS()
             LINE=${TARGET_ENV}-${TARGET}-${TARGET_APP}.${TARGET_DOMAIN}
             echo $(sed -i "s/${LINE}//g" ${ETC_HOSTS_DST})&>/dev/null
         done
-    done
-
-
-
-    
-    
+    done   
 }
