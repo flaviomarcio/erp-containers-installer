@@ -48,6 +48,11 @@ function main()
   fi
 
   utilPrepareClear
+
+  selectDeployOpt
+  if ! [ "$?" -eq 1 ]; then
+    exit 0;
+  fi
   
   while :
   do
@@ -63,29 +68,19 @@ function main()
 
     while : 
     do
-      selectDeployOpt
+      utilPrepareClear
+      selectProject
       if [ "$?" -eq 0 ]; then
         continue;
       elif [ "$?" -eq 2 ]; then
         break;
       else
-        while : 
+        LIST=(${STACK_PROJECT})
+        for ENV in "${LIST[@]}"
         do
           utilPrepareClear
-          selectProject
-          if [ "$?" -eq 0 ]; then
-            continue;
-          elif [ "$?" -eq 2 ]; then
-            break;
-          else
-            LIST=(${STACK_PROJECT})
-            for ENV in "${LIST[@]}"
-            do
-              utilPrepareClear
-              export STACK_PROJECT=${ENV}
-              runOption 1 ${STACK_ACTION} ${STACK_PROJECT}
-            done
-          fi
+          export STACK_PROJECT=${ENV}
+          runOption 1 ${STACK_ACTION} ${STACK_PROJECT}
         done
       fi
     done
