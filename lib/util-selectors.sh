@@ -137,8 +137,7 @@ function selectEnvironment()
 function runOption()
 {
   logStart ${1} "runOption"
-  logMethod ${1} "action: ${STACK_ACTION}"
-  logMethod ${1} "project: ${STACK_PROJECT}"
+  logMethod ${1} "action: ${STACK_ACTION}, project: ${STACK_PROJECT}"
   
   export STACK_ACTION=${2}
   export STACK_PROJECT=${3}

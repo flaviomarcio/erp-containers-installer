@@ -86,7 +86,7 @@ function deployApp()
       rm -rf ${COMPOSE_DST}
       cp -r ${COMPOSE_SRC} ${COMPOSE_DST}
 
-      CMD="${DOCKER_ARGS_DEFAULT} stack deploy -c ${COMPOSE_DST} ${APPLICATION_DEPLOY_CONTAINER_NAME}"
+      CMD="docker --log-level ERROR stack deploy -c ${COMPOSE_DST} ${APPLICATION_DEPLOY_CONTAINER_NAME}"
       logInfo ${1} "docker-image-name" "${APPLICATION_DEPLOY_IMAGE}"
       logCommand ${1} "${CMD}"
       echo $(${CMD})&>/dev/null
@@ -99,9 +99,9 @@ function deployApp()
 function deployAppRun()
 {
   logStart ${1} "deployAppRun"
-  if [[ ${STACK_DEPLOY_MODE} == "deploy" ]]; then
-    deployImage "$(incInt ${1})" ${STACK_ACTION} ${STACK_PROJECT}
-  elif [[ ${STACK_DEPLOY_MODE} == "build" ]]; then
+  if [[ ${STACK_DEPLOY_MODE} == "build" ]]; then
+    deployImage "$(incInt ${1})" ${STACK_ACTION} ${STACK_PROJECT}    
+  elif [[ ${STACK_DEPLOY_MODE} == "deploy" ]]; then
     deployApp "$(incInt ${1})" ${STACK_ACTION} ${STACK_PROJECT}
   else 
     # all
