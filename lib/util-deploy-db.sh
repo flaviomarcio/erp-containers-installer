@@ -14,23 +14,23 @@ function deployPG_prepare()
 
    
     if [[ ${APPLICATION_DB_HOST} == "" ]]; then 
-        log ${1} "Invalid env: APPLICATION_DB_HOST=${APPLICATION_DB_HOST}"
+        log "Invalid env: APPLICATION_DB_HOST=${APPLICATION_DB_HOST}"
         exit 0;
     fi
     if [[ ${APPLICATION_DB_USER} == "" ]]; then 
-        log ${1} "Invalid env: APPLICATION_DB_USER=${APPLICATION_DB_USER}"
+        log "Invalid env: APPLICATION_DB_USER=${APPLICATION_DB_USER}"
         exit 0;
     fi
     if [[ ${APPLICATION_DB_PASSWORD} == "" ]]; then 
-        log ${1} "Invalid env: APPLICATION_DB_PASSWORD=${APPLICATION_DB_PASSWORD}"
+        log "Invalid env: APPLICATION_DB_PASSWORD=${APPLICATION_DB_PASSWORD}"
         exit 0;
     fi
     if [[ ${APPLICATION_DB_DATABASE} == "" ]]; then 
-        log ${1} "Invalid env: APPLICATION_DB_DATABASE=${APPLICATION_DB_DATABASE}"
+        log "Invalid env: APPLICATION_DB_DATABASE=${APPLICATION_DB_DATABASE}"
         exit 0;
     fi
     if [[ ${APPLICATION_DB_PORT} == "" ]]; then 
-        log ${1} "Invalid env: APPLICATION_DB_PORT=${APPLICATION_DB_PORT}"
+        log "Invalid env: APPLICATION_DB_PORT=${APPLICATION_DB_PORT}"
         exit 0;
     fi
     POSTGRES_SERVER=${APPLICATION_DB_HOST}
@@ -63,7 +63,7 @@ function deployPG_runScripts()
     for SCRIPT_STEP_FILENAME in "${SCRIPTS_STEP_FILES[@]}"
     do
         FILTER="${SCRIPT_STEP_FILENAME}*.sql"
-        log ${1} "              Upgrade [${FILTER}] in [./$(basename ${SCRIPTS_STEP_DIR})]";      
+        log "              Upgrade [${FILTER}] in [./$(basename ${SCRIPTS_STEP_DIR})]";      
         FILELIST=($(find ${SCRIPTS_STEP_DIR} -iname ${FILTER} | sort))
         for FILE in "${FILELIST[@]}"
         do
@@ -71,7 +71,7 @@ function deployPG_runScripts()
             DIRNAME=$(dirname ${FILE}) 
             DIRNAME=$(basename ${DIRNAME})
             DIRNAME=$(basename ${DIRNAME})
-            log ${1} "                  executing [./${DIRNAME}], ${FILENAME} to ${ERP_SQL_FILE_SCRIPT_TEMP}";            
+            log "                  executing [./${DIRNAME}], ${FILENAME} to ${ERP_SQL_FILE_SCRIPT_TEMP}";            
             echo "set client_min_messages to WARNING; ">${ERP_SQL_FILE_SCRIPT_TEMP};
             cat ${FILE} >> ${ERP_SQL_FILE_SCRIPT_TEMP};
             logCommand ${1} "psql -h ${APPLICATION_DB_HOST} -U ${APPLICATION_DB_USER} -p ${APPLICATION_DB_PORT} -d ${APPLICATION_DB_DATABASE} -a -f ${ERP_SQL_FILE_SCRIPT_TEMP}"
