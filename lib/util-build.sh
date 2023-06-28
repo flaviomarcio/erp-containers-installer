@@ -341,8 +341,6 @@ function buildRegistryPush()
   logCommand "$(incInt ${1})" "${CMD}"
   echo $(${CMD})&>/dev/null
 
-  exit 0
-
   logFinished ${1} "buildRegistryPush"
   return 1
 }

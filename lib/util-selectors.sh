@@ -16,9 +16,9 @@ function getProjects()
 function selectDeployOpt()
 {
   clearTerm
-  echo $'\n'"Deploy mode menu"$'\n'
+  echo 
   export STACK_DEPLOY_MODE=all
-  PS3='Please select a deploy mode: '
+  PS3=$'\n'"Deploy mode menu"$'\n''Choose a option: '
   options=(Back all build deploy)
   select opt in "${options[@]}"
   do
@@ -35,8 +35,8 @@ function selectDeployOpt()
 function selectProject()
 {
   clearTerm
-  echo $'\n'"Project menu"$'\n'
-  PS3='Please select a project: '
+  echo 
+  PS3=$'\n'"Project menu"$'\n''Choose a option: '
   options=(back all $(getProjects))
   select opt in "${options[@]}"
   do
@@ -60,8 +60,7 @@ function getActions()
 function selectAction()
 {
   clearTerm
-  echo $'\n'"Action menu"$'\n'
-  PS3='Please select a action: '
+  PS3=$'\n'"Action menu"$'\n''Choose option: '
   options=(quit $(getActions))
   select opt in "${options[@]}"
   do
@@ -87,8 +86,7 @@ function selectCustomer()
   options=(${options})
 
   clearTerm
-  echo $'\n'"Customer menu"$'\n'
-  PS3="Choose a customer: "
+  PS3=$'\n'"Customer menu"$'\n''Choose option: '
   select opt in "${options[@]}"
   do
     if [[ ${opt} == "quit" ]]; then
@@ -104,9 +102,7 @@ function selectCustomer()
 function selectEnvironment()
 {
   clearTerm
-  echo $'\n'"Environment menu"$'\n'
-  PS3="Choose a environment: "
-  
+  PS3=$'\n'"Environment menu"$'\n''Choose a option: '
   options=(testing development staging production quit)
 
   select opt in "${options[@]}"
