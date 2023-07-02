@@ -65,13 +65,15 @@ function __private_pg_pass_apply()
 {
   __private_pg_envs_check
   if ! [ "$?" -eq 1 ]; then
-      return 0;       
+    return 0;       
   fi
-  AUTH="${POSTGRES_HOST}:${POSTGRES_PORT}:${POSTGRES_DB}:${POSTGRES_USER}:${POSTGRES_PASS}">${POSTGRES_PGPASS}
+  AUTH="${POSTGRES_HOST}:${POSTGRES_PORT}:${POSTGRES_DB}:${POSTGRES_USER}:${POSTGRES_PASS}"
   if [[ -f ${POSTGRES_PGPASS} ]];then
-      echo ${AUTH} >> ${POSTGRES_PGPASS}
+    #remove host line
+    sed -i "/${AUTH}/d" ${POSTGRES_PGPASS}
+    echo ${AUTH} >> ${POSTGRES_PGPASS}
   else
-      echo ${AUTH} > ${POSTGRES_PGPASS}
+    echo ${AUTH} > ${POSTGRES_PGPASS}
   fi
   chmod 0600 ${POSTGRES_PGPASS};
   return 1
