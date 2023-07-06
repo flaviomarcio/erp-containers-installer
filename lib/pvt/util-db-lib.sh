@@ -50,7 +50,7 @@ function __private_db_scan_files()
 {
   DB_SCAN_RETURN=
   DB_SCAN_DIR=${1}
-  DB_SCAN_FILTERS=(db-init drops tables constraints-pk constraints-fk constraints-check indexes initdata view)
+  DB_SCAN_FILTERS=(drops tables constraints-pk constraints-fk constraints-check indexes initdata view)
   for DB_SCAN_FILTER in ${DB_SCAN_FILTERS[*]}; do 
     DB_SCAN_FILTER="${DB_SCAN_FILTER}*.sql"
     DB_SCAN_FILES=($(echo $(find ${DB_SCAN_DIR} -iname ${DB_SCAN_FILTER} | sort)))
