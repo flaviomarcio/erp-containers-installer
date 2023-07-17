@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 
 . ${BASH_BIN}/bash-util.sh
 
@@ -47,6 +47,7 @@ function __privateEnvsPrepare()
   export PUBLIC_APPLICATIONS_DIR=${HOME}/applications
   export PUBLIC_STORAGE_DIR=$(realpath ${PUBLIC_APPLICATIONS_DIR}/storage)
   export PUBLIC_LIB_DIR=$(realpath ${PUBLIC_APPLICATIONS_DIR}/lib)
+  export PUBLIC_ENVS_DIR=$(realpath ${PUBLIC_APPLICATIONS_DIR}/envs)
 
   export STACK_DB_DROP=0
   export STACK_DOMAIN=portela-professional.com.br
@@ -320,6 +321,13 @@ function __utilPrepareStackEnvs()
   envsParserFile ${1} ${BUILD_TEMP_APP_ENV_FILE}
   runSource ${1} ${BUILD_TEMP_APP_ENV_FILE}
   envsToSimpleEnvs ${1} ${BUILD_TEMP_APP_ENV_FILE}
+
+
+  mkdir -p ${PUBLIC_ENVS_DIR}
+  __env_destine=${PUBLIC_ENVS_DIR}/${APPLICATION_NAME}.env
+
+  cp -rf ${BUILD_TEMP_APP_ENV_FILE} ${__env_destine}
+
   logFinished ${1} "__utilPrepareStackEnvs"
 }
 
