@@ -13,8 +13,8 @@ services:
     volumes:
       - ${PUBLIC_LIB_DIR}:/home/debian/lib
       - ${APPLICATION_DEPLOY_ENV_FILE}:/home/debian/env_file.env
-      - ${APPLICATION_DEPLOY_DATA_DIR}:/app/data
-      - ${APPLICATION_DEPLOY_BACKUP_DIR}:/app/backup
+      - ${APPLICATION_DEPLOY_DATA_DIR}:/app/data:rw
+      - ${APPLICATION_DEPLOY_BACKUP_DIR}:/app/backup:rw
     env_file:
       - ${APPLICATION_DEPLOY_ENV_FILE}
     environment:

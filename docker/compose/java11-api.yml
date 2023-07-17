@@ -16,8 +16,8 @@ services:
       - SERVER_PORT=${APPLICATION_DEPLOY_PORT}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ${APPLICATION_DEPLOY_DATA_DIR}:/app/data
-      - ${APPLICATION_DEPLOY_BACKUP_DIR}:/app/backup
+      - ${APPLICATION_DEPLOY_DATA_DIR}:/app/data:rw
+      - ${APPLICATION_DEPLOY_BACKUP_DIR}:/app/backup:rw
     ports:
       - target: ${APPLICATION_DEPLOY_PORT}
         protocol: tcp
