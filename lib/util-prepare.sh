@@ -47,7 +47,7 @@ function __privateEnvsPrepare()
   export PUBLIC_APPLICATIONS_DIR=${HOME}/applications
   export PUBLIC_STORAGE_DIR=$(realpath ${PUBLIC_APPLICATIONS_DIR}/storage)
   export PUBLIC_LIB_DIR=$(realpath ${PUBLIC_APPLICATIONS_DIR}/lib)
-  export PUBLIC_ENVS_DIR=$(realpath ${PUBLIC_APPLICATIONS_DIR}/envs)
+
 
   export STACK_DB_DROP=0
   export STACK_DOMAIN=portela-professional.com.br
@@ -58,6 +58,7 @@ function __privateEnvsPublic()
 {
   logStart ${1} "__privateEnvsPublic"
   export PUBLIC_ENVIRONMENT_FILE=${PUBLIC_APPLICATIONS_DIR}/${STACK_ENVIRONMENT}/stack_envs.env
+  export PUBLIC_ENVS_DIR=${PUBLIC_APPLICATIONS_DIR}/${STACK_ENVIRONMENT}/envs
 
   runSource ${1} ${PUBLIC_ENVIRONMENT_FILE} 
   if ! [ "$?" -eq 1 ]; then

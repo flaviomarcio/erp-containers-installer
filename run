@@ -1,6 +1,7 @@
 #!/bin/bash
 
 . ${BASH_BIN}/bash-util.sh
+. ${BASH_BIN}/lib-selector.sh
 . ${PWD}/lib/util-prepare.sh
 . ${PWD}/lib/util-selectors.sh
 . ${PWD}/lib/util-build.sh
