@@ -1,6 +1,7 @@
 #!/bin/bash
 
 . ${BASH_BIN}/bash-util.sh
+. ${BASH_BIN}/lib-selector.sh
 . ${INSTALLER_DIR}/lib/util-prepare.sh
 
 function getProjects()
@@ -17,6 +18,7 @@ function selectProject()
 {
   export STACK_INSTALL_BUILD_ARGS=
   clearTerm
+  __private_print_os_information
   echM $'\n'"Project menu"$'\n'
   PS3="Choose a option: "
 
@@ -46,6 +48,7 @@ function selectAction()
 {
   export STACK_INSTALL_BUILD_ARGS=
   clearTerm
+  __private_print_os_information
   echM $'\n'"Action menu"$'\n'
   PS3="Choose a option: "
 
