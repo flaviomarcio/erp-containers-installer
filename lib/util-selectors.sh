@@ -39,33 +39,34 @@ function selectProject()
   return 0;
 }
 
-function getActions()
-{
-  echo -n $(ls ${STACK_INSTALLER_BIN_DIR} | sort)
-}
+# function getActions()
+# {
+#   echo -n $(ls ${STACK_INSTALLER_BIN_DIR} | sort)
+# }
 
-function selectAction()
-{
-  export STACK_INSTALL_BUILD_ARGS=
-  clearTerm
-  __private_print_os_information
-  echM $'\n'"Action menu"$'\n'
-  PS3="Choose a option: "
+# function selectAction()
+# {
+#   export STACK_INSTALL_BUILD_ARGS=
+#   clearTerm
+#   __private_print_os_information
+  
+#   echM $'\n'"Action menu"$'\n'
+#   PS3="Choose a option: "
 
-  options=(quit $(getActions))
+#   options=(quit $(getActions))
 
-  select opt in "${options[@]}"
-  do
-    if [[ ${opt} == "quit" ]]; then
-      return 2
-    else
-      export STACK_ACTION=${opt}
-      return 1
-    fi
-  done
+#   select opt in "${options[@]}"
+#   do
+#     if [[ ${opt} == "quit" ]]; then
+#       return 2
+#     else
+#       export STACK_ACTION=${opt}
+#       return 1
+#     fi
+#   done
 
-  return 0;
-}
+#   return 0;
+# }
 
 function runOption()
 {

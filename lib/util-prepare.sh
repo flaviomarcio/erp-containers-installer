@@ -323,7 +323,6 @@ function __utilPrepareStackEnvs()
   runSource ${1} ${BUILD_TEMP_APP_ENV_FILE}
   envsToSimpleEnvs ${1} ${BUILD_TEMP_APP_ENV_FILE}
 
-
   mkdir -p ${PUBLIC_ENVS_DIR}
   __env_destine=${PUBLIC_ENVS_DIR}/${APPLICATION_NAME}.env
 

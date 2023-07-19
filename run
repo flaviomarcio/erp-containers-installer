@@ -34,15 +34,14 @@ function main()
   export STACK_ACTION=
   export STACK_PROJECT=
 
-  selectCustomer 1
+  selectorCustomer 1
   if ! [ "$?" -eq 1 ]; then
-    log "Invalid call selectCustomer"
     exit 0
   fi
 
-  selectEnvironment 1
+  selectorEnvironment 1
   if ! [ "$?" -eq 1 ]; then
-    log "Invalid call selectEnvironment"
+    exit 0
   fi
 
   utilPrepareInit 1
@@ -50,12 +49,12 @@ function main()
     exit 0;
   fi
 
-  utilPrepareClear
+  # utilPrepareClear
 
-  selectDeployOpt
-  if ! [ "$?" -eq 1 ]; then
-    exit 0;
-  fi
+  # selectorDeployOption
+  # if ! [ "$?" -eq 1 ]; then
+  #   exit 0;
+  # fi
   
   while :
   do
@@ -63,12 +62,6 @@ function main()
     export STACK_ACTION=
     export STACK_PROJECT=
     
-    selectAction
-    if ! [ "$?" -eq 1 ]; then
-      log "Invalid selectAction"
-      break
-    fi
-
     while : 
     do
       utilPrepareClear

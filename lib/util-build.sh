@@ -13,6 +13,7 @@ function buildProjectPrepare()
   
   export STACK_APPLICATIONS_RUN=${STACK_APPLICATIONS_PROJECT_DIR}/${STACK_PROJECT}
   RUN_FILE=${STACK_APPLICATIONS_RUN}
+
   runSource "$(incInt ${1})" ${RUN_FILE}
   if ! [ "$?" -eq 1 ]; then
     logFinished ${1} "buildProjectPrepare on execute ${STACK_APPLICATIONS_RUN}"
@@ -21,6 +22,7 @@ function buildProjectPrepare()
 
   utilPrepareStack "$(incInt ${1})" ${STACK_ACTION} ${STACK_PROJECT}
   logFinished ${1} "buildProjectPrepare"
+
   return 1;
 }
 

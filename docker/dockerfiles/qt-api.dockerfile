@@ -26,7 +26,7 @@ ENV PUBLIC_LIB_DIR /home/debian/lib
 ENV HOME /home/debian
 ENV LIB_PATH ${PUBLIC_LIB_DIR}
 ENV INSTALER_PATH ${HOME}/installer
-ENV WORK_PATH ${HOME}/app
+ENV WORK_PATH ${HOME}/${__deploy_service_name}
 ENV BASHRC_FILE ${WORK_PATH}/bashrc.sh
 ENV INSTALLER_DIR=/home/debian/app/installer-lib
 
