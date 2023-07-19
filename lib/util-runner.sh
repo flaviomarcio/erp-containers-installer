@@ -127,6 +127,7 @@ function dockerMCSMain()
           "${__dk_mcs_target}" \
           "${__dk_mcs_project}" \
           "${__dk_mcs_builder_dir}" \
+          "${__dk_mcs_build_option}" \
           "${__dk_mcs_git_repository}" \
           "${__dk_mcs_git_branch}" \
           "${__dk_mcs_dk_image}" \
