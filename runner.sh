@@ -36,6 +36,7 @@ function __private_runnerMenu()
   options+=(Database-PGPass)
   options+=(DNS-Options)
   options+=(Command-Utils)
+  echM $'\n'"Docker managment tools"$'\n'
   PS3=$'\n'"Choose option:"
   select opt in "${options[@]}"
   do

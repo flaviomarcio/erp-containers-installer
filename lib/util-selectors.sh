@@ -20,7 +20,7 @@ function selectProject()
   clearTerm
   __private_print_os_information
   echM $'\n'"Project menu"$'\n'
-  PS3="Choose a option: "
+  PS3=$'\n'"Choose a option: "
 
   options=(back all $(getProjects))
 
@@ -51,7 +51,7 @@ function selectProject()
 #   __private_print_os_information
   
 #   echM $'\n'"Action menu"$'\n'
-#   PS3="Choose a option: "
+#   PS3=$'\n'"Choose a option: "
 
 #   options=(quit $(getActions))
 
