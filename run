@@ -1,5 +1,7 @@
 #!/bin/bash
 
+export PATH=${PATH}:${BASH_BIN}
+
 . ${BASH_BIN}/bash-util.sh
 . ${BASH_BIN}/lib-selector.sh
 . ${PWD}/lib/util-prepare.sh
