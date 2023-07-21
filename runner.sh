@@ -123,8 +123,8 @@ function runnerMain()
   if ! [ "$?" -eq 1 ]; then
     exit 0
   fi
-  export __public_enviroment=${__selector}
-  export STACK_ENVIRONMENT=${__public_enviroment}
+  export __public_environment=${__selector}
+  export STACK_ENVIRONMENT=${__public_environment}
   export STACK_TARGET=${__public_target}
 
   utilPrepareInit 1
@@ -135,7 +135,7 @@ function runnerMain()
 
   while :
   do
-    __private_runnerMenu ${__public_enviroment} ${__public_target}
+    __private_runnerMenu ${__public_environment} ${__public_target}
   done
 }
 
