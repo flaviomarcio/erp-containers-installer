@@ -124,9 +124,14 @@ function runnerMain()
     exit 0
   fi
   export __public_enviroment=${__selector}
-
   export STACK_ENVIRONMENT=${__public_enviroment}
   export STACK_TARGET=${__public_target}
+
+  utilPrepareInit 1
+  databasePrepare ${STACK_APPLICATIONS_DATA_DB_DIR}
+  if ! [ "$?" -eq 1 ]; then
+    exit 0;
+  fi
 
   while :
   do
