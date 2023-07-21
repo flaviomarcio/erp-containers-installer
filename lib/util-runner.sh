@@ -61,6 +61,7 @@ function dockerMCSMain()
 {
   __dk_mcs_environment=${1} 
   __dk_mcs_target=${2}
+  FAIL_DETECTED=false
 
   export STACK_TARGET=${__dk_mcs_target}
 
@@ -136,77 +137,21 @@ function dockerMCSMain()
           "${__dk_mcs_dk_env}" \
           "${__dk_mcs_bin_dir}" \
           "${__dk_mcs_dep_dir}"
-
+    if ! [ "$?" -eq 1 ]; then
+      FAIL_DETECTED=true
+      continue;
+    fi
   done
 
-  return 1
-  export STACK_TYPE=mcs
-  while :
-  do
-    export FAIL_DETECTED=
-    clearTerm
-    echG "Git repository list"
-    export REPOSITORY_LIST=$(selectorRepository)
-    if [[ ${REPOSITORY_LIST} == "" ]]; then
-      continue
-    elif [[ ${REPOSITORY_LIST} == "Tag" ]]; then
-      clearTerm
-      echG "Git repository tags"
-      export REPOSITORY_LIST=$(selectorRepositoryTags)
-      if [[ ${REPOSITORY_LIST} == "" ]]; then
-        continue
-      fi
-    fi
-    export REPOSITORY_LIST=(${REPOSITORY_LIST})
-
-    clearTerm
-    echG "Build/deploy options for:"
-    for STACK_NAME in "${REPOSITORY_LIST[@]}"
-    do
-    echC "  - ${STACK_NAME}"
-    done
-    echC
-    export BUILD_OPTION=$(selectorBuildOption)
-    if [[ ${BUILD_OPTION} == "" ]]; then
-      continue
-    fi  
-
-    clearTerm
-    echG "Deploying micro services"
-    echC "  - Build option: [${BUILD_OPTION}]"
-    echC
-    if [[ ${BUILD_OPTION} != "deploy" ]]; then
-      for STACK_NAME in "${REPOSITORY_LIST[@]}"
-      do
-        mavenBuild ${STACK_TYPE} ${STACK_NAME}
-        if ! [ "$?" -eq 1 ]; then
-          FAIL_DETECTED=true
-          continue;
-        fi
-      done
-    fi
-
-    if [[ ${BUILD_OPTION} == "build-and-deploy" || ${BUILD_OPTION} == "deploy" ]]; then
-      for STACK_NAME in "${REPOSITORY_LIST[@]}"
-      do
-        mavenPrepare ${STACK_TYPE} ${STACK_NAME}
-        dockerBuild ${STACK_TYPE} ${STACK_NAME}
-        if ! [ "$?" -eq 1 ]; then
-          FAIL_DETECTED=true
-          continue;
-        fi
-      done
-    fi
-    systemETCHostApply
-    echG "  Finished"    
-    if [[ ${FAIL_DETECTED} == true ]]; then
-      echR "  =============================  "
-      echR "  ********FAIL DETECTED********  "
-      echR "  ********FAIL DETECTED********  "
-      echR "  =============================  "    
-    fi
-    break
-  done
+  systemETCHostApply
+  echG "  Finished"    
+  if [[ ${FAIL_DETECTED} == true ]]; then
+    echR "  =============================  "
+    echR "  ********FAIL DETECTED********  "
+    echR "  ********FAIL DETECTED********  "
+    echR "  =============================  "    
+    return 0;
+  fi
   return 1;
 }
 
