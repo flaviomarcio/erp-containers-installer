@@ -84,11 +84,6 @@ function runnerMain()
 {
   utilInitialize "$@"
 
-  if [[ ${PUBLIC_RUNNER_MODE} == teste ]]; then
-    ./runner-test.sh
-    exit 0;
-  fi
-
   clearTerm
 
   dockerSwarmVerify
@@ -122,4 +117,4 @@ function runnerMain()
   done
 }
 
-runnerMain "$@"
+runnerMain
