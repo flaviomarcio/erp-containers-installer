@@ -13,8 +13,8 @@ services:
     volumes:
       - ${PUBLIC_LIB_DIR}:/app/lib
       - ${APPLICATION_DEPLOY_BINARY_DIR}:/app
-      - ${APPLICATION_DEPLOY_DATA_DIR}:/app/data:rw
-      - ${APPLICATION_DEPLOY_BACKUP_DIR}:/app/backup:rw
+      - ${APPLICATION_DEPLOY_DATA_DIR}:/storage/data:rw
+      - ${APPLICATION_DEPLOY_BACKUP_DIR}:/storage/backup:rw
     env_file:
       - ${APPLICATION_NAME}.env
     deploy:
