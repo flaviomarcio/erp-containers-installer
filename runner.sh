@@ -82,9 +82,10 @@ function __private_runnerMenu()
 # main system
 function runnerMain()
 {
+  clearTerm
   utilInitialize "$@"
 
-  if [[ ${PUBLIC_RUNNER_MODE} == teste ]]; then
+  if [[ ${PUBLIC_RUNNER_MODE} == test ]]; then
     ./runner-test.sh
     exit 0;
   fi
