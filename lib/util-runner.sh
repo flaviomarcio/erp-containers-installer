@@ -108,8 +108,18 @@ function dockerMCSMain()
     __dk_mcs_git_repository=${APPLICATION_GIT}
     __dk_mcs_git_branch=${APPLICATION_GIT_BRANCH}
     __dk_mcs_builder_dir="${HOME}/build/${STACK_PREFIX}-${__dk_mcs_project}"
+    __dk_mcs_bin_dir="${HOME}/build/${STACK_PREFIX}/bin"
     rm -rf ${__dk_mcs_builder_dir}
+
+    # __dk_mcs_stack_base_start_dir=${STACK_APPLICATIONS_DATA_CONF_DIR}/${APPLICATION_STACK}
+    # ls -l ${__dk_mcs_stack_base_start_dir}
+    # read
+    # if [[ -d ${__dk_mcs_stack_base_start_dir} ]]; then
+    #   cp -rf ${__dk_mcs_stack_base_start_dir} ${__dk_mcs_builder_dir}
+    # else
+    # fi
     mkdir -p ${__dk_mcs_builder_dir}
+    mkdir -p ${__dk_mcs_bin_dir}
 
     __dk_mcs_dk_yml=${STACK_INSTALLER_DOCKER_COMPOSE_DIR}/${APPLICATION_STACK}.yml
     __dk_mcs_dk_file=${STACK_INSTALLER_DOCKER_FILE_DIR}/${APPLICATION_STACK}.dockerfile
@@ -130,14 +140,11 @@ function dockerMCSMain()
     #envsReplaceFile ${__dk_mcs_dk_yml}
     echG "  Finished"
 
-    __dk_mcs_bin_dir=${HOME}/build/bin
     __dk_mcs_dep_dir="${STACK_APPLICATIONS_DATA_SRC_DIR}/${__dk_mcs_project} ${STACK_INSTALLER_DOCKER_CONF_DIR}/${APPLICATION_STACK}"
 
     if [[ ${__dk_mcs_git_branch} == "" ]]; then
       __dk_mcs_git_branch=master
     fi
-
-
 
     deploy \
           "${__dk_mcs_environment}" \
