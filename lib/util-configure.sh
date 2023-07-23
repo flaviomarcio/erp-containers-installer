@@ -25,8 +25,7 @@ function configureDNS()
 
     cat ${ETC_HOSTS_SRC} > ${ETC_HOSTS_DST}
 
-    
-    DNS_PREFIX=development-company-erp
+
     TARGET_ENV_LIST=(development staging production)   
     TARGET_APP_LIST=(db fil acl msg fil agt)
     LINES=()

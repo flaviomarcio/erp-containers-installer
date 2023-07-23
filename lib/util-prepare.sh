@@ -31,20 +31,16 @@ function __privateEnvsPrepareClear()
 
 function __privateEnvsPrepare()
 {    
-  logStart ${1} "__privateEnvsPrepare"
   export PUBLIC_APPLICATIONS_DIR=${HOME}/applications
   export PUBLIC_STORAGE_DIR=$(realpath ${PUBLIC_APPLICATIONS_DIR}/storage)
   export PUBLIC_LIB_DIR=$(realpath ${PUBLIC_APPLICATIONS_DIR}/lib)
-
-
   export STACK_DB_DROP=0
-  export STACK_DOMAIN=portela-professional.com.br
-  logFinished ${1} "__privateEnvsPrepare"
+  export STACK_DOMAIN=local
 }
 
 function __privateEnvsPublic()
 {
-  export PUBLIC_ENVIRONMENT_FILE=${PUBLIC_APPLICATIONS_DIR}/${STACK_ENVIRONMENT}/stack_envs.env
+  export PUBLIC_ENVIRONMENT_FILE=${PUBLIC_APPLICATIONS_DIR}/${STACK_ENVIRONMENT}/${STACK_TARGET}/stack_envs.env
   export PUBLIC_ENVS_DIR=${PUBLIC_APPLICATIONS_DIR}/${STACK_ENVIRONMENT}/envs
   if ! [[ -f ${PUBLIC_ENVIRONMENT_FILE} ]]; then
     return 0
@@ -67,21 +63,14 @@ function __privateEnvsDefault()
   if [[ ${STACK_DEPLOY_REPLICAS} == "" ]]; then
       export STACK_DEPLOY_REPLICAS=1
   fi
-  if [[ ${STACK_ENVIRONMENT} == "" ]]; then
-      export STACK_ENVIRONMENT=testing
-  fi
   if [[ ${STACK_DOMAIN} == "" ]]; then
       export STACK_DNS=localhost
-  fi
-  if [[ ${STACK_TARGET} == "" ]]; then
-      export STACK_TARGET=company
   fi
   return 1
 }
 
 function __privateEnvsFinal()
 {
-  export STACK_PREFIX=${STACK_ENVIRONMENT}-${STACK_TARGET}
   export STACK_NETWORK_INBOUND=${STACK_PREFIX}-inbound
   export STACK_REGISTRY_DNS=${STACK_PREFIX}-registry.${STACK_DOMAIN}:5000
   return 1

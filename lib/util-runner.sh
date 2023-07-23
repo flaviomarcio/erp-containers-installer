@@ -63,8 +63,6 @@ function dockerMCSMain()
   __dk_mcs_target=${2}
   FAIL_DETECTED=false
 
-  export STACK_TARGET=${__dk_mcs_target}
-
   utilPrepareInit 1
   __dk_mcs_project_dir=${STACK_APPLICATIONS_PROJECT_DIR}
 
@@ -120,8 +118,8 @@ function dockerMCSMain()
     echY "    - docker envs"
     __deploy_dck_compose_name=$(basename ${__dk_mcs_dk_yml} | sed 's/\.yml//g')
     __deploy_dck_env_tags=${APPLICATION_ENV_TAGS}
-    __deploy_dck_env_tags="docker_env.${__deploy_dck_compose_name} ${__deploy_dck_env_tags}"
-    __deploy_dck_env_tags="env.${__deploy_dck_compose_name} ${__deploy_dck_env_tags}"
+    __deploy_dck_env_tags="docker.default docker.${__deploy_dck_compose_name} docker.${APPLICATION_STACK} ${__deploy_dck_env_tags}"
+    __deploy_dck_env_tags="env.default env.${__deploy_dck_compose_name} env.${APPLICATION_STACK} ${__deploy_dck_env_tags}"
     deployPrepareEnvFile "${STACK_APPLICATIONS_DATA_ENV_JSON_FILE}" "${__dk_mcs_builder_dir}" "${__deploy_dck_env_tags}"
     if ! [ "$?" -eq 1 ]; then
       echR "Invalid deployPrepareEnvFile"

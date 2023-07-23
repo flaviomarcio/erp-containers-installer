@@ -111,10 +111,14 @@ function runnerMain()
     exit 0
   fi
   export __public_environment=${__selector}
-  export STACK_ENVIRONMENT=${__public_environment}
-  export STACK_TARGET=${__public_target}
 
+
+  export STACK_TARGET=${__public_target}
+  export STACK_ENVIRONMENT=${__public_environment}
+  export STACK_PREFIX=${STACK_ENVIRONMENT}-${STACK_TARGET}
+  
   utilPrepareInit
+
   if ! [ "$?" -eq 1 ]; then
     echR "Invalid utilPrepareInit"
     exit 0
