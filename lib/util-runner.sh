@@ -109,7 +109,7 @@ function dockerMCSMain()
 
     __dk_mcs_git_repository=${APPLICATION_GIT}
     __dk_mcs_git_branch=${APPLICATION_GIT_BRANCH}
-    __dk_mcs_builder_dir=${HOME}/build/${STACK_PREFIX}-${__dk_mcs_project}
+    __dk_mcs_builder_dir="${HOME}/build/${STACK_PREFIX}-${__dk_mcs_project}"
     rm -rf ${__dk_mcs_builder_dir}
     mkdir -p ${__dk_mcs_builder_dir}
 
@@ -120,7 +120,7 @@ function dockerMCSMain()
     echY "    - docker envs"
     __deploy_dck_compose_name=$(basename ${__dk_mcs_dk_yml} | sed 's/\.yml//g')
     __deploy_dck_env_tags=${APPLICATION_ENV_TAGS}
-    __deploy_dck_env_tags="java_env.${__deploy_dck_compose_name} ${__deploy_dck_env_tags}"
+    __deploy_dck_env_tags="docker_env.${__deploy_dck_compose_name} ${__deploy_dck_env_tags}"
     __deploy_dck_env_tags="env.${__deploy_dck_compose_name} ${__deploy_dck_env_tags}"
     deployPrepareEnvFile "${STACK_APPLICATIONS_DATA_ENV_JSON_FILE}" "${__dk_mcs_builder_dir}" "${__deploy_dck_env_tags}"
     if ! [ "$?" -eq 1 ]; then

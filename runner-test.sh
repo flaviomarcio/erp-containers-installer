@@ -31,7 +31,7 @@ function main()
   mkdir -p /tmp/srv-agt-wrapper
   __prepare_container_src_dir=/mnt/storage/home/person-job/transul/transul-erp-docker-build/applications/data/envs/env_file_default.json
   __prepare_container_name=srv-agt-wrapper
-  __prepare_container_tags="env.default env.erp java_env.default java_env.srv_agt_wrapper"  
+  __prepare_container_tags="env.default env.erp docker_env.default docker_env.srv_agt_wrapper"  
   __prepare_container_destine_dir=/home/debian/build/development-transul-srv-agt-wrapper
   __private_prepareContainerEnvs "${__prepare_container_src_dir}" "${__prepare_container_name}" "${__prepare_container_tags}" "${__prepare_container_destine_dir}"
 
