@@ -51,9 +51,6 @@ function __privateEnvsPublic()
 
 function __privateEnvsDefault()
 {
-  if [[ ${QT_VERSION} == "" ]]; then
-      export QT_VERSION=6.5.0
-  fi
   if [[ ${STACK_CPU_DEFAULT} == "" ]]; then
       export STACK_CPU_DEFAULT=1
   fi

@@ -1,11 +1,1 @@
 #!/bin/bash
-
-. ${INSTALLER_DIR}/lib/util-deploy.sh
-. ${INSTALLER_DIR}/lib/util-selectors.sh
-
-function main()
-{
-  deployAppRun ${1}
-}
-
-main

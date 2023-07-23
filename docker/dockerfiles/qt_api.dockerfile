@@ -8,7 +8,7 @@ RUN apt install -y tzdata;
 RUN useradd -m debian -s /bin/bash
 RUN usermod -aG root debian
 RUN usermod -aG sudo debian
-RUN mkdir -p /home/debian
+RUN mkdir -p /app
 
 RUN apt-get update
 RUN apt-get upgrade -y
@@ -21,23 +21,18 @@ RUN apt-get install -y \
 
 
 ENV XDG_RUNTIME_DIR /run/user/debian
-ENV PUBLIC_LIB_DIR /home/debian/lib 
+ENV PUBLIC_LIB_DIR /app/lib 
 
-ENV HOME /home/debian
-ENV LIB_PATH ${PUBLIC_LIB_DIR}
-ENV INSTALER_PATH ${HOME}/installer
-ENV WORK_PATH ${HOME}/${__deploy_service_name}
+ENV HOME /app
+ENV WORK_PATH /app
 ENV BASHRC_FILE ${WORK_PATH}/bashrc.sh
-ENV INSTALLER_DIR=/home/debian/app/installer-lib
 
 RUN echo "#load application envs" >> ${HOME}/.bashrc
 RUN echo "if [[ -f ${BASHRC_FILE} ]]; then" >> ${HOME}/.bashrc
 RUN echo "  source ${BASHRC_FILE}" >> ${HOME}/.bashrc
 RUN echo "fi" >> ${HOME}/.bashrc
 
-ADD ${APPLICATION_DEPLOY_APP_DIR} ${HOME}
-
-# COPY ${APPLICATION_DEPLOY_APP_DIR} ${WORK}
+#ADD ${APPLICATION_DEPLOY_APP_DIR} ${HOME}
 
 WORKDIR ${WORK_PATH}
 CMD ["./startRun"]

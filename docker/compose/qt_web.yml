@@ -11,10 +11,6 @@ services:
     hostname: ${APPLICATION_DEPLOY_HOSTNAME}
     env_file:
       - ${APPLICATION_DEPLOY_ENV_FILE}
-    ports:
-      - target: ${APPLICATION_DEPLOY_PORT}
-        protocol: tcp
-        mode: ingress
     deploy:
       mode: ${APPLICATION_DEPLOY_MODE}
       replicas: ${APPLICATION_DEPLOY_REPLICAS}
