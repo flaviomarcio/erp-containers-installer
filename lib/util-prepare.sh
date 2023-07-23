@@ -5,7 +5,6 @@
 
 function __privateEnvsPrepareClear()
 {
-  logStart ${1} "__privateEnvsPrepareClear"
   export APPLICATION_TEMPLATE=
   export APPLICATION_PROTOCOL=
   export APPLICATION_STACK=
@@ -28,8 +27,6 @@ function __privateEnvsPrepareClear()
   export APPLICATION_DEPLOY_DATA_DIR=
   export APPLICATION_DEPLOY_BACKUP_DIR=
   export APPLICATION_DEPLOY_NETWORK_NAME=
-  
-  logFinished ${1} "__privateEnvsPrepareClear"
 }
 
 function __privateEnvsPrepare()
@@ -47,26 +44,20 @@ function __privateEnvsPrepare()
 
 function __privateEnvsPublic()
 {
-  logStart ${1} "__privateEnvsPublic"
   export PUBLIC_ENVIRONMENT_FILE=${PUBLIC_APPLICATIONS_DIR}/${STACK_ENVIRONMENT}/stack_envs.env
   export PUBLIC_ENVS_DIR=${PUBLIC_APPLICATIONS_DIR}/${STACK_ENVIRONMENT}/envs
-
-  runSource ${1} ${PUBLIC_ENVIRONMENT_FILE} 
-  if ! [ "$?" -eq 1 ]; then
+  if ! [[ -f ${PUBLIC_ENVIRONMENT_FILE} ]]; then
     return 0
   fi
-
-  logFinished ${1} "__privateEnvsPublic"
+  source ${PUBLIC_ENVIRONMENT_FILE}
   return 1
 }
 
 function __privateEnvsDefault()
 {
-  logStart ${1} "__privateEnvsDefault"
   if [[ ${QT_VERSION} == "" ]]; then
       export QT_VERSION=6.5.0
   fi
-
   if [[ ${STACK_CPU_DEFAULT} == "" ]]; then
       export STACK_CPU_DEFAULT=1
   fi
@@ -85,30 +76,28 @@ function __privateEnvsDefault()
   if [[ ${STACK_TARGET} == "" ]]; then
       export STACK_TARGET=company
   fi
-  logFinished ${1} "__privateEnvsDefault"
+  return 1
 }
 
 function __privateEnvsFinal()
 {
-  logStart ${1} "__privateEnvsDefault"
   export STACK_PREFIX=${STACK_ENVIRONMENT}-${STACK_TARGET}
   export STACK_NETWORK_INBOUND=${STACK_PREFIX}-inbound
   export STACK_REGISTRY_DNS=${STACK_PREFIX}-registry.${STACK_DOMAIN}:5000
-  logFinished ${1} "__privateEnvsFinal"
+  return 1
 }
 
 function __privateEnvsDir()
 {
-  logStart ${1} "__privateEnvsDir"
   #APPLICATIONS DIR
   export STACK_APPLICATIONS_DIR=${ROOT_DIR}/applications
   export STACK_APPLICATIONS_PROJECT_DIR=${STACK_APPLICATIONS_DIR}/projects
   export STACK_APPLICATIONS_DATA_DIR=${STACK_APPLICATIONS_DIR}/data
   export STACK_APPLICATIONS_DATA_ENV_DIR=${STACK_APPLICATIONS_DATA_DIR}/envs
+  export STACK_APPLICATIONS_DATA_ENV_JSON_FILE=${STACK_APPLICATIONS_DATA_ENV_DIR}/env_file_default.json
   export STACK_APPLICATIONS_DATA_CONF_DIR=${STACK_APPLICATIONS_DATA_DIR}/conf
   export STACK_APPLICATIONS_DATA_SRC_DIR=${STACK_APPLICATIONS_DATA_DIR}/source
   export STACK_APPLICATIONS_DATA_DB_DIR=${STACK_APPLICATIONS_DATA_DIR}/db
-
 
   #INSTALLER DIR
   export STACK_INSTALLER_DIR=${ROOT_DIR}/installer
@@ -119,37 +108,39 @@ function __privateEnvsDir()
   export STACK_INSTALLER_DOCKER_FILE_DIR=${STACK_INSTALLER_DOCKER_DIR}/dockerfiles
   export STACK_INSTALLER_DOCKER_SSH_KEYS_DIR=${STACK_INSTALLER_DOCKER_DIR}/ssh-keys
   export STACK_INSTALLER_DOCKER_COMPOSE_DIR=${STACK_INSTALLER_DOCKER_DIR}/compose
-  logFinished ${1} "__privateEnvsDir"
+  return 1
 }
-
 
 function utilPrepareClear()
 {
-  logStart ${1} "utilPrepareClear"
-  __privateEnvsPrepareClear "$(incInt ${1})"  
-  logFinished ${1} "utilPrepareClear"
+  __privateEnvsPrepareClear
 }
 
 function utilPrepareInit()
 {
-  logStart ${1} "utilPrepareInit"
-  __privateEnvsPrepareClear "$(incInt ${1})"
-  __privateEnvsPrepare "$(incInt ${1})"
-  __privateEnvsPublic "$(incInt ${1})"
-  if [ "$?" -eq 1 ]; then
-    __privateEnvsDefault "$(incInt ${1})"
-    __privateEnvsFinal "$(incInt ${1})"
-    __privateEnvsDir "$(incInt ${1})"
-    logFinished ${1} "utilPrepareInit"
-    return 1
+  __privateEnvsPrepareClear
+  __privateEnvsPrepare
+  __privateEnvsPublic
+  if ! [ "$?" -eq 1 ]; then
+    return 0
   fi
-  logFinished ${1} "utilPrepareInit"
-  return 0
+  __privateEnvsDefault
+  if ! [ "$?" -eq 1 ]; then
+    return 0
+  fi
+  __privateEnvsFinal
+  if ! [ "$?" -eq 1 ]; then
+    return 0
+  fi
+  __privateEnvsDir
+  if ! [ "$?" -eq 1 ]; then
+    return 0
+  fi
+  return 1
 }
 
-function __utilPrepareStackEnvsDefault()
+function prepareStack()
 {
-  logStart ${1} "__utilPrepareStackEnvsDefault"
   if [[ ${APPLICATION_NAME} == "" ]]; then
     export APPLICATION_NAME=${STACK_PROJECT}
   fi
@@ -177,8 +168,8 @@ function __utilPrepareStackEnvsDefault()
   export BUILD_TEMP_APP_BIN_SRC_DIR=${STACK_APPLICATIONS_DATA_SRC_DIR}/${STACK_PROJECT}
   
   
-  makeDir "$(incInt ${1})" ${BUILD_TEMP_DIR} 777
-  makeDir "$(incInt ${1})" ${BUILD_TEMP_APP_DATA_DIR} 777
+  makeDir 1 ${BUILD_TEMP_DIR} 777
+  makeDir 1 ${BUILD_TEMP_APP_DATA_DIR} 777
 
 
   export DOCKER_CONF_DIR=${STACK_INSTALLER_DOCKER_CONF_DIR}/${APPLICATION_STACK}
@@ -251,7 +242,7 @@ function __utilPrepareStackEnvsDefault()
   fi
 
   export APPLICATION_STORAGE_TARGET=${PUBLIC_STORAGE_DIR}/${STACK_PREFIX}
-  makeDir "$(incInt ${1})" ${BUILD_TEMP_DIR} 777
+  makeDir 1 ${BUILD_TEMP_DIR} 777
   
   export BUILD_DEPLOY_DATA_DIR=${APPLICATION_STORAGE_TARGET}/${APPLICATION_NAME}
   export BUILD_DEPLOY_DATA_APP_DIR=${BUILD_DEPLOY_DATA_DIR}/data
@@ -268,65 +259,7 @@ function __utilPrepareStackEnvsDefault()
     export APPLICATION_DEPLOY_DATA_BK_DIR=${BUILD_DEPLOY_DATA_BK_DIR}
   fi
 
-  makeDir "$(incInt ${1})" ${BUILD_TEMP_DIR} 777
-  makeDir "$(incInt ${1})" ${APPLICATION_DEPLOY_DATA_DIR} 777
-  makeDir "$(incInt ${1})" ${APPLICATION_DEPLOY_BACKUP_DIR} 777
-  logFinished ${1} "__utilPrepareStackEnvsDefault"
-}
-
-function __utilPrepareStackEnvs()
-{
-  idt=$(incInt ${1})
-  logStart ${1} "__utilPrepareStackEnvs"
-  logTarget ${1} ${BUILD_TEMP_APP_ENV_FILE}
-
-  echo "#!/bin/bash" > ${BUILD_TEMP_APP_ENV_FILE} 
-
-  IMAGE_ENVS=${APPLICATION_STACK}.env
-
-  #ENV_DIR_LIST=(${STACK_APPLICATIONS_DATA_ENV_DIR} ${STACK_INSTALLER_DOCKER_FILE_DIR})
-  ENV_DIR_LIST=(${STACK_APPLICATIONS_DATA_ENV_DIR} ${STACK_INSTALLER_DOCKER_FILE_DIR})
-  ENV_LIST=(default.env ${IMAGE_ENVS} ${APPLICATION_ENV_TAGS} ${APPLICATION_ENV_TAGS})
-  
-
-  for ENV_DIR in "${ENV_DIR_LIST[@]}"
-  do
-    for ENV_NAME in "${ENV_LIST[@]}"
-    do
-      ENV_FILE=${ENV_DIR}/${ENV_NAME}
-      if ! [[ -f ${ENV_FILE} ]]; then
-        logWarning ${1} "${ENV_FILE} not found"
-        continue;
-      fi  
-      logTarget ${idt} "info: append ${ENV_FILE}"
-      runSource ${idt} ${ENV_FILE} 
-      if ! [ "$?" -eq 1 ]; then
-        continue;
-      else
-        echo "" >> ${BUILD_TEMP_APP_ENV_FILE}
-        cat ${ENV_FILE} >> ${BUILD_TEMP_APP_ENV_FILE}
-        echo "" >> ${BUILD_TEMP_APP_ENV_FILE}
-      fi      
-    done
-  done
-  
-  envsParserFile ${1} ${BUILD_TEMP_APP_ENV_FILE}
-  runSource ${1} ${BUILD_TEMP_APP_ENV_FILE}
-  envsToSimpleEnvs ${1} ${BUILD_TEMP_APP_ENV_FILE}
-
-  mkdir -p ${PUBLIC_ENVS_DIR}
-  __env_destine=${PUBLIC_ENVS_DIR}/${APPLICATION_NAME}.env
-
-  cp -rf ${BUILD_TEMP_APP_ENV_FILE} ${__env_destine}
-
-  logFinished ${1} "__utilPrepareStackEnvs"
-}
-
-
-function utilPrepareStack()
-{
-  logStart ${1} "utilPrepareStack"
-  __utilPrepareStackEnvsDefault "$(incInt ${1})"
-  __utilPrepareStackEnvs "$(incInt ${1})"
-  logFinished ${1} "utilPrepareStack"
+  makeDir 1 ${BUILD_TEMP_DIR} 777
+  makeDir 1 ${APPLICATION_DEPLOY_DATA_DIR} 777
+  makeDir 1 ${APPLICATION_DEPLOY_BACKUP_DIR} 777
 }

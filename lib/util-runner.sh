@@ -95,26 +95,42 @@ function dockerMCSMain()
   echC "  - Build option: [${__dk_mcs_build_option}]"
   echC
   
-  utilPrepareInit 1
   for __dk_mcs_project in "${__dk_mcs_projects[@]}"
   do
     export STACK_PROJECT=${__dk_mcs_project}
 
-    runSource 1 "${__dk_mcs_project_dir}/${__dk_mcs_project}"
-    if ! [ "$?" -eq 1 ]; then
-      exit 0;
-    fi
-    buildProjectPrepare 1 ${STACK_PROJECT} ${STACK_PROJECT}
+    __dk_mcs_stack_env=${__dk_mcs_project_dir}/${__dk_mcs_project}
 
-    __dk_mcs_builder_dir=${HOME}/build
+    echM "  Environment preparing "
+    echY "    - source ${__dk_mcs_stack_env}"
+    source ${__dk_mcs_stack_env};
+    echY "    - stack envs"
+    prepareStack
+
     __dk_mcs_git_repository=${APPLICATION_GIT}
     __dk_mcs_git_branch=${APPLICATION_GIT_BRANCH}
+    __dk_mcs_builder_dir=${HOME}/build/${STACK_PREFIX}-${__dk_mcs_project}
+    rm -rf ${__dk_mcs_builder_dir}
+    mkdir -p ${__dk_mcs_builder_dir}
+
     __dk_mcs_dk_yml=${STACK_INSTALLER_DOCKER_COMPOSE_DIR}/${APPLICATION_STACK}.yml
     __dk_mcs_dk_file=${STACK_INSTALLER_DOCKER_FILE_DIR}/${APPLICATION_STACK}.dockerfile
-    __dk_mcs_dk_image=${APPLICATION_DEPLOY_IMAGE}
-    
-    __dk_mcs_dk_env=$(echo ${__dk_mcs_dk_yml} | sed 's/yml/env/g')
-    cp -rf ${APPLICATION_DEPLOY_ENV_FILE} ${__dk_mcs_dk_env}
+    __dk_mcs_dk_image=${APPLICATION_DEPLOY_IMAGE}    
+
+    echY "    - docker envs"
+    __deploy_dck_compose_name=$(basename ${__dk_mcs_dk_yml} | sed 's/\.yml//g')
+    __deploy_dck_env_tags=${APPLICATION_ENV_TAGS}
+    __deploy_dck_env_tags="java_env.${__deploy_dck_compose_name} ${__deploy_dck_env_tags}"
+    __deploy_dck_env_tags="env.${__deploy_dck_compose_name} ${__deploy_dck_env_tags}"
+    deployPrepareEnvFile "${STACK_APPLICATIONS_DATA_ENV_JSON_FILE}" "${__dk_mcs_builder_dir}" "${__deploy_dck_env_tags}"
+    if ! [ "$?" -eq 1 ]; then
+      echR "Invalid deployPrepareEnvFile"
+      continue;
+    else
+      __dk_mcs_dk_env_file=${__func_return}
+    fi
+    #envsReplaceFile ${__dk_mcs_dk_yml}
+    echG "  Finished"
 
     __dk_mcs_bin_dir=${HOME}/build/bin
     __dk_mcs_dep_dir="${STACK_APPLICATIONS_DATA_SRC_DIR}/${__dk_mcs_project} ${STACK_INSTALLER_DOCKER_CONF_DIR}/${APPLICATION_STACK}"
@@ -122,6 +138,8 @@ function dockerMCSMain()
     if [[ ${__dk_mcs_git_branch} == "" ]]; then
       __dk_mcs_git_branch=master
     fi
+
+
 
     deploy \
           "${__dk_mcs_environment}" \
@@ -134,7 +152,7 @@ function dockerMCSMain()
           "${__dk_mcs_dk_image}" \
           "${__dk_mcs_dk_file}" \
           "${__dk_mcs_dk_yml}" \
-          "${__dk_mcs_dk_env}" \
+          "${__dk_mcs_dk_env_file}" \
           "${__dk_mcs_bin_dir}" \
           "${__dk_mcs_dep_dir}"
     if ! [ "$?" -eq 1 ]; then
