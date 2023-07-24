@@ -105,6 +105,13 @@ function dockerMCSMain()
     echY "    - stack envs"
     prepareStack
 
+    export APPLICATION_STORAGE_TARGET=${PUBLIC_STORAGE_DIR}/${STACK_PREFIX}/${__dk_mcs_project}
+    export APPLICATION_DEPLOY_DATA_DIR=${APPLICATION_STORAGE_TARGET}/data
+    export APPLICATION_DEPLOY_BACKUP_DIR=${APPLICATION_STORAGE_TARGET}/backup
+    
+    mkdir -p ${APPLICATION_DEPLOY_DATA_DIR}
+    mkdir -p ${APPLICATION_DEPLOY_BACKUP_DIR}
+
     __dk_mcs_git_repository=${APPLICATION_GIT}
     __dk_mcs_git_branch=${APPLICATION_GIT_BRANCH}
     __dk_mcs_builder_dir="${HOME}/build/${STACK_PREFIX}-${__dk_mcs_project}"
