@@ -124,7 +124,7 @@ function runnerMain()
     exit 0
   fi
 
-  databasePrepare ${STACK_APPLICATIONS_DATA_DB_DIR}
+  databasePrepare ${STACK_ENVIRONMENT} ${STACK_APPLICATIONS_DATA_DB_DIR}
   if ! [ "$?" -eq 1 ]; then
     echR "Invalid databasePrepare"
     exit 0;

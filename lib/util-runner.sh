@@ -127,9 +127,21 @@ function dockerMCSMain()
 
     echY "    - docker envs"
     __deploy_dck_compose_name=$(basename ${__dk_mcs_dk_yml} | sed 's/\.yml//g')
-    __deploy_dck_env_tags=${APPLICATION_ENV_TAGS}
-    __deploy_dck_env_tags="docker.default docker.${__deploy_dck_compose_name} docker.${APPLICATION_STACK} ${__deploy_dck_env_tags}"
-    __deploy_dck_env_tags="env.default env.${__deploy_dck_compose_name} env.${APPLICATION_STACK} ${__deploy_dck_env_tags}"
+
+    __deploy_dck_env_tags=
+    __deploy_dck_env_tags_headers=(env docker)
+    for __deploy_dck_env_tags_header in "${__deploy_dck_env_tags_headers[@]}"
+    do
+      __deploy_dck_env_tags_defaults=("default.${STACK_ENVIRONMENT}" ${APPLICATION_STACK})
+      for __deploy_dck_env_tags_default in "${__deploy_dck_env_tags_defaults[@]}"
+      do
+        __deploy_dck_env_tags_name="${__deploy_dck_env_tags_header}.${__deploy_dck_env_tags_default}"
+        __deploy_dck_env_tags="${__deploy_dck_env_tags} ${__deploy_dck_env_tags_name}"
+      done
+    done
+    #application args
+    __deploy_dck_env_tags="${__deploy_dck_env_tags} ${APPLICATION_ENV_TAGS}"
+
     deployPrepareEnvFile "${STACK_APPLICATIONS_DATA_ENV_JSON_FILE}" "${__dk_mcs_builder_dir}" "${__deploy_dck_env_tags}"
     if ! [ "$?" -eq 1 ]; then
       echR "Invalid deployPrepareEnvFile"
