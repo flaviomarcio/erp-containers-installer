@@ -1,6 +1,7 @@
 #!/bin/bash
 
 . ${BASH_BIN}/bash-util.sh
+. ${BASH_BIN}/lib-selector.sh
 . ${INSTALLER_DIR}/lib/util-prepare.sh
 
 function getProjects()
@@ -13,31 +14,16 @@ function getProjects()
   echo -n $(ls ${OPTDIR} | sort)
 }
 
-function selectDeployOpt()
-{
-  clearTerm
-  echo 
-  export STACK_DEPLOY_MODE=all
-  PS3=$'\n'"Deploy mode menu"$'\n''Choose a option: '
-  options=(Back all build deploy)
-  select opt in "${options[@]}"
-  do
-    if [[ ${opt} == "back" ]]; then
-      return 2;
-    else
-      export STACK_DEPLOY_MODE=${opt}
-      return 1;
-    fi    
-  done
-  return 0;
-}
-
 function selectProject()
 {
+  export STACK_INSTALL_BUILD_ARGS=
   clearTerm
-  echo 
-  PS3=$'\n'"Project menu"$'\n''Choose a option: '
+  __private_print_os_information
+  echM $'\n'"Project menu"$'\n'
+  PS3=$'\n'"Choose a option: "
+
   options=(back all $(getProjects))
+
   select opt in "${options[@]}"
   do
     if [[ ${opt} == "back" ]]; then
@@ -49,86 +35,38 @@ function selectProject()
     fi    
     return 1;
   done
+
   return 0;
 }
 
-function getActions()
-{
-  echo -n $(ls ${STACK_INSTALLER_BIN_DIR} | sort)
-}
+# function getActions()
+# {
+#   echo -n $(ls ${STACK_INSTALLER_BIN_DIR} | sort)
+# }
 
-function selectAction()
-{
-  clearTerm
-  PS3=$'\n'"Action menu"$'\n''Choose option: '
-  options=(quit $(getActions))
-  select opt in "${options[@]}"
-  do
-    if [[ ${opt} == "quit" ]]; then
-      return 2
-    else
-      export STACK_ACTION=${opt}
-      return 1
-    fi
-  done
-  return 0;  
-}
+# function selectAction()
+# {
+#   export STACK_INSTALL_BUILD_ARGS=
+#   clearTerm
+#   __private_print_os_information
+  
+#   echM $'\n'"Action menu"$'\n'
+#   PS3=$'\n'"Choose a option: "
 
-function selectCustomer()
-{
-  export PUBLIC_STACK_TARGET_FILE=${HOME}/applications/stack_targets.env
-  if [[ -f ${PUBLIC_STACK_TARGET_FILE} ]]; then
-    options=$(cat ${PUBLIC_STACK_TARGET_FILE})
-    options="quit company ${options}"
-  else
-    options="quit company"
-  fi
-  options=(${options})
+#   options=(quit $(getActions))
 
-  clearTerm
-  PS3=$'\n'"Customer menu"$'\n''Choose option: '
-  select opt in "${options[@]}"
-  do
-    if [[ ${opt} == "quit" ]]; then
-      return 2
-    else
-      export STACK_TARGET=${opt}
-      return 1
-    fi
-  done
-  return 0;
-}
+#   select opt in "${options[@]}"
+#   do
+#     if [[ ${opt} == "quit" ]]; then
+#       return 2
+#     else
+#       export STACK_ACTION=${opt}
+#       return 1
+#     fi
+#   done
 
-function selectEnvironment()
-{
-  clearTerm
-  PS3=$'\n'"Environment menu"$'\n''Choose a option: '
-  options=(testing development staging production quit)
-
-  select opt in "${options[@]}"
-  do
-    export STACK_ENVIRONMENT=${opt}
-    case ${opt} in
-        "development")
-          break;
-            ;;
-        "testing")
-          break;
-            ;;
-        "stating")
-          break;
-            ;;
-        "production")
-          break;
-            ;;
-        "quit")
-          return 0;
-            ;;
-        *) echo "invalid option ${opt}";
-    esac
-  done
-  return 1;
-}
+#   return 0;
+# }
 
 function runOption()
 {

@@ -11,18 +11,12 @@ services:
     image: ${APPLICATION_DEPLOY_IMAGE}
     hostname: ${APPLICATION_DEPLOY_HOSTNAME}
     volumes:
-      - ${PUBLIC_LIB_DIR}:/home/debian/lib
-      - ${APPLICATION_DEPLOY_ENV_FILE}:/home/debian/env_file.env
-      - ${APPLICATION_DEPLOY_DATA_DIR}:/app/data
-      - ${APPLICATION_DEPLOY_BACKUP_DIR}:/app/backup
+      - ${PUBLIC_LIB_DIR}:/app/lib
+      - ${APPLICATION_DEPLOY_BINARY_DIR}:/app
+      - ${APPLICATION_DEPLOY_DATA_DIR}:/storage/data:rw
+      - ${APPLICATION_DEPLOY_BACKUP_DIR}:/storage/backup:rw
     env_file:
-      - ${APPLICATION_DEPLOY_ENV_FILE}
-    environment:
-      - ENV_FILE=/home/debian/env_file.env
-    ports:
-      - target: ${APPLICATION_DEPLOY_PORT}
-        protocol: tcp
-        mode: ingress
+      - ${APPLICATION_NAME}.env
     deploy:
       mode: ${APPLICATION_DEPLOY_MODE}
       replicas: ${APPLICATION_DEPLOY_REPLICAS}

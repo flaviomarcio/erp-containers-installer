@@ -6,28 +6,14 @@ networks:
     external: true
 
 services:
-  api:
+  app:
     image: ${APPLICATION_DEPLOY_IMAGE}
     hostname: ${APPLICATION_DEPLOY_HOSTNAME}
     env_file:
-      - ${APPLICATION_DEPLOY_ENV_FILE}
-    environment:
-      - SERVER_CONTEXT_PATH=${APPLICATION_DEPLOY_CONTEXT_PATH}
-      - SERVER_PORT=${APPLICATION_DEPLOY_PORT}
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - ${APPLICATION_DEPLOY_DATA_DIR}:/app/data
-      - ${APPLICATION_DEPLOY_BACKUP_DIR}:/app/backup
-    ports:
-      - target: ${APPLICATION_DEPLOY_PORT}
-        protocol: tcp
-        mode: ingress
+      - ${APPLICATION_NAME}
     deploy:
       mode: ${APPLICATION_DEPLOY_MODE}
-    #   #  replicas: ${APPLICATION_DEPLOY_REPLICAS}
-      placement:
-        constraints:
-          - ${APPLICATION_DEPLOY_NODE}
+      replicas: ${APPLICATION_DEPLOY_REPLICAS}
       update_config:
         parallelism: 1
         delay: 10s

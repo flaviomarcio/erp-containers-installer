@@ -22,15 +22,14 @@ function deployDb()
 {
   idx=$(toInt ${1})
   logStart ${idx} "deployDb"
-
-  
+ 
 
   if [[ ${2} != "" && ${3} != "" ]]; then
     export STACK_ACTION=${2}
     export STACK_PROJECT=${3}
   fi
 
-  buildProjectPrepare "$(incInt ${idx})" ${STACK_ACTION} ${STACK_PROJECT}
+  prepareStack "$(incInt ${idx})" ${STACK_ACTION} ${STACK_PROJECT}
 
   if [[ ${APPLICATION_DB_TYPE} == "postgres" ]]; then
     deployPG "$(incInt ${idx})" ${STACK_APPLICATIONS_DATA_DB_DIR}/${STACK_PROJECT}

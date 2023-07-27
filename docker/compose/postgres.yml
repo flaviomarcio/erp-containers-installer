@@ -14,8 +14,8 @@ services:
     hostname: ${APPLICATION_DEPLOY_HOSTNAME}
     volumes:
       # - /var/run/docker.sock:/var/run/docker.sock
-      - ${APPLICATION_DEPLOY_DATA_DIR}:/postgresql/pg/data
-      - ${APPLICATION_DEPLOY_BACKUP_DIR}:/postgresql/pg/backup
+      - ${APPLICATION_DEPLOY_DATA_DIR}:/postgresql/pg/data:rw
+      - ${APPLICATION_DEPLOY_BACKUP_DIR}:/postgresql/pg/backup:rw
     environment:
       - POSTGRES_USER=${APPLICATION_DB_USER}
       - POSTGRES_PASSWORD=${APPLICATION_DB_PASSWORD}

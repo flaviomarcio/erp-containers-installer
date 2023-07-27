@@ -1,0 +1,38 @@
+version: '3.9'
+   
+networks:
+  stack-inbound:
+    name: ${APPLICATION_DEPLOY_NETWORK_NAME}
+    external: true
+
+services:
+  api:
+    image: openjdk:11
+    # image: ${APPLICATION_DEPLOY_IMAGE}
+    hostname: ${APPLICATION_DEPLOY_HOSTNAME}
+    env_file:
+      - ${APPLICATION_NAME}.env
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${APPLICATION_DEPLOY_BINARY_DIR}:/app
+      - ${APPLICATION_DEPLOY_DATA_DIR}:/storage/data:rw
+      - ${APPLICATION_DEPLOY_BACKUP_DIR}:/storage/backup:rw
+    entrypoint: java -jar /app/app.jar
+    deploy:
+      mode: ${APPLICATION_DEPLOY_MODE}
+      replicas: ${APPLICATION_DEPLOY_REPLICAS}
+      # placement:
+      #   constraints:
+      #     - ${APPLICATION_DEPLOY_NODE}
+      update_config:
+        parallelism: 1
+        delay: 10s
+      restart_policy:
+        condition: on-failure
+      labels:
+        - "traefik.http.routers.${APPLICATION_SERVICE}.rule=Host(`${APPLICATION_DEPLOY_DNS}`)"
+        - "traefik.http.routers.${APPLICATION_SERVICE}.service=${APPLICATION_SERVICE}"
+        - "traefik.http.services.${APPLICATION_SERVICE}.loadbalancer.server.port=${APPLICATION_DEPLOY_PORT}"
+        - "traefik.docker.network=${APPLICATION_DEPLOY_NETWORK_NAME}"
+    networks:
+      - stack-inbound
