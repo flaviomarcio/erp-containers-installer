@@ -35,7 +35,7 @@ function dbPGExecDDL()
 # ROOT_DIR=${PWD}/applications/data/db/pg
 # PG_HOST="localhost"
 # PG_USER=services
-# PG_PASS=ZjU0ODUyMjVi
+# PG_PASS=services
 # PG_DB=services
 # PG_PORT=5432
 
