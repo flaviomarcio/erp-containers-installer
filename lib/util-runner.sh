@@ -144,6 +144,7 @@ function dockerMCSMain()
       do
         __deploy_dck_env_tags_name="${__deploy_dck_env_tags_header}.${__deploy_dck_env_tags_default}"
         __deploy_dck_env_tags="${__deploy_dck_env_tags} ${__deploy_dck_env_tags_name}"
+        APPLICATION_ENV_TAGS=$(echo ${APPLICATION_ENV_TAGS} | sed "s/${__deploy_dck_env_tags_name}//g" | sed "s/  / /g")
       done
     done
     #application args

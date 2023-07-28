@@ -10,7 +10,7 @@ services:
     image: ${APPLICATION_DEPLOY_IMAGE}
     hostname: ${APPLICATION_DEPLOY_HOSTNAME}
     env_file:
-      - ${APPLICATION_NAME}
+      - ${APPLICATION_NAME}.env
     deploy:
       mode: ${APPLICATION_DEPLOY_MODE}
       replicas: ${APPLICATION_DEPLOY_REPLICAS}
