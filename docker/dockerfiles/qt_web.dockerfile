@@ -5,7 +5,7 @@ ENV TZ=America/Sao_Paulo
 RUN apt update;
 RUN apt install -y tzdata;
 
-ADD . /
+ADD . /app
 ADD ./nginx.conf /etc/nginx/
 
 WORKDIR /app
