@@ -98,17 +98,21 @@ function runnerMain()
     exit 0
   fi
 
-  selectorCustomer 1
-  if ! [ "$?" -eq 1 ]; then
-    echR "Invalid selectorCustomer"
-    exit 0
+  if [[ ${__public_target} == "" ]]; then
+    selectorCustomer 1
+    if ! [ "$?" -eq 1 ]; then
+      echR "Invalid selectorCustomer"
+      exit 0
+    fi
+    export __public_target=${__selector}
   fi
-  export __public_target=${__selector}
 
-  selectorEnvironment 1
-  if ! [ "$?" -eq 1 ]; then
-    echR "Invalid selectorEnvironment"
-    exit 0
+  if [[ ${__public_environment} == "" ]]; then
+    selectorEnvironment 1
+    if ! [ "$?" -eq 1 ]; then
+      echR "Invalid selectorEnvironment"
+      exit 0
+    fi
   fi
   export __public_environment=${__selector}
 
