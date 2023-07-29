@@ -114,6 +114,7 @@ function dockerMCSMain()
 
     __dk_mcs_git_repository=${APPLICATION_GIT}
     __dk_mcs_git_branch=${APPLICATION_GIT_BRANCH}
+    __dk_mcs_git_project_file=${APPLICATION_GIT_PROJECT_FILE}
     __dk_mcs_builder_dir="${HOME}/build/${STACK_PREFIX}-${__dk_mcs_project}"
     __dk_mcs_bin_dir="${HOME}/build/${STACK_PREFIX}/bin"
     rm -rf ${__dk_mcs_builder_dir}
@@ -174,6 +175,7 @@ function dockerMCSMain()
           "${__dk_mcs_build_option}" \
           "${__dk_mcs_git_repository}" \
           "${__dk_mcs_git_branch}" \
+          "${__dk_mcs_git_project_file}" \
           "${__dk_mcs_dk_image}" \
           "${__dk_mcs_dk_file}" \
           "${__dk_mcs_dk_yml}" \
