@@ -19,6 +19,8 @@ export PATH=${PATH}:${PWD}/lib
 
 function main()
 {
+  envsFileConvertToExport "/home/debian/build/development-transul-erp-api/development-transul-erp-api.env" "/tmp/env"
+  subl /tmp/env
   return 1
 }
 

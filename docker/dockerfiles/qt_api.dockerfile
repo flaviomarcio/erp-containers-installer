@@ -2,26 +2,18 @@ FROM debian:bullseye
 LABEL maintainer "FlavioPortela <fmspx@hotmail.com>"
 
 ENV TZ=America/Sao_Paulo
-RUN apt update;
-RUN apt install -y tzdata;
 
-RUN useradd -m debian -s /bin/bash
-RUN usermod -aG root debian
-RUN usermod -aG sudo debian
-RUN mkdir -p /home/debian
+RUN apt update && apt-get upgrade -y
+RUN apt install -y tzdata libglib2.0-0 libdw1 openssh-client postgresql-client libjemalloc2 libnss3 libmemcached11
 
-RUN apt-get update
-RUN apt-get upgrade -y
-RUN apt-get install -y \
-    libglib2.0-0 libdw1 openssh-client postgresql-client libjemalloc2 \
-    libnss3 libmemcached11 \
-    libegl1 libxcb-xinerama0 libgl1-mesa-glx libxkbcommon-tools libxcb-util1 xvfb \
-    imagemagick exiftool poppler-utils
+ADD ./app /app/app
+ADD ./startRun /app/startRun
+ADD ./startBin /app/startBin
 
-ENV XDG_RUNTIME_DIR /run/user/debian
+ENV XDG_RUNTIME_DIR /app
 
-ENV HOME /home/debian
+ENV HOME /app
 
 WORKDIR /app
-#CMD ["./startRun"]
-ENTRYPOINT ["./startRun"]
+
+ENTRYPOINT ["/app/app"]

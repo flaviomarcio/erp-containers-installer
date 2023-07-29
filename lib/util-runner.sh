@@ -117,6 +117,7 @@ function dockerMCSMain()
     __dk_mcs_git_project_file=${APPLICATION_GIT_PROJECT_FILE}
     __dk_mcs_builder_dir="${HOME}/build/${STACK_PREFIX}-${__dk_mcs_project}"
     __dk_mcs_bin_dir="${HOME}/build/${STACK_PREFIX}/bin"
+    __dk_mcs_binary_name=${APPLICATION_DEPLOY_BINARY_NAME}
     rm -rf ${__dk_mcs_builder_dir}
 
     # __dk_mcs_stack_base_start_dir=${STACK_APPLICATIONS_DATA_CONF_DIR}/${APPLICATION_STACK}
@@ -181,6 +182,7 @@ function dockerMCSMain()
           "${__dk_mcs_dk_yml}" \
           "${__dk_mcs_dk_env_file}" \
           "${__dk_mcs_bin_dir}" \
+          "${__dk_mcs_binary_name}" \
           "${__dk_mcs_dep_dir}"
     if ! [ "$?" -eq 1 ]; then
       FAIL_DETECTED=true
