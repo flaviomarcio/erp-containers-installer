@@ -31,6 +31,11 @@ services:
         - "traefik.http.routers.${APPLICATION_NAME}.rule=Host(`${APPLICATION_DEPLOY_DNS}`)"
         - "traefik.http.routers.${APPLICATION_NAME}.service=${APPLICATION_NAME}"
         - "traefik.http.services.${APPLICATION_NAME}.loadbalancer.server.port=${APPLICATION_DEPLOY_PORT}"
+
+        - "traefik.http.routers.${APPLICATION_NAME}_pub.rule=Host(`${APPLICATION_DEPLOY_DNS_PUBLIC}`)"
+        - "traefik.http.routers.${APPLICATION_NAME}_pub.service=${APPLICATION_NAME}_pub"
+        - "traefik.http.services.${APPLICATION_NAME}_pub.loadbalancer.server.port=${APPLICATION_DEPLOY_PORT}"
+
         - "traefik.docker.network=${APPLICATION_DEPLOY_NETWORK_NAME}"
     networks:
       - stack-inbound
