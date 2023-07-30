@@ -29,4 +29,4 @@ ADD ./startRun /home/debian/app/startRun
 
 VOLUME /home/debian/qt
 WORKDIR /home/debian/app
-ENTRYPOINT ["sh", "./startRun"]
+ENTRYPOINT ["/home/debian/app/startRun"]

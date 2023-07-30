@@ -1,9 +1,8 @@
 #!/bin/bash
 
-function __privateCallWithDisplay()
+function __private_call_with_display()
 {
-  SCRIPTPATH="$( cd "`dirname "$1"`" ; pwd -P )"
-  export BINARY=$1
+  export __private_call_with_display_binary=${1}
 
   export XDG_RUNTIME_DIR=/tmp/runtime-invservernode
   export TZ=:/etc/localtime
@@ -21,14 +20,11 @@ function __privateCallWithDisplay()
   Xvfb ${DISPLAY} -nolisten tcp -extension RANDR -screen 0 1280x800x24 &
   sleep 2
 
-  # export LD_LIBRARY_PATH=/opt/Qt5.12.5/5.12.5/gcc_64/lib
-  # export QT_PLUGIN_PATH=/opt/Qt5.12.5/5.12.5/gcc_64/plugins
+  cd $(basename ${__private_call_with_display_binary})
 
-  cd "${SCRIPTPATH}"
-
-  while true
+  while :
   do
-      LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so.2 ${BINARY} 2>&1 | tee -a general.log
+      LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so.2 ${__private_call_with_display_binary} 2>&1 | tee -a general.log
       sleep 2
   done
 }
@@ -36,17 +32,17 @@ function __privateCallWithDisplay()
 
 function callWithDisplay()
 {
-  RUN_FILE=${1}
-  BASE_DIR=$(dirname ${RUN_FILE})
+  callWithDisplay_binary=${1}
+  callWithDisplay_binary_dir=$(dirname ${callWithDisplay_binary})
 
-  if ! [[ -f ${RUN_FILE} ]]; then
+  if ! [[ -f ${callWithDisplay_binary} ]]; then
     echo "Invalid filename"
     return 0;
   fi
 
-  __privateCallWithDisplay "$@"
+  __private_call_with_display ${callWithDisplay_binary}
 
-  cd ${BASE_DIR}
+  cd ${callWithDisplay_binary_dir}
   if [[ -d ./core ]]; then
     rm -rf ./core
   fi
@@ -54,4 +50,20 @@ function callWithDisplay()
   return 1;
 }
 
-callWithDisplay ${PWD}/run
+
+export __app_env_file=${PWD}/app.env
+export __app_file=${PWD}/app
+
+if [[ -f ${__app_env_file} ]]; then
+  source ${__app_env_file}
+fi
+
+if ! [[ -f ${__app_file} ]]; then
+  echo "File not found: ${__app_file}"
+  export;
+  pwd
+  ls -l
+  exit 0
+else
+  callWithDisplay ${__app_file}
+fi
