@@ -10,7 +10,7 @@ function __private_pg_envs_clear()
 {
   export POSTGRES_HOST="localhost"
   export POSTGRES_USER=postgres
-  export POSTGRES_PASS=postgres
+  export POSTGRES_PASSWORD=postgres
   export POSTGRES_DB=postgres
   export POSTGRES_PORT=5432
 }
@@ -28,8 +28,8 @@ function __private_pg_envs_check()
   if [[ ${POSTGRES_USER} == "" ]]; then
     export POSTGRES_USER=postgres
   fi
-  if [[ ${POSTGRES_PASS} == "" ]]; then
-    export POSTGRES_PASS=postgres
+  if [[ ${POSTGRES_PASSWORD} == "" ]]; then
+    export POSTGRES_PASSWORD=postgres
   fi
   if [[ ${POSTGRES_DB} == "" ]]; then
     export POSTGRES_DB=postgres
@@ -46,8 +46,8 @@ function __private_pg_envs_check()
     echo "Invalid env: POSTGRES_USER=${POSTGRES_USER}"
     return 0
   fi
-  if [[ ${POSTGRES_PASS} == "" ]]; then 
-    echo "Invalid env: POSTGRES_PASS=${POSTGRES_PASS}"
+  if [[ ${POSTGRES_PASSWORD} == "" ]]; then 
+    echo "Invalid env: POSTGRES_PASSWORD=${POSTGRES_PASSWORD}"
     return 0
   fi
   if [[ ${POSTGRES_DB} == "" ]]; then 
@@ -67,7 +67,7 @@ function __private_pg_pass_apply()
   if ! [ "$?" -eq 1 ]; then
     return 0;       
   fi
-  AUTH="${POSTGRES_HOST}:${POSTGRES_PORT}:${POSTGRES_DB}:${POSTGRES_USER}:${POSTGRES_PASS}"
+  AUTH="${POSTGRES_HOST}:${POSTGRES_PORT}:${POSTGRES_DB}:${POSTGRES_USER}:${POSTGRES_PASSWORD}"
   if [[ -f ${POSTGRES_PGPASS} ]];then
     #remove host line
     sed -i "/${AUTH}/d" ${POSTGRES_PGPASS}
@@ -103,7 +103,7 @@ function __private_pg_exec_start()
   export DB_ROOT_DIR=${2}
   export POSTGRES_HOST=${3}
   export POSTGRES_USER=${4}
-  export POSTGRES_PASS=${5}
+  export POSTGRES_PASSWORD=${5}
   export POSTGRES_DB=${6}
   export POSTGRES_PORT=${7}
 
