@@ -5,7 +5,7 @@ ENV TZ=America/Sao_Paulo
 RUN apt update;
 RUN apt install -y tzdata;
 
-COPY . /app
+ADD ./app.jar /app/app.jar
 
 ENV HOME /app
 ENV WORK /app
