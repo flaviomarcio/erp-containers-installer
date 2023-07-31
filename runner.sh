@@ -124,7 +124,6 @@ function runnerMain()
   utilPrepareInit
 
   if ! [ "$?" -eq 1 ]; then
-    echR "Invalid utilPrepareInit"
     exit 0
   fi
 

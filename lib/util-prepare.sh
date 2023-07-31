@@ -2,6 +2,27 @@
 
 . ${BASH_BIN}/bash-util.sh
 
+function __privateEnvsIsInited()
+{
+  if [[ ${STACK_ROOT_DIR} == "" ]]; then
+    export STACK_ROOT_DIR=${HOME}
+  fi
+  export PUBLIC_APPLICATIONS_DIR=${STACK_ROOT_DIR}/applications
+  export PUBLIC_STACK_TARGET_FILE=${STACK_ROOT_DIR}/applications/stack_targets.env
+  export PUBLIC_ENVIRONMENT_FILE=${PUBLIC_APPLICATIONS_DIR}/${STACK_ENVIRONMENT}/${STACK_TARGET}/stack_envs.env
+  export PUBLIC_ENVS_DIR=${PUBLIC_APPLICATIONS_DIR}/${STACK_ENVIRONMENT}/envs
+  if ! [[ -f ${PUBLIC_STACK_TARGET_FILE} ]]; then
+    echY "Environment no inited"
+    echR "Invalid file: ${PUBLIC_STACK_TARGET_FILE}"
+  elif ! [[ -f ${PUBLIC_ENVIRONMENT_FILE} ]]; then
+    echY "Environment no inited"
+    echR "Invalid file: ${PUBLIC_ENVIRONMENT_FILE}"
+  else
+    source ${PUBLIC_ENVIRONMENT_FILE}
+    return 1
+  fi
+  return 0
+}
 
 function __privateEnvsPrepareClear()
 {
@@ -29,12 +50,10 @@ function __privateEnvsPrepareClear()
   return 1
 }
 
+
+
 function __privateEnvsPrepare()
 {    
-  if [[ ${STACK_ROOT_DIR} == "" ]]; then
-    export STACK_ROOT_DIR=${HOME}
-  fi
-  export PUBLIC_APPLICATIONS_DIR=${STACK_ROOT_DIR}/applications
   export PUBLIC_STORAGE_DIR=$(realpath ${PUBLIC_APPLICATIONS_DIR}/storage)
   export PUBLIC_LIB_DIR=$(realpath ${PUBLIC_APPLICATIONS_DIR}/lib)
   export STACK_DB_DROP=0
@@ -42,17 +61,21 @@ function __privateEnvsPrepare()
   return 1
 }
 
+
+
 function __privateEnvsPublic()
 {
-  export PUBLIC_ENVIRONMENT_FILE=${PUBLIC_APPLICATIONS_DIR}/${STACK_ENVIRONMENT}/${STACK_TARGET}/stack_envs.env
-  export PUBLIC_ENVS_DIR=${PUBLIC_APPLICATIONS_DIR}/${STACK_ENVIRONMENT}/envs
-  if ! [[ -f ${PUBLIC_ENVIRONMENT_FILE} ]]; then
+  if ! [[ -f ${PUBLIC_STACK_TARGET_FILE} ]]; then
+    echY "Environment no inited"
+    echR "Invalid file: ${PUBLIC_STACK_TARGET_FILE}"
+  elif ! [[ -f ${PUBLIC_ENVIRONMENT_FILE} ]]; then
     echY "Environment no inited"
     echR "Invalid file: ${PUBLIC_ENVIRONMENT_FILE}"
-    return 0
+  else
+    source ${PUBLIC_ENVIRONMENT_FILE}
+    return 1
   fi
-  source ${PUBLIC_ENVIRONMENT_FILE}
-  return 1
+  return 0
 }
 
 function __privateEnvsDefault()
@@ -110,8 +133,20 @@ function utilPrepareClear()
 
 function utilPrepareInit()
 {
+  __privateEnvsIsInited
+  if ! [ "$?" -eq 1 ]; then
+    return 0
+  fi
   __privateEnvsPrepareClear
+  if ! [ "$?" -eq 1 ]; then
+    echR
+    return 0
+  fi
   __privateEnvsPrepare
+  if ! [ "$?" -eq 1 ]; then
+    echR
+    return 0
+  fi
   __privateEnvsPublic
   if ! [ "$?" -eq 1 ]; then
     echR
