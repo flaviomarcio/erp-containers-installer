@@ -141,7 +141,7 @@ function dockerMCSMain()
     __deploy_dck_env_tags_headers=(env docker)
     for __deploy_dck_env_tags_header in "${__deploy_dck_env_tags_headers[@]}"
     do
-      __deploy_dck_env_tags_defaults=("default.${STACK_ENVIRONMENT}" ${APPLICATION_STACK})
+      __deploy_dck_env_tags_defaults=("resource.${STACK_ENVIRONMENT}" "default.${STACK_ENVIRONMENT}" ${APPLICATION_STACK})
       for __deploy_dck_env_tags_default in "${__deploy_dck_env_tags_defaults[@]}"
       do
         __deploy_dck_env_tags_name="${__deploy_dck_env_tags_header}.${__deploy_dck_env_tags_default}"
