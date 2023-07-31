@@ -83,6 +83,8 @@ function __private_runnerMenu()
 function runnerMain()
 {
   clearTerm
+  export STACK_TARGET=${__public_target}
+  export STACK_ENVIRONMENT=${__public_environment}
   utilInitialize "$@"
 
   if [[ ${PUBLIC_RUNNER_MODE} == test ]]; then
