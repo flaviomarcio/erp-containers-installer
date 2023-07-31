@@ -7,8 +7,8 @@ networks:
 
 services:
   api:
-    image: openjdk:11
-    # image: ${APPLICATION_DEPLOY_IMAGE}
+    #image: openjdk:11
+    image: ${APPLICATION_DEPLOY_IMAGE}
     hostname: ${APPLICATION_DEPLOY_HOSTNAME}
     env_file:
       - ${APPLICATION_NAME}.env
