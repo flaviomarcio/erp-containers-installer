@@ -141,9 +141,4 @@ function runnerMain()
   done
 }
 
-echo "__public_target==${__public_target}"
-echo "__public_environment==${__public_environment}"
-echo "STACK_TARGET==${STACK_TARGET}"
-echo "STACK_ENVIRONMENT==${STACK_ENVIRONMENT}"
-read
 runnerMain "$@"
