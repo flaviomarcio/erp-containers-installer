@@ -16,9 +16,9 @@ services:
     hostname: ${APPLICATION_DEPLOY_HOSTNAME}
     env_file:
       - ${APPLICATION_NAME}.env
-    volumes:
-      - ./:/var/www
-      - ./nginx.conf:/etc/nginx/nginx.conf
+    #volumes:
+    #  - ./:/var/www
+    #  - ./nginx.conf:/etc/nginx/nginx.conf
     deploy:
       mode: ${APPLICATION_DEPLOY_MODE}
       replicas: ${APPLICATION_DEPLOY_REPLICAS}
