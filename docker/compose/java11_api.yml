@@ -21,9 +21,9 @@ services:
     deploy:
       mode: ${APPLICATION_DEPLOY_MODE}
       replicas: ${APPLICATION_DEPLOY_REPLICAS}
-      # placement:
-      #   constraints:
-      #     - ${APPLICATION_DEPLOY_NODE}
+      placement:
+        constraints:
+          - node.labels.node-app-01 == true
       update_config:
         parallelism: 1
         delay: 10s
