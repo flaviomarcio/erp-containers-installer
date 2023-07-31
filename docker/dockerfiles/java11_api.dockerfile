@@ -2,8 +2,8 @@ FROM openjdk:17
 LABEL maintainer flavio.portela
 
 ENV TZ=America/Sao_Paulo
-RUN apt update;
-RUN apt install -y tzdata;
+#RUN apt update;
+#RUN apt install -y tzdata;
 
 ADD ./app.jar /app/app.jar
 
