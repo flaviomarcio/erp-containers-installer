@@ -1,4 +1,4 @@
-FROM openjdk:17
+FROM openjdk:11
 LABEL maintainer flavio.portela
 
 ENV TZ=America/Sao_Paulo
