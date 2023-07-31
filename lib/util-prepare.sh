@@ -26,15 +26,20 @@ function __privateEnvsPrepareClear()
   export APPLICATION_DEPLOY_DATA_DIR=
   export APPLICATION_DEPLOY_BACKUP_DIR=
   export APPLICATION_DEPLOY_NETWORK_NAME=
+  return 1
 }
 
 function __privateEnvsPrepare()
 {    
-  export PUBLIC_APPLICATIONS_DIR=${HOME}/applications
+  if [[ ${STACK_ROOT_DIR} == "" ]]; then
+    export STACK_ROOT_DIR=${HOME}
+  fi
+  export PUBLIC_APPLICATIONS_DIR=${STACK_ROOT_DIR}/applications
   export PUBLIC_STORAGE_DIR=$(realpath ${PUBLIC_APPLICATIONS_DIR}/storage)
   export PUBLIC_LIB_DIR=$(realpath ${PUBLIC_APPLICATIONS_DIR}/lib)
   export STACK_DB_DROP=0
   export STACK_DOMAIN=local
+  return 1
 }
 
 function __privateEnvsPublic()
@@ -42,6 +47,8 @@ function __privateEnvsPublic()
   export PUBLIC_ENVIRONMENT_FILE=${PUBLIC_APPLICATIONS_DIR}/${STACK_ENVIRONMENT}/${STACK_TARGET}/stack_envs.env
   export PUBLIC_ENVS_DIR=${PUBLIC_APPLICATIONS_DIR}/${STACK_ENVIRONMENT}/envs
   if ! [[ -f ${PUBLIC_ENVIRONMENT_FILE} ]]; then
+    echY "Environment no inited"
+    echR "Invalid file: ${PUBLIC_ENVIRONMENT_FILE}"
     return 0
   fi
   source ${PUBLIC_ENVIRONMENT_FILE}
@@ -107,6 +114,7 @@ function utilPrepareInit()
   __privateEnvsPrepare
   __privateEnvsPublic
   if ! [ "$?" -eq 1 ]; then
+    echR
     return 0
   fi
   __privateEnvsDefault
