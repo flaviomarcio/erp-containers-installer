@@ -22,7 +22,7 @@ services:
       replicas: ${APPLICATION_DEPLOY_REPLICAS}
       placement:
         constraints:
-          - node.labels.node-app-01 == true
+          - ${APPLICATION_DEPLOY_NODE}
       update_config:
         parallelism: 1
         delay: 10s
