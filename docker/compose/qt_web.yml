@@ -25,6 +25,10 @@ services:
       placement:
         constraints:
           - ${APPLICATION_DEPLOY_NODE}
+      resources:
+        limits:
+          cpus: "${STACK_CPU_DEFAULT}"
+          memory: ${STACK_MEMORY_DEFAULT}
       update_config:
         parallelism: 1
         delay: 10s

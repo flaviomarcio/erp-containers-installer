@@ -15,12 +15,14 @@ services:
     #  - ${APPLICATION_DEPLOY_DATA_DIR}:/var/lib/mysql
     command:
       - --default-authentication-plugin=mysql_native_password
-    environment:
-      # - MYSQL_ALLOW_EMPTY_PASSWORD=yes
-      - MYSQL_ROOT_PASSWORD=${APPLICATION_DB_PASSWORD}
-      - MYSQL_DATABASE=${APPLICATION_DB_DATABASE}
-      - MYSQL_USER=${APPLICATION_DB_USER}
-      - MYSQL_PASSWORD=${APPLICATION_DB_PASSWORD}
+    env_file:
+      - ${APPLICATION_NAME}.env
+    # environment:
+    #   # - MYSQL_ALLOW_EMPTY_PASSWORD=yes
+    #   - MYSQL_ROOT_PASSWORD=${APPLICATION_DB_PASSWORD}
+    #   - MYSQL_DATABASE=${APPLICATION_DB_DATABASE}
+    #   - MYSQL_USER=${APPLICATION_DB_USER}
+    #   - MYSQL_PASSWORD=${APPLICATION_DB_PASSWORD}
     ports:
       - target: ${APPLICATION_DEPLOY_PORT}
         published: ${APPLICATION_DEPLOY_PORT}
@@ -30,11 +32,11 @@ services:
       mode: global
       placement:
         constraints:
-          - ${STACK_NODE_ROLE}
+          - ${APPLICATION_DEPLOY_NODE}
       resources:
-          limits:
-            cpus: ${STACK_CPU_DEFAULT}
-            memory: ${STACK_MEMORY_DEFAULT}
+        limits:
+          cpus: "${STACK_CPU_DEFAULT}"
+          memory: ${STACK_MEMORY_DEFAULT}
       restart_policy:
         condition: on-failure
     networks:

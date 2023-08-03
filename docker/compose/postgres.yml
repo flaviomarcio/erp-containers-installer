@@ -16,9 +16,11 @@ services:
       # - /var/run/docker.sock:/var/run/docker.sock
       - ${APPLICATION_DEPLOY_DATA_DIR}:/postgresql/pg/data:rw
       - ${APPLICATION_DEPLOY_BACKUP_DIR}:/postgresql/pg/backup:rw
+    env_file:
+      - ${APPLICATION_NAME}.env
     environment:
-      - POSTGRES_USER=${APPLICATION_DB_USER}
-      - POSTGRES_PASSWORD=${APPLICATION_DB_PASSWORD}
+      # - POSTGRES_USER=${APPLICATION_DB_USER}
+      # - POSTGRES_PASSWORD=${APPLICATION_DB_PASSWORD}
       - PGDATA=/postgresql/pg/data
     ports:
       - target: 5432
@@ -29,20 +31,20 @@ services:
       mode: global
       placement:
         constraints:
-          - ${STACK_NODE_ROLE}
+          - ${APPLICATION_DEPLOY_NODE}
       resources:
-          limits:
-            cpus: ${STACK_CPU_DEFAULT}
-            memory: ${STACK_MEMORY_DEFAULT}
+        limits:
+          cpus: "${STACK_CPU_DEFAULT}"
+          memory: ${STACK_MEMORY_DEFAULT}
       restart_policy:
         condition: on-failure
       labels:
         - "traefik.enable=true"
         - "traefik.docker.network=${APPLICATION_DEPLOY_NETWORK_NAME}"
         - "traefik.tcp.routers.${APPLICATION_NAME}.rule=Host(`${APPLICATION_DEPLOY_DNS}`)"
-        - "traefik.tcp.routers.${APPLICATION_NAME}.entryPoints=postgres"
+        - "traefik.tcp.routers.${APPLICATION_NAME}.entryPoints=${APPLICATION_NAME}"
         - "traefik.tcp.routers.${APPLICATION_NAME}.service=${APPLICATION_NAME}"
-        - "traefik.tcp.services.${APPLICATION_NAME}.loadbalancer.server.port=${APPLICATION_DEPLOY_PORT}"
+        - "traefik.tcp.services.${APPLICATION_NAME}.loadbalancer.server.port=5432"
 
     networks:
       - stack-inbound
