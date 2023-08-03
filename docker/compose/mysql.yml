@@ -30,7 +30,7 @@ services:
       mode: global
       placement:
         constraints:
-          - node.role==manager
+          - ${STACK_NODE_ROLE}
       resources:
           limits:
             cpus: ${STACK_CPU_DEFAULT}
