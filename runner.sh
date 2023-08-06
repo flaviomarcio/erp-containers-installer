@@ -25,12 +25,10 @@ function __private_runnerMenu()
   __runner_menu_target=${2}
 
   options=(Quit)
-  options+=(Docker-Configure)
+  options+=(Docker-List)
   options+=(Docker-Build-SRV)
   options+=(Docker-Build-MCS)
   options+=(Docker-Build-ADM)
-  options+=(Docker-Reset)
-  options+=(Docker-List)
   options+=(Database-Update)
   options+=(Database-DDL-Maker)
   options+=(Database-PGPass)
