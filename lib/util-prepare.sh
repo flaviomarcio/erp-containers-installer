@@ -26,24 +26,18 @@ function __privateEnvsIsInited()
 
 function __privateEnvsPrepareClear()
 {
-  export APPLICATION_TEMPLATE=
-  export APPLICATION_PROTOCOL=
   export APPLICATION_STACK=
   export APPLICATION_NAME=
   export APPLICATION_GIT=
   export APPLICATION_GIT_BRANCH=
-  export APPLICATION_VERSION=
-  export APPLICATION_AUTH=
   export APPLICATION_DEPLOY_PORT=
-  export APPLICATION_DEPLOY_CONTEXT_PATH=
-  export APPLICATION_DEPLOY_DNS_PUBLIC=
   export APPLICATION_DEPLOY_DNS=
+  export APPLICATION_DEPLOY_DNS_PUBLIC=
   export APPLICATION_DEPLOY_IMAGE=
   export APPLICATION_DEPLOY_HOSTNAME=
   export APPLICATION_DEPLOY_NODE=
   export APPLICATION_DEPLOY_MODE=
   export APPLICATION_DEPLOY_REPLICAS=
-  export APPLICATION_DEPLOY_NETWORK=
   export APPLICATION_DEPLOY_DATA_DIR=
   export APPLICATION_DEPLOY_BACKUP_DIR=
   export APPLICATION_DEPLOY_NETWORK_NAME=
@@ -179,52 +173,43 @@ function prepareStackForDeploy()
   if [[ ${APPLICATION_DEPLOY_PORT} == "" ]]; then
     export APPLICATION_DEPLOY_PORT=8080
   fi
-
-  if [[ ${APPLICATION_DEPLOY_CONTEXT_PATH} == "" ]]; then
-    export APPLICATION_DEPLOY_CONTEXT_PATH=/
-  fi
-
-  if [[ ${APPLICATION_DEPLOY_DNS_PUBLIC} == "" ]]; then
-    export APPLICATION_DEPLOY_DNS_PUBLIC=false
-  fi  
-
   if [[ ${APPLICATION_DEPLOY_DNS} == "" ]]; then
-    if [[ ${APPLICATION_DEPLOY_DNS_PUBLIC} == "true" ]]; then
-      export APPLICATION_DEPLOY_DNS=${__prepareStack_prefix_name}.${STACK_DOMAIN}
-    else
-      export APPLICATION_DEPLOY_DNS=${__prepareStack_prefix_name}
-    fi
+    export APPLICATION_DEPLOY_DNS=${__prepareStack_prefix_name}
   fi
-
-  export APPLICATION_DEPLOY_IMAGE=${STACK_REGISTRY_DNS_PUBLIC}/${__prepareStack_prefix_name}  
-
+  if [[ ${APPLICATION_DEPLOY_DNS_PUBLIC} == "" ]]; then
+    export APPLICATION_DEPLOY_DNS_PUBLIC=${__prepareStack_prefix_name}.${STACK_DOMAIN}
+  fi
+  if [[ ${APPLICATION_DEPLOY_IMAGE} == "" ]]; then
+    export APPLICATION_DEPLOY_IMAGE=${STACK_REGISTRY_DNS_PUBLIC}/${__prepareStack_prefix_name}  
+  fi
   if [[ ${APPLICATION_DEPLOY_HOSTNAME} == "" ]]; then
     export APPLICATION_DEPLOY_HOSTNAME=${__prepareStack_prefix_name}
   fi
-
   if [[ ${APPLICATION_DEPLOY_MODE} == "" ]]; then
     export APPLICATION_DEPLOY_MODE=replicated
-  fi
-  
+  fi  
   if [[ ${APPLICATION_DEPLOY_NODE} == "" ]]; then
     export APPLICATION_DEPLOY_NODE=${STACK_SERVICE_NODE_SERVICES}
   fi
-
   if [[ ${APPLICATION_DEPLOY_REPLICAS} == "" ]]; then
     export APPLICATION_DEPLOY_REPLICAS=1
   fi
-
   if [[ ${APPLICATION_DEPLOY_NETWORK_NAME} == "" ]]; then
     export APPLICATION_DEPLOY_NETWORK_NAME=${STACK_NETWORK_INBOUND}
-  fi  
-
-  if [[ ${APPLICATION_TEMPLATE} == "" ]]; then
-    export APPLICATION_TEMPLATE=app
   fi
-
-  if [[ ${APPLICATION_PROTOCOL} == "" ]]; then
-    export APPLICATION_PROTOCOL=http
+  if [[ ${APPLICATION_DEPLOY_DATA_DIR} == "" ]]; then
+    export APPLICATION_DEPLOY_DATA_DIR=${PUBLIC_STORAGE_DIR}/${STACK_PREFIX}/${__dk_mcs_project}/data
   fi
-
+  if [[ ${APPLICATION_DEPLOY_BACKUP_DIR} == "" ]]; then
+    export APPLICATION_DEPLOY_BACKUP_DIR=${PUBLIC_STORAGE_DIR}/${STACK_PREFIX}/${__dk_mcs_project}/backup
+  fi
+  if ! [[ -d ${APPLICATION_DEPLOY_DATA_DIR} ]]; then
+    mkdir -p ${APPLICATION_DEPLOY_DATA_DIR}
+    chmod 777 ${APPLICATION_DEPLOY_DATA_DIR}
+  fi
+  if ! [[ -d ${APPLICATION_DEPLOY_BACKUP_DIR} ]]; then
+    mkdir -p ${APPLICATION_DEPLOY_BACKUP_DIR}
+    chmod 777 ${APPLICATION_DEPLOY_BACKUP_DIR}
+  fi
 
 }

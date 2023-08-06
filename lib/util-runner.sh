@@ -104,12 +104,23 @@ function dockerMCSMain()
     echY "    - stack envs"
     prepareStackForDeploy
 
-    export APPLICATION_STORAGE_TARGET=${PUBLIC_STORAGE_DIR}/${STACK_PREFIX}/${__dk_mcs_project}
-    export APPLICATION_DEPLOY_DATA_DIR=${APPLICATION_STORAGE_TARGET}/data
-    export APPLICATION_DEPLOY_BACKUP_DIR=${APPLICATION_STORAGE_TARGET}/backup
-    
-    mkdir -p ${APPLICATION_DEPLOY_DATA_DIR}
-    mkdir -p ${APPLICATION_DEPLOY_BACKUP_DIR}
+    if [[ ${APPLICATION_DEPLOY_DATA_DIR} == "" ]]; then
+      export APPLICATION_DEPLOY_DATA_DIR=${PUBLIC_STORAGE_DIR}/${STACK_PREFIX}/${__dk_mcs_project}/data
+    fi
+
+    if [[ ${APPLICATION_DEPLOY_BACKUP_DIR} == "" ]]; then
+      export APPLICATION_DEPLOY_BACKUP_DIR=${PUBLIC_STORAGE_DIR}/${STACK_PREFIX}/${__dk_mcs_project}/backup
+    fi
+
+    if ! [[ -d ${APPLICATION_DEPLOY_DATA_DIR} ]]; then
+      mkdir -p ${APPLICATION_DEPLOY_DATA_DIR}
+      chmod 777 ${APPLICATION_DEPLOY_DATA_DIR}
+    fi
+
+    if ! [[ -d ${APPLICATION_DEPLOY_BACKUP_DIR} ]]; then
+      mkdir -p ${APPLICATION_DEPLOY_BACKUP_DIR}
+      chmod 777 ${APPLICATION_DEPLOY_BACKUP_DIR}
+    fi
 
     __dk_mcs_git_repository=${APPLICATION_GIT}
     __dk_mcs_git_branch=${APPLICATION_GIT_BRANCH}
@@ -118,14 +129,6 @@ function dockerMCSMain()
     __dk_mcs_bin_dir="${HOME}/build/${STACK_PREFIX}/bin"
     __dk_mcs_binary_name=${APPLICATION_DEPLOY_BINARY_NAME}
     rm -rf ${__dk_mcs_builder_dir}
-
-    # __dk_mcs_stack_base_start_dir=${STACK_APPLICATIONS_DATA_CONF_DIR}/${APPLICATION_STACK}
-    # ls -l ${__dk_mcs_stack_base_start_dir}
-    # read
-    # if [[ -d ${__dk_mcs_stack_base_start_dir} ]]; then
-    #   cp -rf ${__dk_mcs_stack_base_start_dir} ${__dk_mcs_builder_dir}
-    # else
-    # fi
     mkdir -p ${__dk_mcs_builder_dir}
     mkdir -p ${__dk_mcs_bin_dir}
 
