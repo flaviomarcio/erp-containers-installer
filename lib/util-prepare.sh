@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-. ${BASH_BIN}/bash-util.sh
+. ${BASH_BIN}/lib-strings.sh
 
 function __privateEnvsIsInited()
 {
@@ -160,16 +160,10 @@ function utilPrepareInit()
 
 function prepareStackForDeploy()
 {
+  __prepareStack_prefix_name=${STACK_PREFIX}-${STACK_PROJECT}
   if [[ ${APPLICATION_NAME} == "" ]]; then
     export APPLICATION_NAME=${STACK_PROJECT}
-  fi
-
-  __prepareStack_prefix_name=${STACK_PREFIX}-${APPLICATION_NAME}
-  #TODO tentar destoninuar env ${BUILD_TEMP_DIR}
-  export BUILD_TEMP_DIR=${HOME}/build/${__prepareStack_prefix_name}
-  mkdir -p ${BUILD_TEMP_DIR}
-  export DOCKER_CONF_DIR=${STACK_INSTALLER_DOCKER_CONF_DIR}/${APPLICATION_STACK}  
- 
+  fi 
   if [[ ${APPLICATION_DEPLOY_PORT} == "" ]]; then
     export APPLICATION_DEPLOY_PORT=8080
   fi

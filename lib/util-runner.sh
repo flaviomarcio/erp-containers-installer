@@ -1,6 +1,5 @@
 #!/bin/bash
 
-. lib-bash.sh
 . lib-docker.sh
 . lib-database.sh
 . lib-selector.sh
@@ -104,23 +103,7 @@ function dockerMCSMain()
     echY "    - stack envs"
     prepareStackForDeploy
 
-    if [[ ${APPLICATION_DEPLOY_DATA_DIR} == "" ]]; then
-      export APPLICATION_DEPLOY_DATA_DIR=${PUBLIC_STORAGE_DIR}/${STACK_PREFIX}/${__dk_mcs_project}/data
-    fi
 
-    if [[ ${APPLICATION_DEPLOY_BACKUP_DIR} == "" ]]; then
-      export APPLICATION_DEPLOY_BACKUP_DIR=${PUBLIC_STORAGE_DIR}/${STACK_PREFIX}/${__dk_mcs_project}/backup
-    fi
-
-    if ! [[ -d ${APPLICATION_DEPLOY_DATA_DIR} ]]; then
-      mkdir -p ${APPLICATION_DEPLOY_DATA_DIR}
-      chmod 777 ${APPLICATION_DEPLOY_DATA_DIR}
-    fi
-
-    if ! [[ -d ${APPLICATION_DEPLOY_BACKUP_DIR} ]]; then
-      mkdir -p ${APPLICATION_DEPLOY_BACKUP_DIR}
-      chmod 777 ${APPLICATION_DEPLOY_BACKUP_DIR}
-    fi
 
     __dk_mcs_git_repository=${APPLICATION_GIT}
     __dk_mcs_git_branch=${APPLICATION_GIT_BRANCH}
