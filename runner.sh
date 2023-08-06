@@ -46,26 +46,22 @@ function __private_runnerMenu()
     echo ""
     echo "Action selected: [${opt}]"
     echo ""
-    if [[ ${opt} == "Docker-Configure" ]]; then
-      dockerConfigure ${__runner_menu_environment} ${__runner_menu_target}
+    if [[ ${opt} == "Docker-List" ]]; then
+      dockerList ${__runner_menu_environment} ${__runner_menu_target}
     elif [[ ${opt} == "Docker-Build-SRV" ]]; then
       dockerSRVMain ${__runner_menu_environment} ${__runner_menu_target}
     elif [[ ${opt} == "Docker-Build-MCS" ]]; then
       dockerMCSMain ${__runner_menu_environment} ${__runner_menu_target}
     elif [[ ${opt} == "Docker-Build-ADM" ]]; then
       dockerADMMain ${__runner_menu_environment} ${__runner_menu_target}
-    elif [[ ${opt} == "Docker-List" ]]; then
-      dockerList ${__runner_menu_environment} ${__runner_menu_target}
-    elif [[ ${opt} == "Docker-Reset" ]]; then
-      dockerReset ${__runner_menu_environment} ${__runner_menu_target}
     elif [[ ${opt} == "Database-Update" ]]; then
       databaseUpdate ${__runner_menu_environment} ${__runner_menu_target}
     elif [[ ${opt} == "Database-DDL-Maker" ]]; then
       databaseDDLMaker ${__runner_menu_environment} ${__runner_menu_target}
-    elif [[ ${opt} == "DNS-Options" ]]; then
-      systemDNSOptions ${__runner_menu_environment} ${__runner_menu_target}
     elif [[ ${opt} == "Database-PGPass" ]]; then
       selectorPGPass ${__runner_menu_environment} ${__runner_menu_target}
+    elif [[ ${opt} == "DNS-Options" ]]; then
+      systemDNSOptions ${__runner_menu_environment} ${__runner_menu_target}
     elif [[ ${opt} == "Command-Utils" ]]; then
       selectorCommands ${__runner_menu_environment} ${__runner_menu_target}
     else
