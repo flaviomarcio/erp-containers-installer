@@ -2,29 +2,45 @@
 
 . ${BASH_BIN}/lib-strings.sh
 
-function __privateEnvsIsInited()
+function __privateEnvsStackEnvInit()
 {
-  if [[ ${STACK_ROOT_DIR} == "" ]]; then
-    export STACK_ROOT_DIR=${HOME}
+  export __func_return=
+  if ! [[ -f ${PUBLIC_STACK_ENVS_FILE} ]]; then
+    export __func_return="File not found ${PUBLIC_STACK_ENVS_FILE}"
+    return 0
   fi
-  export PUBLIC_APPLICATIONS_DIR=${STACK_ROOT_DIR}/applications
-  export PUBLIC_STACK_TARGET_FILE=${STACK_ROOT_DIR}/applications/stack_targets.env
-  export PUBLIC_ENVIRONMENT_FILE=${PUBLIC_APPLICATIONS_DIR}/${STACK_ENVIRONMENT}/${STACK_TARGET}/stack_envs.env
-  export PUBLIC_ENVS_DIR=${PUBLIC_APPLICATIONS_DIR}/${STACK_ENVIRONMENT}/envs
-  if ! [[ -f ${PUBLIC_STACK_TARGET_FILE} ]]; then
-    echY "Environment no inited"
-    echR "Invalid targets file: ${PUBLIC_STACK_TARGET_FILE}"
-  elif ! [[ -f ${PUBLIC_ENVIRONMENT_FILE} ]]; then
-    echY "Environment no inited"
-    echR "Invalid stack env file: ${PUBLIC_ENVIRONMENT_FILE}"
-  else
-    source ${PUBLIC_ENVIRONMENT_FILE}
-    return 1
-  fi
-  return 0
+  envsFileAddIfNotExists ${PUBLIC_STACK_ENVS_FILE} STACK_TEMPLATES_DIR
+  source ${PUBLIC_STACK_ENVS_FILE}
+  return 1
 }
 
-function __privateEnvsPrepareClear()
+function __privateEnvsIsInited()
+{
+  export __func_return=
+  if [[ ${PUBLIC_STACK_TARGETS_FILE} == "" ]]; then
+    export __func_return="Invalid env \${PUBLIC_STACK_TARGETS_FILE}"
+    return 0
+  fi
+
+  if ! [[ -f ${PUBLIC_STACK_TARGETS_FILE} ]]; then
+    export __func_return="Invalid targets file: ${PUBLIC_STACK_TARGETS_FILE}"
+    return 0
+  fi
+
+  if [[ ${PUBLIC_STACK_ENVS_FILE} == "" ]]; then
+    export __func_return="Invalid env \${PUBLIC_STACK_ENVS_FILE}"
+    return 0
+  fi
+
+  if ! [[ -f ${PUBLIC_STACK_ENVS_FILE} ]]; then
+    export __func_return="Invalid stack environment file: ${PUBLIC_STACK_ENVS_FILE}"
+    return 0
+  fi
+
+  return 1
+}
+
+function __privateEnvsStackClear()
 {
   export APPLICATION_STACK=
   export APPLICATION_NAME=
@@ -44,50 +60,62 @@ function __privateEnvsPrepareClear()
   return 1
 }
 
-
-
 function __privateEnvsPrepare()
 {    
   export PUBLIC_STORAGE_DIR=$(realpath ${PUBLIC_APPLICATIONS_DIR}/storage)
   export PUBLIC_LIB_DIR=$(realpath ${PUBLIC_APPLICATIONS_DIR}/lib)
-  export STACK_DB_DROP=0
-  export STACK_DOMAIN=local
+  return 1
+}
+
+function __privateEnvsStartedInit()
+{
+  envsSetIfIsEmpty STACK_ROOT_DIR ${HOME}
+
+  export PUBLIC_APPLICATIONS_DIR=${STACK_ROOT_DIR}/applications
+  export PUBLIC_STACK_TARGET_DIR=${PUBLIC_APPLICATIONS_DIR}/${STACK_ENVIRONMENT}/${STACK_TARGET}
+  export PUBLIC_ENVS_DIR=${PUBLIC_APPLICATIONS_DIR}/${STACK_ENVIRONMENT}/envs
+
+  #env configurations
+  export PUBLIC_STACK_TARGETS_FILE=${PUBLIC_APPLICATIONS_DIR}/stack_targets.env
+  export PUBLIC_STACK_ENVS_FILE=${PUBLIC_STACK_TARGET_DIR}/stack_envs.env
   return 1
 }
 
 function __privateEnvsPublic()
 {
-  if ! [[ -f ${PUBLIC_STACK_TARGET_FILE} ]]; then
-    echY "Environment no inited"
-    echR "Invalid targets file: ${PUBLIC_STACK_TARGET_FILE}"
-  elif ! [[ -f ${PUBLIC_ENVIRONMENT_FILE} ]]; then
-    echY "Environment no inited"
-    echR "Invalid enviroment file: ${PUBLIC_ENVIRONMENT_FILE}"
-  else
-    source ${PUBLIC_ENVIRONMENT_FILE}
-    return 1
+  __privateEnvsIsInited
+  if ! [ "$?" -eq 1 ]; then
+    echFail 1 "fail on calling __privateEnvsIsInited: ${__func_return}"
+    return 0
   fi
-  return 0
-}
 
-function __privateEnvsDefault()
-{
-  if [[ ${STACK_CPU_DEFAULT} == "" ]]; then
-      export STACK_CPU_DEFAULT=1
+  __privateEnvsStackEnvInit
+  if ! [ "$?" -eq 1 ]; then
+    echFail 1 "fail on calling __privateEnvsStackEnvInit: ${__func_return}"
+    return 0
   fi
-  if [[ ${STACK_MEMORY_DEFAULT} == "" ]]; then
-      export STACK_MEMORY_DEFAULT=1GB
-  fi
-  if [[ ${STACK_DEPLOY_REPLICAS} == "" ]]; then
-      export STACK_DEPLOY_REPLICAS=1
-  fi
-  if [[ ${STACK_DOMAIN} == "" ]]; then
-      export STACK_DNS=localhost
-  fi
+
+  envsSetIfIsEmpty STACK_DOMAIN localhost
+  envsSetIfIsEmpty STACK_TEMPLATES_DIR "${PUBLIC_STACK_TARGET_DIR}/templates"
+
   return 1
 }
 
-function __privateEnvsFinal()
+function __privateEnvsAuthService()
+{
+  envsSetIfIsEmpty STACK_SERVICE_AUTH_SERVER_CERT ${STACK_SERVICE_AUTH_SERVER_CERT}
+  return 1
+}
+
+function __privateEnvsResources()
+{
+  envsSetIfIsEmpty STACK_CPU_DEFAULT 1
+  envsSetIfIsEmpty STACK_MEMORY_DEFAULT "1GB"
+  envsSetIfIsEmpty STACK_DEPLOY_REPLICAS 1
+  return 1
+}
+
+function __privateEnvsTargetFinal()
 {
   export STACK_NETWORK_INBOUND=${STACK_PREFIX}-inbound
   export STACK_REGISTRY_DNS=${STACK_PREFIX}-registry:5000
@@ -95,7 +123,7 @@ function __privateEnvsFinal()
   return 1
 }
 
-function __privateEnvsDir()
+function __privateEnvsInstallerDir()
 {
   #APPLICATIONS DIR
   export STACK_APPLICATIONS_DIR=${ROOT_DIR}/applications
@@ -117,42 +145,51 @@ function __privateEnvsDir()
   return 1
 }
 
-function utilPrepareClear()
-{
-  __privateEnvsPrepareClear
-}
-
 function utilPrepareInit()
 {
-  __privateEnvsIsInited
+  __privateEnvsStartedInit
   if ! [ "$?" -eq 1 ]; then
+    echR "  fail on calling __privateEnvsStartedInit"
     return 0
   fi
-  __privateEnvsPrepareClear
+  __privateEnvsIsInited
   if ! [ "$?" -eq 1 ]; then
-    echR
+    echFail 1 "fail on calling __privateEnvsIsInited: ${__func_return}"
+    return 0
+  fi
+  __privateEnvsStackClear
+  if ! [ "$?" -eq 1 ]; then
+    echR "  fail on calling __privateEnvsStackClear"
     return 0
   fi
   __privateEnvsPrepare
   if ! [ "$?" -eq 1 ]; then
-    echR
+    echR "  fail on calling __privateEnvsPrepare"
     return 0
   fi
   __privateEnvsPublic
   if ! [ "$?" -eq 1 ]; then
-    echR
+    echR "  fail on calling __privateEnvsPublic"
     return 0
   fi
-  __privateEnvsDefault
+  __privateEnvsAuthService
   if ! [ "$?" -eq 1 ]; then
+    echR "  fail on calling __privateEnvsAuthService"
     return 0
   fi
-  __privateEnvsFinal
+  __privateEnvsResources
   if ! [ "$?" -eq 1 ]; then
+    echR "  fail on calling __privateEnvsResources"
     return 0
   fi
-  __privateEnvsDir
+  __privateEnvsTargetFinal
   if ! [ "$?" -eq 1 ]; then
+    echR "  fail on calling __privateEnvsTargetFinal"
+    return 0
+  fi
+  __privateEnvsInstallerDir
+  if ! [ "$?" -eq 1 ]; then
+    echR "  fail on calling __privateEnvsInstallerDir"
     return 0
   fi
   return 1
@@ -160,42 +197,27 @@ function utilPrepareInit()
 
 function prepareStackForDeploy()
 {
-  __prepareStack_prefix_name=${STACK_PREFIX}-${STACK_PROJECT}
-  if [[ ${APPLICATION_NAME} == "" ]]; then
-    export APPLICATION_NAME=${STACK_PROJECT}
-  fi 
-  if [[ ${APPLICATION_DEPLOY_PORT} == "" ]]; then
-    export APPLICATION_DEPLOY_PORT=8080
-  fi
-  if [[ ${APPLICATION_DEPLOY_DNS} == "" ]]; then
-    export APPLICATION_DEPLOY_DNS=${__prepareStack_prefix_name}
-  fi
-  if [[ ${APPLICATION_DEPLOY_DNS_PUBLIC} == "" ]]; then
-    export APPLICATION_DEPLOY_DNS_PUBLIC=${__prepareStack_prefix_name}.${STACK_DOMAIN}
-  fi
-  if [[ ${APPLICATION_DEPLOY_IMAGE} == "" ]]; then
-    export APPLICATION_DEPLOY_IMAGE=${STACK_REGISTRY_DNS_PUBLIC}/${__prepareStack_prefix_name}  
-  fi
-  if [[ ${APPLICATION_DEPLOY_HOSTNAME} == "" ]]; then
-    export APPLICATION_DEPLOY_HOSTNAME=${__prepareStack_prefix_name}
-  fi
-  if [[ ${APPLICATION_DEPLOY_MODE} == "" ]]; then
-    export APPLICATION_DEPLOY_MODE=replicated
-  fi  
-  if [[ ${APPLICATION_DEPLOY_NODE} == "" ]]; then
-    export APPLICATION_DEPLOY_NODE=${STACK_SERVICE_NODE_SERVICES}
-  fi
-  if [[ ${APPLICATION_DEPLOY_REPLICAS} == "" ]]; then
-    export APPLICATION_DEPLOY_REPLICAS=1
-  fi
-  if [[ ${APPLICATION_DEPLOY_NETWORK_NAME} == "" ]]; then
-    export APPLICATION_DEPLOY_NETWORK_NAME=${STACK_NETWORK_INBOUND}
-  fi
-  if [[ ${APPLICATION_DEPLOY_DATA_DIR} == "" ]]; then
-    export APPLICATION_DEPLOY_DATA_DIR=${PUBLIC_STORAGE_DIR}/${STACK_PREFIX}/${__dk_mcs_project}/data
-  fi
-  if [[ ${APPLICATION_DEPLOY_BACKUP_DIR} == "" ]]; then
-    export APPLICATION_DEPLOY_BACKUP_DIR=${PUBLIC_STORAGE_DIR}/${STACK_PREFIX}/${__dk_mcs_project}/backup
+  __prepareStackForDeploy_prefix=${1}
+  __prepareStackForDeploy_project=${1}
+  __prepareStackForDeploy_domain=${1}
+  __prepareStack_prefix_name=${__prepareStackForDeploy_prefix}-${__prepareStackForDeploy_project}
+  envsSetIfIsEmpty APPLICATION_NAME ${__prepareStackForDeploy_project}
+  envsSetIfIsEmpty APPLICATION_DEPLOY_PORT 8080
+  envsSetIfIsEmpty APPLICATION_DEPLOY_DNS ${__prepareStack_prefix_name}
+  envsSetIfIsEmpty APPLICATION_DEPLOY_DNS_PUBLIC "${__prepareStack_prefix_name}.${__prepareStackForDeploy_domain}"
+  envsSetIfIsEmpty APPLICATION_DEPLOY_IMAGE "${STACK_REGISTRY_DNS_PUBLIC}/${__prepareStack_prefix_name}"
+  envsSetIfIsEmpty APPLICATION_DEPLOY_HOSTNAME ${__prepareStack_prefix_name}
+  envsSetIfIsEmpty APPLICATION_DEPLOY_MODE replicated
+  envsSetIfIsEmpty APPLICATION_DEPLOY_NODE ${STACK_SERVICE_NODE_SERVICES}
+  envsSetIfIsEmpty APPLICATION_DEPLOY_REPLICAS "1"
+  envsSetIfIsEmpty APPLICATION_DEPLOY_NETWORK_NAME ${STACK_NETWORK_INBOUND}
+  envsSetIfIsEmpty APPLICATION_DEPLOY_TEMPLATE_DIR "${STACK_TEMPLATES_DIR}/${__prepareStackForDeploy_prefix}/${__prepareStackForDeploy_project}/data"
+  envsSetIfIsEmpty APPLICATION_DEPLOY_DATA_DIR "${PUBLIC_STORAGE_DIR}/${__prepareStackForDeploy_prefix}/${__prepareStackForDeploy_project}/data"
+  envsSetIfIsEmpty APPLICATION_DEPLOY_BACKUP_DIR "${PUBLIC_STORAGE_DIR}/${__prepareStackForDeploy_prefix}/${__prepareStackForDeploy_project}/backup"
+
+  if ! [[ -d ${APPLICATION_DEPLOY_TEMPLATE_DIR} ]]; then
+    mkdir -p ${APPLICATION_DEPLOY_TEMPLATE_DIR}
+    chmod 777 ${APPLICATION_DEPLOY_TEMPLATE_DIR}
   fi
   if ! [[ -d ${APPLICATION_DEPLOY_DATA_DIR} ]]; then
     mkdir -p ${APPLICATION_DEPLOY_DATA_DIR}

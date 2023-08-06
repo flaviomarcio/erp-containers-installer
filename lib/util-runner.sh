@@ -93,17 +93,18 @@ function dockerMCSMain()
   
   for __dk_mcs_project in "${__dk_mcs_projects[@]}"
   do
-    export STACK_PROJECT=${__dk_mcs_project}
-
     __dk_mcs_stack_env=${__dk_mcs_project_dir}/${__dk_mcs_project}
 
     echM "  Environment preparing "
     echY "    - source ${__dk_mcs_stack_env}"
     source ${__dk_mcs_stack_env};
     echY "    - stack envs"
-    prepareStackForDeploy
-
-
+    prepareStackForDeploy ${STACK_PREFIX} ${__dk_mcs_project} ${STACK_DOMAIN}
+    if ! [ "$?" -eq 1 ]; then
+      echY "      fault on calling prepareStackForDeploy"
+      FAIL_DETECTED=true
+      break
+    fi
 
     __dk_mcs_git_repository=${APPLICATION_GIT}
     __dk_mcs_git_branch=${APPLICATION_GIT_BRANCH}
@@ -139,8 +140,9 @@ function dockerMCSMain()
 
     deployPrepareEnvFile "${STACK_APPLICATIONS_DATA_ENV_JSON_FILE}" "${__dk_mcs_builder_dir}" "${__deploy_dck_env_tags}"
     if ! [ "$?" -eq 1 ]; then
-      echR "Invalid deployPrepareEnvFile"
-      continue;
+      echR "Fault on calling deployPrepareEnvFile"
+      FAIL_DETECTED=true
+      break
     else
       __dk_mcs_dk_env_file=${__func_return}
     fi
@@ -171,11 +173,10 @@ function dockerMCSMain()
           "${__dk_mcs_dep_dir}"
     if ! [ "$?" -eq 1 ]; then
       FAIL_DETECTED=true
-      continue;
+      break
     fi
   done
 
-  systemETCHostApply
   echG "  Finished"    
   if [[ ${FAIL_DETECTED} == true ]]; then
     echR "  =============================  "
@@ -184,6 +185,7 @@ function dockerMCSMain()
     echR "  =============================  "    
     return 0;
   fi
+  systemETCHostApply
   return 1;
 }
 

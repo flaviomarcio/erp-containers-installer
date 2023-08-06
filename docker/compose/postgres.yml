@@ -13,14 +13,11 @@ services:
     image: ${APPLICATION_DEPLOY_IMAGE}
     hostname: ${APPLICATION_DEPLOY_HOSTNAME}
     volumes:
-      # - /var/run/docker.sock:/var/run/docker.sock
       - ${APPLICATION_DEPLOY_DATA_DIR}:/postgresql/pg/data:rw
-      - ${APPLICATION_DEPLOY_BACKUP_DIR}:/postgresql/pg/backup:rw
+      - ${APPLICATION_DEPLOY_BACKUP_DIR}:/storage/backup:rw
     env_file:
       - ${APPLICATION_NAME}.env
     environment:
-      # - POSTGRES_USER=${APPLICATION_DB_USER}
-      # - POSTGRES_PASSWORD=${APPLICATION_DB_PASSWORD}
       - PGDATA=/postgresql/pg/data
     ports:
       - target: 5432

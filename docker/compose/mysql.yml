@@ -11,17 +11,12 @@ services:
     hostname: ${APPLICATION_DEPLOY_HOSTNAME}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-    #  - ${APPLICATION_DEPLOY_DATA_DIR}:/var/lib/mysql
+      - ${APPLICATION_DEPLOY_DATA_DIR}:/var/lib/mysql:rw
+      - ${APPLICATION_DEPLOY_BACKUP_DIR}:/storage/backup:rw
     command:
       - --default-authentication-plugin=mysql_native_password
     env_file:
       - ${APPLICATION_NAME}.env
-    # environment:
-    #   # - MYSQL_ALLOW_EMPTY_PASSWORD=yes
-    #   - MYSQL_ROOT_PASSWORD=${APPLICATION_DB_PASSWORD}
-    #   - MYSQL_DATABASE=${APPLICATION_DB_DATABASE}
-    #   - MYSQL_USER=${APPLICATION_DB_USER}
-    #   - MYSQL_PASSWORD=${APPLICATION_DB_PASSWORD}
     ports:
       - target: ${APPLICATION_DEPLOY_PORT}
         published: ${APPLICATION_DEPLOY_PORT}

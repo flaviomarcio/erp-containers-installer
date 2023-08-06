@@ -83,7 +83,7 @@ function runnerMain()
 
   dockerSwarmVerify
   if ! [ "$?" -eq 1 ]; then
-    echR "Invalid dockerSwarmVerify"
+    echR "  fail on calling dockerSwarmVerify"
     exit 0
   fi
 
@@ -91,6 +91,7 @@ function runnerMain()
     selectorCustomer 1
     if ! [ "$?" -eq 1 ]; then
       echR "Invalid selectorCustomer"
+      echR "  fail on calling selectorCustomer"
       exit 0
     fi
     export __public_target=${__selector}
@@ -99,7 +100,7 @@ function runnerMain()
   if [[ ${__public_environment} == "" ]]; then
     selectorEnvironment 1
     if ! [ "$?" -eq 1 ]; then
-      echR "Invalid selectorEnvironment"
+      echR "  fail on calling selectorEnvironment"
       exit 0
     fi
     export __public_environment=${__selector}
@@ -113,12 +114,13 @@ function runnerMain()
   utilPrepareInit
 
   if ! [ "$?" -eq 1 ]; then
+    echR "  fail on calling utilPrepareInit"
     exit 0
   fi
 
   databasePrepare ${STACK_ENVIRONMENT} ${STACK_APPLICATIONS_DATA_DB_DIR}
   if ! [ "$?" -eq 1 ]; then
-    echR "Invalid databasePrepare"
+    echR "  fail on calling databasePrepare"
     exit 0;
   fi
 

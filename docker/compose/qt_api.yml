@@ -10,7 +10,9 @@ services:
     image: ${APPLICATION_DEPLOY_IMAGE}
     hostname: ${APPLICATION_DEPLOY_HOSTNAME}
     volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
       - ${PUBLIC_LIB_DIR}/qt/${QT_VERSION}:/home/debian/qt
+      - ${APPLICATION_DEPLOY_TEMPLATE_DIR}:/storage/template:ro
       - ${APPLICATION_DEPLOY_DATA_DIR}:/storage/data:rw
       - ${APPLICATION_DEPLOY_BACKUP_DIR}:/storage/backup:rw
     env_file:
