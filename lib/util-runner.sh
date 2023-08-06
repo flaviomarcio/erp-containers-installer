@@ -8,7 +8,6 @@
 . lib-deploy.sh
 
 . util-prepare.sh
-. util-build.sh
 
 function dockerBuild()
 {
@@ -103,7 +102,7 @@ function dockerMCSMain()
     echY "    - source ${__dk_mcs_stack_env}"
     source ${__dk_mcs_stack_env};
     echY "    - stack envs"
-    prepareStack
+    prepareStackForDeploy
 
     export APPLICATION_STORAGE_TARGET=${PUBLIC_STORAGE_DIR}/${STACK_PREFIX}/${__dk_mcs_project}
     export APPLICATION_DEPLOY_DATA_DIR=${APPLICATION_STORAGE_TARGET}/data

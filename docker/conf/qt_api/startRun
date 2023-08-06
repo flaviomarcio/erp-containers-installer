@@ -36,7 +36,7 @@ function callWithDisplay()
   callWithDisplay_binary_dir=$(dirname ${callWithDisplay_binary})
 
   if ! [[ -f ${callWithDisplay_binary} ]]; then
-    echo "Invalid filename"
+    echo "Invalid binary file"
     return 0;
   fi
 

@@ -36,15 +36,10 @@ services:
         limits:
           cpus: "${STACK_CPU_DEFAULT}"
           memory: ${STACK_MEMORY_DEFAULT}
+      update_config:
+        parallelism: 1
+        delay: 10s
       restart_policy:
         condition: on-failure
-      labels:
-        - "traefik.enable=true"
-        - "traefik.docker.network=${APPLICATION_DEPLOY_NETWORK_NAME}"
-        - "traefik.tcp.routers.${APPLICATION_NAME}.rule=Host(`${APPLICATION_DEPLOY_DNS}`)"
-        - "traefik.tcp.routers.${APPLICATION_NAME}.entryPoints=${APPLICATION_NAME}"
-        - "traefik.tcp.routers.${APPLICATION_NAME}.service=${APPLICATION_NAME}"
-        - "traefik.tcp.services.${APPLICATION_NAME}.loadbalancer.server.port=5432"
-
     networks:
       - stack-inbound

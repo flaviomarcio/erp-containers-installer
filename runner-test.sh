@@ -12,7 +12,6 @@ export PATH=${PATH}:${PWD}/lib
 
 
 # . ${INSTALLER_DIR}/lib/util-prepare.sh
-# . ${INSTALLER_DIR}/lib/util-selectors.sh
 #. ${INSTALLER_DIR}/lib/util-runner.sh
 
 

@@ -13,10 +13,10 @@ function __privateEnvsIsInited()
   export PUBLIC_ENVS_DIR=${PUBLIC_APPLICATIONS_DIR}/${STACK_ENVIRONMENT}/envs
   if ! [[ -f ${PUBLIC_STACK_TARGET_FILE} ]]; then
     echY "Environment no inited"
-    echR "Invalid file: ${PUBLIC_STACK_TARGET_FILE}"
+    echR "Invalid targets file: ${PUBLIC_STACK_TARGET_FILE}"
   elif ! [[ -f ${PUBLIC_ENVIRONMENT_FILE} ]]; then
     echY "Environment no inited"
-    echR "Invalid file: ${PUBLIC_ENVIRONMENT_FILE}"
+    echR "Invalid stack env file: ${PUBLIC_ENVIRONMENT_FILE}"
   else
     source ${PUBLIC_ENVIRONMENT_FILE}
     return 1
@@ -61,16 +61,14 @@ function __privateEnvsPrepare()
   return 1
 }
 
-
-
 function __privateEnvsPublic()
 {
   if ! [[ -f ${PUBLIC_STACK_TARGET_FILE} ]]; then
     echY "Environment no inited"
-    echR "Invalid file: ${PUBLIC_STACK_TARGET_FILE}"
+    echR "Invalid targets file: ${PUBLIC_STACK_TARGET_FILE}"
   elif ! [[ -f ${PUBLIC_ENVIRONMENT_FILE} ]]; then
     echY "Environment no inited"
-    echR "Invalid file: ${PUBLIC_ENVIRONMENT_FILE}"
+    echR "Invalid enviroment file: ${PUBLIC_ENVIRONMENT_FILE}"
   else
     source ${PUBLIC_ENVIRONMENT_FILE}
     return 1
@@ -116,13 +114,11 @@ function __privateEnvsDir()
   export STACK_APPLICATIONS_DATA_DB_DIR=${STACK_APPLICATIONS_DATA_DIR}/db
 
   #INSTALLER DIR
-  export STACK_INSTALLER_DIR=${ROOT_DIR}/installer
   export STACK_INSTALLER_BIN_DIR=${INSTALLER_DIR}/bin
   export STACK_INSTALLER_LIB_DIR=${INSTALLER_DIR}/lib
   export STACK_INSTALLER_DOCKER_DIR=${INSTALLER_DIR}/docker
   export STACK_INSTALLER_DOCKER_CONF_DIR=${STACK_INSTALLER_DOCKER_DIR}/conf
   export STACK_INSTALLER_DOCKER_FILE_DIR=${STACK_INSTALLER_DOCKER_DIR}/dockerfiles
-  export STACK_INSTALLER_DOCKER_SSH_KEYS_DIR=${STACK_INSTALLER_DOCKER_DIR}/ssh-keys
   export STACK_INSTALLER_DOCKER_COMPOSE_DIR=${STACK_INSTALLER_DOCKER_DIR}/compose
   return 1
 }
@@ -168,48 +164,24 @@ function utilPrepareInit()
   return 1
 }
 
-function prepareStack()
+function prepareStackForDeploy()
 {
   if [[ ${APPLICATION_NAME} == "" ]]; then
     export APPLICATION_NAME=${STACK_PROJECT}
   fi
 
-  BUILD_DEPLOY_APP_NAME=${STACK_PREFIX}-${APPLICATION_NAME}
-  BUILD_DEPLOY_TEMPLATE=app
-  BUILD_DEPLOY_PROTOCOL=http
-  BUILD_DEPLOY_MODE=replicated
-  BUILD_DEPLOY_CONTEXT_PATH=/
-  BUILD_DEPLOY_PORT=8080
-  BUILD_DEPLOY_CONTAINER_NAME=${BUILD_DEPLOY_APP_NAME}
-  BUILD_DEPLOY_DNS_PRIVATE=${BUILD_DEPLOY_APP_NAME}
-  BUILD_DEPLOY_DNS_PUBLIC=${BUILD_DEPLOY_DNS_PRIVATE}.${STACK_DOMAIN}
-  BUILD_DEPLOY_NODE=${STACK_DEPLOY_NODE_ROLE}
-  BUILD_DEPLOY_REPLICAS=${STACK_DEPLOY_REPLICAS}
-  BUILD_DEPLOY_IMAGE_NAME=${BUILD_DEPLOY_APP_NAME}
-  BUILD_DEPLOY_IMAGE_DNS=${STACK_REGISTRY_DNS_PUBLIC}/${BUILD_DEPLOY_IMAGE_NAME}
-
-  export BUILD_TEMP_DIR=${HOME}/build/${BUILD_DEPLOY_APP_NAME}
-  export BUILD_TEMP_SOURCE_DIR=${BUILD_TEMP_DIR}/src
-  export BUILD_TEMP_APP_DATA_DIR=${BUILD_TEMP_DIR}/app
-  export BUILD_TEMP_APP_ENV_FILE=${BUILD_TEMP_DIR}/env_file.env
-  export BUILD_TEMP_APP_BIN_SRC_DIR=${STACK_APPLICATIONS_DATA_SRC_DIR}/${STACK_PROJECT}
-  
-
-  export DOCKER_CONF_DIR=${STACK_INSTALLER_DOCKER_CONF_DIR}/${APPLICATION_STACK}
-  export DOCKER_FILE_NAME=${APPLICATION_STACK}.dockerfile
-  export DOCKER_STACK_FILE_NAME=${APPLICATION_STACK}.yml
-  export DOCKER_FILE_SRC=${STACK_INSTALLER_DOCKER_FILE_DIR}/${DOCKER_FILE_NAME}
-  export DOCKER_FILE_DST=${BUILD_TEMP_DIR}/Dockerfile
-  
-  export APPLICATION_DEPLOY_APP_DIR=${BUILD_TEMP_APP_DATA_DIR}
-  export APPLICATION_DEPLOY_BASHRC_FILE=${APPLICATION_DEPLOY_APP_DIR}/bashrc.sh
-  
+  __prepareStack_prefix_name=${STACK_PREFIX}-${APPLICATION_NAME}
+  #TODO tentar destoninuar env ${BUILD_TEMP_DIR}
+  export BUILD_TEMP_DIR=${HOME}/build/${__prepareStack_prefix_name}
+  mkdir -p ${BUILD_TEMP_DIR}
+  export DOCKER_CONF_DIR=${STACK_INSTALLER_DOCKER_CONF_DIR}/${APPLICATION_STACK}  
+ 
   if [[ ${APPLICATION_DEPLOY_PORT} == "" ]]; then
-    export APPLICATION_DEPLOY_PORT=${BUILD_DEPLOY_PORT}
+    export APPLICATION_DEPLOY_PORT=8080
   fi
 
   if [[ ${APPLICATION_DEPLOY_CONTEXT_PATH} == "" ]]; then
-    export APPLICATION_DEPLOY_CONTEXT_PATH=${BUILD_DEPLOY_CONTEXT_PATH}
+    export APPLICATION_DEPLOY_CONTEXT_PATH=/
   fi
 
   if [[ ${APPLICATION_DEPLOY_DNS_PUBLIC} == "" ]]; then
@@ -218,30 +190,28 @@ function prepareStack()
 
   if [[ ${APPLICATION_DEPLOY_DNS} == "" ]]; then
     if [[ ${APPLICATION_DEPLOY_DNS_PUBLIC} == "true" ]]; then
-      export APPLICATION_DEPLOY_DNS=${BUILD_DEPLOY_DNS_PUBLIC}
+      export APPLICATION_DEPLOY_DNS=${__prepareStack_prefix_name}.${STACK_DOMAIN}
     else
-      export APPLICATION_DEPLOY_DNS=${BUILD_DEPLOY_DNS_PRIVATE}
+      export APPLICATION_DEPLOY_DNS=${__prepareStack_prefix_name}
     fi
   fi
 
-  if [[ ${APPLICATION_DEPLOY_IMAGE} == "" ]]; then
-    export APPLICATION_DEPLOY_IMAGE=${BUILD_DEPLOY_IMAGE_DNS}
-  fi  
+  export APPLICATION_DEPLOY_IMAGE=${STACK_REGISTRY_DNS_PUBLIC}/${__prepareStack_prefix_name}  
 
   if [[ ${APPLICATION_DEPLOY_HOSTNAME} == "" ]]; then
-    export APPLICATION_DEPLOY_HOSTNAME=${BUILD_DEPLOY_CONTAINER_NAME}
+    export APPLICATION_DEPLOY_HOSTNAME=${__prepareStack_prefix_name}
   fi
 
   if [[ ${APPLICATION_DEPLOY_MODE} == "" ]]; then
-    export APPLICATION_DEPLOY_MODE=${BUILD_DEPLOY_MODE}
+    export APPLICATION_DEPLOY_MODE=replicated
   fi
   
   if [[ ${APPLICATION_DEPLOY_NODE} == "" ]]; then
-    export APPLICATION_DEPLOY_NODE=${BUILD_DEPLOY_NODE}
+    export APPLICATION_DEPLOY_NODE=${STACK_SERVICE_NODE_SERVICES}
   fi
 
   if [[ ${APPLICATION_DEPLOY_REPLICAS} == "" ]]; then
-    export APPLICATION_DEPLOY_REPLICAS=${BUILD_DEPLOY_REPLICAS}
+    export APPLICATION_DEPLOY_REPLICAS=1
   fi
 
   if [[ ${APPLICATION_DEPLOY_NETWORK_NAME} == "" ]]; then
@@ -249,13 +219,12 @@ function prepareStack()
   fi  
 
   if [[ ${APPLICATION_TEMPLATE} == "" ]]; then
-    export APPLICATION_TEMPLATE=${BUILD_DEPLOY_TEMPLATE}
+    export APPLICATION_TEMPLATE=app
   fi
 
   if [[ ${APPLICATION_PROTOCOL} == "" ]]; then
-    export APPLICATION_PROTOCOL=${BUILD_DEPLOY_PROTOCOL}
+    export APPLICATION_PROTOCOL=http
   fi
 
-  mkdir -p ${BUILD_TEMP_DIR}
 
 }
