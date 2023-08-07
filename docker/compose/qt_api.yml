@@ -12,7 +12,7 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ${PUBLIC_LIB_DIR}/qt/${QT_VERSION}:/home/debian/qt
-      - ${APPLICATION_DEPLOY_TEMPLATE_DIR}:/storage/template:ro
+      #- ${APPLICATION_DEPLOY_TEMPLATE_DIR}:/storage/template:ro
       - ${APPLICATION_DEPLOY_DATA_DIR}:/storage/data:rw
       - ${APPLICATION_DEPLOY_BACKUP_DIR}:/storage/backup:rw
     env_file:
@@ -35,13 +35,25 @@ services:
       restart_policy:
         condition: on-failure
       labels:
+        - traefik.http.middlewares.cloudflare-middleware.headers.customRequestHeaders.X-Forwarded-Proto=https
+
         - traefik.http.routers.${APPLICATION_NAME}.rule=Host(`${APPLICATION_DEPLOY_DNS}`)
         - traefik.http.routers.${APPLICATION_NAME}.service=${APPLICATION_NAME}
+        - traefik.http.routers.${APPLICATION_NAME}.entrypoints=http,https
+        - traefik.http.routers.${APPLICATION_NAME}.tls=true
         - traefik.http.services.${APPLICATION_NAME}.loadbalancer.server.port=${APPLICATION_DEPLOY_PORT}
 
         - traefik.http.routers.${APPLICATION_NAME}_pub.rule=Host(`${APPLICATION_DEPLOY_DNS_PUBLIC}`)
         - traefik.http.routers.${APPLICATION_NAME}_pub.service=${APPLICATION_NAME}_pub
+        - traefik.http.routers.${APPLICATION_NAME}_pub.entrypoints=http,https
+        - traefik.http.routers.${APPLICATION_NAME}_pub.tls=true
         - traefik.http.services.${APPLICATION_NAME}_pub.loadbalancer.server.port=${APPLICATION_DEPLOY_PORT}
+
+        - traefik.http.routers.${APPLICATION_NAME}_3rdp.rule=Host(`${APPLICATION_DEPLOY_DNS_3RDPARTY}`)
+        - traefik.http.routers.${APPLICATION_NAME}_3rdp.service=${APPLICATION_NAME}_3rdp
+        - traefik.http.routers.${APPLICATION_NAME}_3rdp.entrypoints=http,https
+        - traefik.http.routers.${APPLICATION_NAME}_3rdp.tls=true
+        - traefik.http.services.${APPLICATION_NAME}_3rdp.loadbalancer.server.port=${APPLICATION_DEPLOY_PORT}
 
         - traefik.docker.network=${APPLICATION_DEPLOY_NETWORK_NAME}
     networks:
