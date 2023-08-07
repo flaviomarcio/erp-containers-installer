@@ -220,6 +220,7 @@ function prepareStackForDeploy()
   envsSetIfIsEmpty APPLICATION_DEPLOY_PORT 8080
   envsSetIfIsEmpty APPLICATION_DEPLOY_DNS ${__prepareStack_prefix_name}
   envsSetIfIsEmpty APPLICATION_DEPLOY_DNS_PUBLIC "${__prepareStack_prefix_name}.${__prepareStackForDeploy_domain}"
+  envsSetIfIsEmpty APPLICATION_DEPLOY_DNS_3RDPARTY "${APPLICATION_DEPLOY_DNS_PUBLIC}"
   envsSetIfIsEmpty APPLICATION_DEPLOY_IMAGE "${STACK_REGISTRY_DNS_PUBLIC}/${__prepareStack_prefix_name}"
   envsSetIfIsEmpty APPLICATION_DEPLOY_HOSTNAME ${__prepareStack_prefix_name}
   envsSetIfIsEmpty APPLICATION_DEPLOY_MODE replicated
