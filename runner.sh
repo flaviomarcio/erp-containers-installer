@@ -106,10 +106,17 @@ function runnerMain()
     export __public_environment=${__selector}
   fi
 
-
   export STACK_TARGET=${__public_target}
   export STACK_ENVIRONMENT=${__public_environment}
   export STACK_PREFIX=${STACK_ENVIRONMENT}-${STACK_TARGET}
+
+  echo "__public_target==${__public_target}"
+  echo "__public_environment==${__public_environment}"
+
+  echo "STACK_TARGET==${STACK_TARGET}"
+  echo "STACK_ENVIRONMENT==${STACK_ENVIRONMENT}"
+
+  exit 0
   
   utilPrepareInit
 
