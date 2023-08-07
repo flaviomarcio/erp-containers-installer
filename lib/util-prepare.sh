@@ -20,7 +20,7 @@ function __privateEnvsStackEnvInit()
   envsSetIfIsEmpty STACK_SERVICE_DEFAULT_PASS services
 
   envsSetIfIsEmpty POSTGRES_DATABASE "services"
-  envsSetIfIsEmpty POSTGRES_HOST "locahost"
+  envsSetIfIsEmpty POSTGRES_HOST "localhost"
   envsSetIfIsEmpty POSTGRES_USER "${STACK_SERVICE_DEFAULT_USER}"
   envsSetIfIsEmpty POSTGRES_PASSWORD "${STACK_SERVICE_DEFAULT_PASS}"
   envsSetIfIsEmpty POSTGRES_PORT 5432
