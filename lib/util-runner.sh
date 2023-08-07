@@ -59,7 +59,7 @@ function dockerMCSMain()
 {
   __dk_mcs_environment=${1} 
   __dk_mcs_target=${2}
-  FAIL_DETECTED=false
+  __dk_mcs_fail_detected=false
 
   utilPrepareInit 1
   __dk_mcs_project_dir=${STACK_APPLICATIONS_PROJECT_DIR}
@@ -99,10 +99,10 @@ function dockerMCSMain()
     echY "    - source ${__dk_mcs_stack_env}"
     source ${__dk_mcs_stack_env};
     echY "    - stack envs"
-    prepareStackForDeploy ${STACK_PREFIX} ${__dk_mcs_project} ${STACK_DOMAIN}
+    prepareStackForDeploy "${STACK_PREFIX}" "${__dk_mcs_project}" "${STACK_DOMAIN}"
     if ! [ "$?" -eq 1 ]; then
-      echY "      fault on calling prepareStackForDeploy"
-      FAIL_DETECTED=true
+      echY "      fail on calling prepareStackForDeploy"
+      __dk_mcs_fail_detected=true
       break
     fi
 
@@ -140,8 +140,8 @@ function dockerMCSMain()
 
     deployPrepareEnvFile "${STACK_APPLICATIONS_DATA_ENV_JSON_FILE}" "${__dk_mcs_builder_dir}" "${__deploy_dck_env_tags}"
     if ! [ "$?" -eq 1 ]; then
-      echR "Fault on calling deployPrepareEnvFile"
-      FAIL_DETECTED=true
+      echR "fail on calling deployPrepareEnvFile"
+      __dk_mcs_fail_detected=true
       break
     else
       __dk_mcs_dk_env_file=${__func_return}
@@ -172,13 +172,13 @@ function dockerMCSMain()
           "${__dk_mcs_binary_name}" \
           "${__dk_mcs_dep_dir}"
     if ! [ "$?" -eq 1 ]; then
-      FAIL_DETECTED=true
+      __dk_mcs_fail_detected=true
       break
     fi
   done
 
   echG "  Finished"    
-  if [[ ${FAIL_DETECTED} == true ]]; then
+  if [[ ${__dk_mcs_fail_detected} == true ]]; then
     echR "  =============================  "
     echR "  ********FAIL DETECTED********  "
     echR "  ********FAIL DETECTED********  "
@@ -191,6 +191,35 @@ function dockerMCSMain()
 
 function databaseUpdate()
 {
+  __environment=${1}
+  if [[ ${__environment} != "testing" && ${__environment} != "development"  ]]; then
+    echo ""
+    echR "  =============================  "
+    echR "  ***********CRITICAL**********  "
+    echR "  =============================  "
+    echo ""
+    echY "  =============================  "
+    echY "  *******DATABASE UPDATE*******  "
+    echY "  =============================  "
+    echo ""
+    selectorWaitSeconds 3 "" "${COLOR_YELLOW_B}"
+
+    selectorYesNo "Database update"
+    if ! [ "$?" -eq 1 ]; then
+      return 0
+    fi
+    echo ""
+    echR "  =============================  "
+    echR "  ***********CRITICAL**********  "
+    echR "  =============================  "
+    echo ""
+    echY "  =============================  "
+    echY "  *******DATABASE UPDATE*******  "
+    echY "  =============================  "
+    echo ""
+    selectorWaitSeconds 10 "" "${COLOR_YELLOW_B}"
+  fi
+
   databaseUpdateExec
   return 0
 }

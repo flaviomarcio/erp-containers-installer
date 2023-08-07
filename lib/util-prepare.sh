@@ -9,8 +9,23 @@ function __privateEnvsStackEnvInit()
     export __func_return="File not found ${PUBLIC_STACK_ENVS_FILE}"
     return 0
   fi
-  envsFileAddIfNotExists ${PUBLIC_STACK_ENVS_FILE} STACK_TEMPLATES_DIR
+
   source ${PUBLIC_STACK_ENVS_FILE}
+
+  envsSetIfIsEmpty STACK_SERVICE_NODE_DB "node.role == manager"
+  envsSetIfIsEmpty STACK_SERVICE_NODE_GLOBAL "${STACK_SERVICE_NODE_DB}"
+  envsSetIfIsEmpty STACK_SERVICE_NODE_SERVICES "${STACK_SERVICE_NODE_DB}"
+
+  envsSetIfIsEmpty STACK_SERVICE_DEFAULT_USER services
+  envsSetIfIsEmpty STACK_SERVICE_DEFAULT_PASS services
+
+  envsSetIfIsEmpty POSTGRES_DATABASE "services"
+  envsSetIfIsEmpty POSTGRES_HOST "locahost"
+  envsSetIfIsEmpty POSTGRES_USER "${STACK_SERVICE_DEFAULT_USER}"
+  envsSetIfIsEmpty POSTGRES_PASSWORD "${STACK_SERVICE_DEFAULT_PASS}"
+  envsSetIfIsEmpty POSTGRES_PORT 5432
+  envsSetIfIsEmpty POSTGRES_URL "jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DATABASE}"
+
   return 1
 }
 
@@ -198,9 +213,9 @@ function utilPrepareInit()
 function prepareStackForDeploy()
 {
   __prepareStackForDeploy_prefix=${1}
-  __prepareStackForDeploy_project=${1}
-  __prepareStackForDeploy_domain=${1}
-  __prepareStack_prefix_name=${__prepareStackForDeploy_prefix}-${__prepareStackForDeploy_project}
+  __prepareStackForDeploy_project=${2}
+  __prepareStackForDeploy_domain=${3}
+  __prepareStack_prefix_name="${__prepareStackForDeploy_prefix}-${__prepareStackForDeploy_project}"
   envsSetIfIsEmpty APPLICATION_NAME ${__prepareStackForDeploy_project}
   envsSetIfIsEmpty APPLICATION_DEPLOY_PORT 8080
   envsSetIfIsEmpty APPLICATION_DEPLOY_DNS ${__prepareStack_prefix_name}
@@ -208,7 +223,7 @@ function prepareStackForDeploy()
   envsSetIfIsEmpty APPLICATION_DEPLOY_IMAGE "${STACK_REGISTRY_DNS_PUBLIC}/${__prepareStack_prefix_name}"
   envsSetIfIsEmpty APPLICATION_DEPLOY_HOSTNAME ${__prepareStack_prefix_name}
   envsSetIfIsEmpty APPLICATION_DEPLOY_MODE replicated
-  envsSetIfIsEmpty APPLICATION_DEPLOY_NODE ${STACK_SERVICE_NODE_SERVICES}
+  envsSetIfIsEmpty APPLICATION_DEPLOY_NODE "${STACK_SERVICE_NODE_SERVICES}"
   envsSetIfIsEmpty APPLICATION_DEPLOY_REPLICAS "1"
   envsSetIfIsEmpty APPLICATION_DEPLOY_NETWORK_NAME ${STACK_NETWORK_INBOUND}
   envsSetIfIsEmpty APPLICATION_DEPLOY_TEMPLATE_DIR "${STACK_TEMPLATES_DIR}/${__prepareStackForDeploy_prefix}/${__prepareStackForDeploy_project}/data"
@@ -227,5 +242,7 @@ function prepareStackForDeploy()
     mkdir -p ${APPLICATION_DEPLOY_BACKUP_DIR}
     chmod 777 ${APPLICATION_DEPLOY_BACKUP_DIR}
   fi
+
+  return 1
 
 }
