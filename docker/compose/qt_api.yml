@@ -37,6 +37,8 @@ services:
       labels:
         #- traefik.http.middlewares.cloudflare-middleware.headers.customRequestHeaders.X-Forwarded-Proto=https
 
+        - traefik.enable=true
+
         - traefik.http.routers.${APPLICATION_NAME}.rule=Host(`${APPLICATION_DEPLOY_DNS}`) && PathPrefix(`${APPLICATION_DEPLOY_DNS_PATH}`)
         - traefik.http.routers.${APPLICATION_NAME}.service=${APPLICATION_NAME}
         - traefik.http.routers.${APPLICATION_NAME}.entrypoints=http,https
