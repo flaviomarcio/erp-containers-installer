@@ -34,7 +34,7 @@ services:
       restart_policy:
         condition: on-failure
       labels:
-        # - traefik.http.middlewares.cloudflare-middleware.headers.customRequestHeaders.X-Forwarded-Proto=https
+        - traefik.http.middlewares.redirect.headers.customRequestHeaders.X-Forwarded-Proto=https
 
         # - "traefik.http.middlewares.cloudflare-middleware.headers.customRequestHeaders.X-Forwarded-Proto=https"
         # - "traefik.http.routers.${APPLICATION_NAME}.rule=Host(`${APPLICATION_DEPLOY_DNS}`)"
