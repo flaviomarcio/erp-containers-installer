@@ -37,19 +37,19 @@ services:
       labels:
         - traefik.http.middlewares.cloudflare-middleware.headers.customRequestHeaders.X-Forwarded-Proto=https
 
-        - traefik.http.routers.${APPLICATION_NAME}.rule=Host(`${APPLICATION_DEPLOY_DNS}`)
+        - traefik.http.routers.${APPLICATION_NAME}.rule=Host(`${APPLICATION_DEPLOY_DNS}`) && PathPrefix(`${APPLICATION_DEPLOY_DNS_PATH}`)
         - traefik.http.routers.${APPLICATION_NAME}.service=${APPLICATION_NAME}
         - traefik.http.routers.${APPLICATION_NAME}.entrypoints=http,https
         - traefik.http.routers.${APPLICATION_NAME}.tls=true
         - traefik.http.services.${APPLICATION_NAME}.loadbalancer.server.port=${APPLICATION_DEPLOY_PORT}
 
-        - traefik.http.routers.${APPLICATION_NAME}_pub.rule=Host(`${APPLICATION_DEPLOY_DNS_PUBLIC}`)
+        - traefik.http.routers.${APPLICATION_NAME}_pub.rule=Host(`${APPLICATION_DEPLOY_DNS_PUBLIC}`) && PathPrefix(`${APPLICATION_DEPLOY_DNS_PUBLIC_PATH}`)
         - traefik.http.routers.${APPLICATION_NAME}_pub.service=${APPLICATION_NAME}_pub
         - traefik.http.routers.${APPLICATION_NAME}_pub.entrypoints=http,https
         - traefik.http.routers.${APPLICATION_NAME}_pub.tls=true
         - traefik.http.services.${APPLICATION_NAME}_pub.loadbalancer.server.port=${APPLICATION_DEPLOY_PORT}
 
-        - traefik.http.routers.${APPLICATION_NAME}_3rdp.rule=Host(`${APPLICATION_DEPLOY_DNS_3RDPARTY}`)
+        - traefik.http.routers.${APPLICATION_NAME}_3rdp.rule=Host(`${APPLICATION_DEPLOY_DNS_3RDPARTY}`) && PathPrefix(`${APPLICATION_DEPLOY_DNS_3RDPARTY_PATH}`)
         - traefik.http.routers.${APPLICATION_NAME}_3rdp.service=${APPLICATION_NAME}_3rdp
         - traefik.http.routers.${APPLICATION_NAME}_3rdp.entrypoints=http,https
         - traefik.http.routers.${APPLICATION_NAME}_3rdp.tls=true
