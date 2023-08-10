@@ -1,6 +1,7 @@
 #!/bin/bash -e
 
 . ${BASH_BIN}/lib-strings.sh
+. ${BASH_BIN}/lib-stack.sh
 
 function __privateEnvsStackEnvInit()
 {
