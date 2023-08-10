@@ -32,26 +32,10 @@ function __privateEnvsStackEnvInit()
 function __privateEnvsIsInited()
 {
   export __func_return=
-  if [[ ${PUBLIC_STACK_TARGETS_FILE} == "" ]]; then
-    export __func_return="Invalid env \${PUBLIC_STACK_TARGETS_FILE}"
+  stackEnvsIsConfigured
+  if ! [ "$?" -eq 1 ]; then
     return 0
   fi
-
-  if ! [[ -f ${PUBLIC_STACK_TARGETS_FILE} ]]; then
-    export __func_return="Invalid targets file: ${PUBLIC_STACK_TARGETS_FILE}"
-    return 0
-  fi
-
-  if [[ ${PUBLIC_STACK_ENVS_FILE} == "" ]]; then
-    export __func_return="Invalid env \${PUBLIC_STACK_ENVS_FILE}"
-    return 0
-  fi
-
-  if ! [[ -f ${PUBLIC_STACK_ENVS_FILE} ]]; then
-    export __func_return="Invalid stack environment file: ${PUBLIC_STACK_ENVS_FILE}"
-    return 0
-  fi
-
   return 1
 }
 
