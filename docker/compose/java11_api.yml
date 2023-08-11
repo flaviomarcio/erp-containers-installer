@@ -14,7 +14,6 @@ services:
       - ${APPLICATION_NAME}.env
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      #- ${APPLICATION_DEPLOY_TEMPLATE_DIR}:/storage/template:ro
       - ${APPLICATION_DEPLOY_DATA_DIR}:/storage/data:rw
       - ${APPLICATION_DEPLOY_BACKUP_DIR}:/storage/backup:rw
     deploy:
