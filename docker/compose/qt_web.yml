@@ -33,14 +33,14 @@ services:
         delay: 10s
       restart_policy:
         condition: on-failure
-      labels:
-        - traefik.enable=true
-        - traefik.docker.network=${APPLICATION_DEPLOY_NETWORK_NAME}
+      # labels:
+      #   - traefik.enable=true
+      #   - traefik.docker.network=${APPLICATION_DEPLOY_NETWORK_NAME}
 
-        - traefik.http.routers.${APPLICATION_NAME}.rule=Host(`${APPLICATION_DEPLOY_DNS}`)
-        - traefik.http.routers.${APPLICATION_NAME}.service=${APPLICATION_NAME}
-        - traefik.http.routers.${APPLICATION_NAME}.entrypoints=http
-        - traefik.http.services.${APPLICATION_NAME}.loadbalancer.server.port=${APPLICATION_DEPLOY_PORT}
+      #   - traefik.http.routers.${APPLICATION_NAME}.rule=Host(`${APPLICATION_DEPLOY_DNS}`)
+      #   - traefik.http.routers.${APPLICATION_NAME}.service=${APPLICATION_NAME}
+      #   - traefik.http.routers.${APPLICATION_NAME}.entrypoints=http
+      #   - traefik.http.services.${APPLICATION_NAME}.loadbalancer.server.port=${APPLICATION_DEPLOY_PORT}
 
         # - traefik.http.routers.${APPLICATION_NAME}_pub.rule=Host(`${APPLICATION_DEPLOY_DNS_PUBLIC}`)
         # - traefik.http.routers.${APPLICATION_NAME}_pub.service=${APPLICATION_NAME}_pub
