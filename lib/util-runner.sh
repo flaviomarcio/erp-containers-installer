@@ -57,11 +57,9 @@ function dockerADMMain()
 
 function dockerMCSMain()
 {
-  __dk_mcs_environment=${1} 
-  __dk_mcs_target=${2}
+  __dk_mcs_environment=${STACK_ENVIRONMENT} 
+  __dk_mcs_target=${STACK_TARGET}
   __dk_mcs_fail_detected=false
-
-  utilPrepareInit 1
   __dk_mcs_project_dir=${STACK_APPLICATIONS_PROJECT_DIR}
 
   __private_print_os_information
@@ -99,9 +97,9 @@ function dockerMCSMain()
     echY "    - source ${__dk_mcs_stack_env}"
     source ${__dk_mcs_stack_env};
     echY "    - stack envs"
-    prepareStackForDeploy "${STACK_PREFIX}" "${__dk_mcs_project}" "${STACK_DOMAIN}"
+    prepareStackForDeploy "${__dk_mcs_project}"
     if ! [ "$?" -eq 1 ]; then
-      echY "      fail on calling prepareStackForDeploy"
+      echY "      fail on calling prepareStackForDeploy, ${__func_return}"
       __dk_mcs_fail_detected=true
       break
     fi
@@ -127,7 +125,7 @@ function dockerMCSMain()
     __deploy_dck_env_tags_headers=(env docker)
     for __deploy_dck_env_tags_header in "${__deploy_dck_env_tags_headers[@]}"
     do
-      __deploy_dck_env_tags_defaults=("resource.${STACK_ENVIRONMENT}" "default.${STACK_ENVIRONMENT}" "${APPLICATION_STACK}")
+      __deploy_dck_env_tags_defaults=("resource.${__dk_mcs_environment}" "default.${__dk_mcs_environment}" "${APPLICATION_STACK}")
       for __deploy_dck_env_tags_default in "${__deploy_dck_env_tags_defaults[@]}"
       do
         __deploy_dck_env_tags_name="${__deploy_dck_env_tags_header}.${__deploy_dck_env_tags_default}"
