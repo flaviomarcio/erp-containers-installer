@@ -5,7 +5,6 @@
 . lib-selector.sh
 . lib-system.sh
 . lib-deploy.sh
-
 . util-prepare.sh
 
 function dockerBuild()
@@ -34,7 +33,7 @@ function dockerSRVMain()
   dockerBuild ${STACK_TYPE}
   if ! [ "$?" -eq 1 ]; then
     echB
-    echR "[FAIL]dockerBuildCompose"
+    echR "[FAIL]dockerBuild"
   fi
   systemETCHostApply
   return 0
@@ -49,7 +48,7 @@ function dockerADMMain()
   dockerBuild ${STACK_TYPE}
   if ! [ "$?" -eq 1 ]; then
     echB
-    echR "[FAIL]dockerBuildCompose"
+    echR "[FAIL]dockerBuild"
   fi
   systemETCHostApply
   return 0
@@ -237,4 +236,9 @@ function systemDNSOptions()
     systemETCHostPrint
   fi 
   return 1
+}
+
+function userManagmentMain()
+{
+  userManagmentMenu
 }

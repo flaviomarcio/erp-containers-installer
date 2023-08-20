@@ -4,11 +4,21 @@ export PATH=${PATH}:${BASH_BIN}
 export PATH=${PATH}:${BASH_BIN}
 export PATH=${PATH}:${PWD}/lib
 
+if [[ ${BASH_BIN} == "" ]]; then
+  BASH_BIN="$(dirname ${PWD})/bash-bin"
+fi
+
+if [[ ${INSTALLER_LIB} == "" ]]; then
+  INSTALLER_DIR=${PWD}
+fi
+
+export INSTALLER_LIB=${INSTALLER_DIR}/lib
+
 . ${BASH_BIN}/lib-strings.sh
 . ${BASH_BIN}/lib-docker.sh
 . ${BASH_BIN}/lib-selector.sh
 . ${BASH_BIN}/lib-database.sh
-. ${INSTALLER_DIR}/lib/util-runner.sh
+. ${INSTALLER_LIB}/util-runner.sh
 
 
 function __private_runnerMenu()
@@ -26,6 +36,7 @@ function __private_runnerMenu()
   options+=(Database-Update)
   options+=(Database-DDL-Maker)
   options+=(Database-PGPass)
+  options+=(User-Management)
   options+=(DNS-Options)
   options+=(Command-Utils)
   echM $'\n'"Docker managment tools"$'\n'
@@ -52,6 +63,8 @@ function __private_runnerMenu()
       databaseDDLMaker ${__runner_menu_environment} ${__runner_menu_target}
     elif [[ ${opt} == "Database-PGPass" ]]; then
       selectorPGPass ${__runner_menu_environment} ${__runner_menu_target}
+    elif [[ ${opt} == "User-Management" ]]; then
+      userManagmentMain ${__runner_menu_environment} ${__runner_menu_target}
     elif [[ ${opt} == "DNS-Options" ]]; then
       systemDNSOptions ${__runner_menu_environment} ${__runner_menu_target}
     elif [[ ${opt} == "Command-Utils" ]]; then

@@ -6,6 +6,7 @@ fi
 
 . ${BASH_BIN}/lib-strings.sh
 . ${BASH_BIN}/lib-stack.sh
+. ${INSTALLER_LIB}/pvt/lib-auth.sh
 
 
 function __privateEnvsInstallerDir()
@@ -26,8 +27,6 @@ function __privateEnvsInstallerDir()
   export STACK_APPLICATIONS_DATA_DB_DIR=${STACK_APPLICATIONS_DATA_DIR}/db
 
   #INSTALLER DIR
-  export STACK_INSTALLER_BIN_DIR=${INSTALLER_DIR}/bin
-  export STACK_INSTALLER_LIB_DIR=${INSTALLER_DIR}/lib
   export STACK_INSTALLER_DOCKER_DIR=${INSTALLER_DIR}/docker
   export STACK_INSTALLER_DOCKER_CONF_DIR=${STACK_INSTALLER_DOCKER_DIR}/conf
   export STACK_INSTALLER_DOCKER_FILE_DIR=${STACK_INSTALLER_DOCKER_DIR}/dockerfiles
