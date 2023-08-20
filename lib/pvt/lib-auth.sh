@@ -72,6 +72,11 @@ function authByGrantCode()
 
 function authByLogin()
 {
+  __authByLogin_shw=${1}
+  if [[ ${__authByLogin_shw} == "" ]]; then
+    __authByLogin_shw=true
+  fi
+  loadCredential
   export ACCESS_TOKEN=
   export ACCESS_TOKEN_MD5=
   export REFRESH_TOKEN=
@@ -82,19 +87,23 @@ function authByLogin()
   echo "                        --header 'Content-Type: application/json'  \\">>${CMD_FILE}
   echo "                        --data '{\"clientId\": \"${CLIENT_ID}\", \"secret\": \"${CLIENT_SECRET}\"}'">>${CMD_FILE}
   chmod +x /tmp/req.sh;
-  echo ""
-  echo -e "${COLOR_MAGENTA}Request access-token${COLOR_DEFAULT}"
-  echo -e "  - ${COLOR_CIANO}Authorization  : ${COLOR_RED}Basic ${COLOR_GREEN}${BASIC_AUTH}${COLOR_DEFAULT}"
-  echo -e "  - ${COLOR_CIANO}Request        :${COLOR_DEFAULT} ${COLOR_YELLOW}$(cat ${CMD_FILE})${COLOR_DEFAULT}"
-  echo -e "  - ${COLOR_CIANO}Response       :${COLOR_DEFAULT}"
+  if [[ ${__authByLogin_shw} == true ]]; then
+    echo ""
+    echo -e "${COLOR_MAGENTA}Request access-token${COLOR_DEFAULT}"
+    echo -e "  - ${COLOR_CIANO}Authorization  : ${COLOR_RED}Basic ${COLOR_GREEN}${BASIC_AUTH}${COLOR_DEFAULT}"
+    echo -e "  - ${COLOR_CIANO}Request        :${COLOR_DEFAULT} ${COLOR_YELLOW}$(cat ${CMD_FILE})${COLOR_DEFAULT}"
+    echo -e "  - ${COLOR_CIANO}Response       :${COLOR_DEFAULT}"
+  fi
   export JSON=$(/tmp/req.sh);
   export ACCESS_TOKEN=$(echo ${JSON} | jq '.token.accessToken' | sed 's/\"//g')
   export ACCESS_TOKEN_MD5=$(echo ${JSON} | jq '.token.accessTokenMd5' | sed 's/\"//g')
   export REFRESH_TOKEN=$(echo ${JSON} | jq '.token.refreshToken' | sed 's/\"//g')
   export REFRESH_TOKEN_MD5=$(echo ${JSON} | jq '.token.refreshTokenMd5' | sed 's/\"//g')
-  echo -e "    - ${COLOR_CIANO}access-token : ${COLOR_RED}Bearer ${COLOR_GREEN}${ACCESS_TOKEN}${COLOR_DEFAULT}"
-  echo ""
-  echo -e "    - ${COLOR_CIANO}access-token : ${COLOR_RED}Bearer ${COLOR_GREEN}${REFRESH_TOKEN}${COLOR_DEFAULT}"  
+  if [[ ${__authByLogin_shw} == true ]]; then
+    echo -e "    - ${COLOR_CIANO}access-token : ${COLOR_RED}Bearer ${COLOR_GREEN}${ACCESS_TOKEN}${COLOR_DEFAULT}"
+    echo ""
+    echo -e "    - ${COLOR_CIANO}access-token : ${COLOR_RED}Bearer ${COLOR_GREEN}${REFRESH_TOKEN}${COLOR_DEFAULT}"  
+  fi
 }
 
 function sessionCheck()
@@ -127,12 +136,13 @@ function userFind()
 
 function userCreateRecord()
 {
-  export _c_usr="${1}"
-  export _c_pwd="${2}"
-  export _c_nam="${3}"
-  export _c_doc="${4}"
-  export _c_ema="${5}"
-  export _c_phn="${6}"
+  export _c_shw="${1}"
+  export _c_usr="${2}"
+  export _c_pwd="${3}"
+  export _c_nam="${4}"
+  export _c_doc="${5}"
+  export _c_ema="${6}"
+  export _c_phn="${7}"
 
   if [[ ${_c_usr} == "" ]]; then
     echo -e "   ${COLOR_RED}    Invalid username ${COLOR_DEFAULT}"
@@ -140,7 +150,7 @@ function userCreateRecord()
   fi
 
   if [[ ${_c_pwd} == "" ]]; then
-    _c_pwd="${_c_usr}_$RANDOM"
+    _c_pwd="${_c_usr}@1234"
   fi
 
   if [[ ${_c_ema} == "" ]]; then
@@ -160,7 +170,10 @@ function userCreateRecord()
     _c_phn=$(expr substr "$_c_phn" 1 14)
   fi
 
-  authByLogin
+  if [[ ${ACCESS_TOKEN} == "" ]]; then
+    authByLogin ${_c_shw}
+  fi
+
   if [[ ${ACCESS_TOKEN} == "" ]]; then
     return 0
   fi
@@ -170,15 +183,18 @@ function userCreateRecord()
   echo "                        --header 'Authorization: Bearer ${ACCESS_TOKEN}'  \\">>${CMD_FILE}
   echo "                        --data '{\"username\": \"${_c_usr}\", \"password\": \"${_c_pwd}\", \"name\": \"${_c_nam}\", \"document\": \"${_c_doc}\", \"email\": \"${_c_ema}\", \"phoneNumber\": \"${_c_phn}\"}'">>${CMD_FILE}
   chmod +x /tmp/req.sh;
-  cat /tmp/req.sh
+  if [[ ${_c_shw} == true ]]; then
+    cat /tmp/req.sh
+  fi
   export JSON=$(/tmp/req.sh)
-  echo ${JSON} | jq
+  if [[ ${_c_shw} == true ]]; then
+    echo ${JSON} | jq
+  fi
 }
 
 function userCreateTest()
 {
   clear
-  authByLogin
   export _c_usr="u${RANDOM}"
   export _c_pwd="p${RANDOM}"
   export _c_nam="u${RANDOM}"
@@ -186,7 +202,7 @@ function userCreateTest()
   export _c_ema="${_c_usr}@admin.com"
   export _c_phn="5511${RANDOM}${RANDOM}"
 
-  userCreateRecord "${_c_usr}" "${_c_pwd}" "${_c_nam}" "${_c_doc}" "${_c_ema}" "${_c_phn}"
+  userCreateRecord true, "${_c_usr}" "${_c_pwd}" "${_c_nam}" "${_c_doc}" "${_c_ema}" "${_c_phn}"
 }
 
 function userCreateNew()
@@ -204,7 +220,8 @@ function userCreateNew()
   echo -e "   ${COLOR_GREEN}Set a phone number: ${COLOR_DEFAULT}"
   read _c_phn
   echo -e "${COLOR_MAGENTA}User detail ${COLOR_DEFAULT}"
-  userCreateRecord "${_c_usr}" "${_c_pwd}" "${_c_nam}" "${_c_doc}" "${_c_ema}" "${_c_phn}"
+
+  userCreateRecord true, "${_c_usr}" "${_c_pwd}" "${_c_nam}" "${_c_doc}" "${_c_ema}" "${_c_phn}"
   echo -e "   ${COLOR_BLUE_B} username......: ${_c_usr} ${COLOR_DEFAULT}"
   echo -e "   ${COLOR_BLUE_B} password......: ${_c_pwd} ${COLOR_DEFAULT}"
   echo -e "   ${COLOR_BLUE_B} name..........: ${_c_nam} ${COLOR_DEFAULT}"
@@ -215,6 +232,7 @@ function userCreateNew()
 
 function userCreateDelete()
 {
+  authByLogin
   return 1
 }
 
