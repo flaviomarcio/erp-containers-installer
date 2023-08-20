@@ -229,8 +229,8 @@ function databaseDDLMaker()
 
 function systemDNSOptions()
 {
-  selector "DNS options" "Back etc-hosts print"
-  if [[ ${__selector} == "etc-hosts" ]]; then
+  selector "DNS options" "Back print etc-hosts-apply etc-hosts-remove"
+  if [[ ${__selector} == "etc-hosts-apply" || ${__selector} == "etc-hosts-remove" ]]; then
 
     if [[ ${STACK_ENVIRONMENT} == "production" ]]; then
       echo ""
@@ -249,7 +249,12 @@ function systemDNSOptions()
       fi
       selectorWaitSeconds 5 "" "${COLOR_YELLOW_B}"
     fi
-    systemETCHostApply
+    if [[ ${__selector} == "etc-hosts-apply" ]]; then
+      systemETCHostApply
+    else
+      systemETCHostRemove
+    fi
+
   elif [[ ${__selector} == "print" ]]; then
     systemETCHostPrint
     return 0
