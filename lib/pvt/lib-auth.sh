@@ -23,6 +23,7 @@ function loadCredential()
 {
   export AUTH_HOST=${STACK_ENVIRONMENT}-${STACK_TARGET}-srv-auth
   export AUTH_CONTEXT_PATH=
+  export AUTH_URI=${AUTH_HOST}${AUTH_CONTEXT_PATH}
   export CLIENT_ID=${STACK_SERVICE_DEFAULT_USER}
   export CLIENT_SECRET=${STACK_SERVICE_DEFAULT_PASS}
   export GRANT_TYPE=urn:ietf:params:oauth:grant-type:jwt-bearer
@@ -33,7 +34,7 @@ function authByGrantCode()
 {
   export REQUEST_GRANT_DATA=""
   # shellcheck disable=SC2089
-  echo "curl -s --location 'http://${AUTH_HOST}${AUTH_CONTEXT_PATH}/api/oauth/grant-code' \\">${CMD_FILE}
+  echo "curl -s --location 'http://${AUTH_URI}/api/oauth/grant-code' \\">${CMD_FILE}
   echo "                        --header 'Content-Type: application/json'  \\">>${CMD_FILE}
   echo "                        --data '{\"clientId\": \"${CLIENT_ID}\"}'">>${CMD_FILE}
   chmod +x ${CMD_FILE};
@@ -49,7 +50,7 @@ function authByGrantCode()
   export BASIC_AUTH=$(echo -n "${CLIENT_ID}:${CLIENT_SECRET}" | base64 -w 0);
 
   #request token
-  echo "curl -s --location \"http://${AUTH_HOST}${AUTH_CONTEXT_PATH}/api/oauth/access-token\" \\" >${CMD_FILE}
+  echo "curl -s --location \"http://${AUTH_URI}/api/oauth/access-token\" \\" >${CMD_FILE}
   echo "                      --header \"Content-Type: application/x-www-form-urlencoded\" \\" >>${CMD_FILE}
   echo "                      --header \"Authorization: Basic ${BASIC_AUTH}\" \\" >>${CMD_FILE}
   echo "                      --data-urlencode \"code=${GRANT_CODE}\" \\" >>${CMD_FILE}
@@ -61,18 +62,20 @@ function authByGrantCode()
   echo -e "  - ${COLOR_CIANO}Request        :${COLOR_DEFAULT} ${COLOR_YELLOW}$(cat ${CMD_FILE})${COLOR_DEFAULT}"
   echo -e "  - ${COLOR_CIANO}Response       :${COLOR_DEFAULT}"
   export JSON=$(/tmp/req.sh);
-  echo -e "    - ${COLOR_CIANO}access-token : ${COLOR_RED}Bearer ${COLOR_GREEN}$(echo ${JSON} | jq '.accessToken' | sed 's/\"//g')${COLOR_DEFAULT}"
+  export ACCESS_TOKEN=$(echo ${JSON} | jq '.token.accessToken' | sed 's/\"//g')
+  export ACCESS_TOKEN_MD5=$(echo ${JSON} | jq '.token.accessTokenMd5' | sed 's/\"//g')
+  export REFRESH_TOKEN=$(echo ${JSON} | jq '.token.refreshToken' | sed 's/\"//g')
+  export REFRESH_TOKEN_MD5=$(echo ${JSON} | jq '.token.refreshTokenMd5' | sed 's/\"//g')
+  echo -e "    - ${COLOR_CIANO}access-token : ${COLOR_RED}Bearer ${COLOR_GREEN}${ACCESS_TOKEN}${COLOR_DEFAULT}"
   echo ""
-  echo -e "    - ${COLOR_CIANO}refresh-token: ${COLOR_RED}Bearer ${COLOR_GREEN}$(echo ${JSON} | jq '.refreshToken' | sed 's/\"//g')${COLOR_DEFAULT}"
-
-  export ACCESS_TOKEN=$(echo ${JSON} | jq '.accessToken' | sed 's/\"//g')
+  echo -e "    - ${COLOR_CIANO}access-token : ${COLOR_RED}Bearer ${COLOR_GREEN}${REFRESH_TOKEN}${COLOR_DEFAULT}"
 }
 
 function authByLogin()
 {
   export REQUEST_GRANT_DATA=""
   # shellcheck disable=SC2089
-  echo "curl -s --location 'http://${AUTH_HOST}${AUTH_CONTEXT_PATH}/api/oauth/login' \\">${CMD_FILE}
+  echo "curl -s --location 'http://${AUTH_URI}/api/oauth/login' \\">${CMD_FILE}
   echo "                        --header 'Content-Type: application/json'  \\">>${CMD_FILE}
   echo "                        --data '{\"clientId\": \"${CLIENT_ID}\", \"secret\": \"${CLIENT_SECRET}\"}'">>${CMD_FILE}
   chmod +x /tmp/req.sh;
@@ -84,14 +87,11 @@ function authByLogin()
   export JSON=$(/tmp/req.sh);
   export ACCESS_TOKEN=$(echo ${JSON} | jq '.token.accessToken' | sed 's/\"//g')
   export ACCESS_TOKEN_MD5=$(echo ${JSON} | jq '.token.accessTokenMd5' | sed 's/\"//g')
-
   export REFRESH_TOKEN=$(echo ${JSON} | jq '.token.refreshToken' | sed 's/\"//g')
   export REFRESH_TOKEN_MD5=$(echo ${JSON} | jq '.token.refreshTokenMd5' | sed 's/\"//g')
-
   echo -e "    - ${COLOR_CIANO}access-token : ${COLOR_RED}Bearer ${COLOR_GREEN}${ACCESS_TOKEN}${COLOR_DEFAULT}"
   echo ""
-  echo -e "    - ${COLOR_CIANO}access-token : ${COLOR_RED}Bearer ${COLOR_GREEN}${REFRESH_TOKEN}${COLOR_DEFAULT}"
-  
+  echo -e "    - ${COLOR_CIANO}access-token : ${COLOR_RED}Bearer ${COLOR_GREEN}${REFRESH_TOKEN}${COLOR_DEFAULT}"  
 }
 
 function sessionCheck()
@@ -100,7 +100,7 @@ function sessionCheck()
   authByLogin
   clear
   _c_usr=${CLIENT_ID}
-  echo "curl -s --location 'http://${AUTH_HOST}${AUTH_CONTEXT_PATH}/api/oauth/check' \\">${CMD_FILE}
+  echo "curl -s --location 'http://${AUTH_URI}/api/oauth/check' \\">${CMD_FILE}
   echo "                        --header 'Content-Type: application/json'  \\">>${CMD_FILE}
   echo "                        --header 'Authorization: Bearer ${ACCESS_TOKEN}'">>${CMD_FILE}
   cat /tmp/req.sh
@@ -114,7 +114,7 @@ function userFind()
   authByLogin
   clear
   _c_usr=${CLIENT_ID}
-  echo "curl -s --location 'http://${AUTH_HOST}${AUTH_CONTEXT_PATH}/users/find?userKey=${_c_usr}' \\">${CMD_FILE}
+  echo "curl -s --location 'http://${AUTH_URI}/users/find?userKey=${_c_usr}' \\">${CMD_FILE}
   echo "                        --header 'Content-Type: application/json'  \\">>${CMD_FILE}
   echo "                        --header 'Authorization: Bearer ${ACCESS_TOKEN}'">>${CMD_FILE}
   cat /tmp/req.sh
@@ -129,7 +129,7 @@ function userCreateRecord()
   export _c_doc="${3}"
   export _c_ema="${4}"
   export _c_phn="${5}"
-  echo "curl -s --location 'http://${AUTH_HOST}${AUTH_CONTEXT_PATH}/users/register' \\">${CMD_FILE}
+  echo "curl -s --location 'http://${AUTH_URI}/users/register' \\">${CMD_FILE}
   echo "                        --header 'Content-Type: application/json'  \\">>${CMD_FILE}
   echo "                        --data '{\"username\": \"${_c_usr}\", \"password\": \"${_c_pwd}\", \"document\": \"${_c_doc}\", \"email\": \"${_c_ema}\", \"phoneNumber\": \"${_c_phn}\"}'">>${CMD_FILE}
   chmod +x /tmp/req.sh;
