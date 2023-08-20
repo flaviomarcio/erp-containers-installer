@@ -13,8 +13,8 @@ export COLOR_CIANO="\e[36m"
 #auth server
 #  curl -i -X POST -H 'Content-Type:application/json' http://localhost:8080/api/users/register -d '{"username":"admin","password":"admin"}'
 #  curl -i -X GET http://localhost:8080/api/users/user?id=ee11cbb1-9052-340b-87aa-c0ca060c23ee
-#  curl -i -X POST -H 'Content-Type:application/json'  http://localhost:8080/api/api/oauth/login -d '{"username":"user2","password":"teste"}'
-#  curl -s --location 'http://localhost:8080/api/api/oauth/grant-code' --header 'Content-Type: application/json' --data '{"clientId": "c4ca4238-a0b9-2382-0dcc-509a6f75849b"}'
+#  curl -i -X POST -H 'Content-Type:application/json'  http://localhost:8080/api/oauth/login -d '{"username":"user2","password":"teste"}'
+#  curl -s --location 'http://localhost:8080/api/oauth/grant-code' --header 'Content-Type: application/json' --data '{"clientId": "c4ca4238-a0b9-2382-0dcc-509a6f75849b"}'
 
 #sensedia steps
 export CMD_FILE=/tmp/req.sh
@@ -23,18 +23,17 @@ function loadCredential()
 {
   export AUTH_HOST=${STACK_ENVIRONMENT}-${STACK_TARGET}-srv-auth
   export AUTH_CONTEXT_PATH=
-  export AUTH_URI=${AUTH_HOST}${AUTH_CONTEXT_PATH}
+  export AUTH_URI="http://${AUTH_HOST}${AUTH_CONTEXT_PATH}/api"
   export CLIENT_ID=${STACK_SERVICE_DEFAULT_USER}
   export CLIENT_SECRET=${STACK_SERVICE_DEFAULT_PASS}
   export GRANT_TYPE=urn:ietf:params:oauth:grant-type:jwt-bearer
-  export ACCESS_TOKEN=
 }
 
 function authByGrantCode()
 {
   export REQUEST_GRANT_DATA=""
   # shellcheck disable=SC2089
-  echo "curl -s --location 'http://${AUTH_URI}/api/oauth/grant-code' \\">${CMD_FILE}
+  echo "curl -s --location '${AUTH_URI}/oauth/grant-code' \\">${CMD_FILE}
   echo "                        --header 'Content-Type: application/json'  \\">>${CMD_FILE}
   echo "                        --data '{\"clientId\": \"${CLIENT_ID}\"}'">>${CMD_FILE}
   chmod +x ${CMD_FILE};
@@ -50,7 +49,7 @@ function authByGrantCode()
   export BASIC_AUTH=$(echo -n "${CLIENT_ID}:${CLIENT_SECRET}" | base64 -w 0);
 
   #request token
-  echo "curl -s --location \"http://${AUTH_URI}/api/oauth/access-token\" \\" >${CMD_FILE}
+  echo "curl -s --location \"${AUTH_URI}/oauth/access-token\" \\" >${CMD_FILE}
   echo "                      --header \"Content-Type: application/x-www-form-urlencoded\" \\" >>${CMD_FILE}
   echo "                      --header \"Authorization: Basic ${BASIC_AUTH}\" \\" >>${CMD_FILE}
   echo "                      --data-urlencode \"code=${GRANT_CODE}\" \\" >>${CMD_FILE}
@@ -73,9 +72,13 @@ function authByGrantCode()
 
 function authByLogin()
 {
-  export REQUEST_GRANT_DATA=""
+  export ACCESS_TOKEN=
+  export ACCESS_TOKEN_MD5=
+  export REFRESH_TOKEN=
+  export REFRESH_TOKEN_MD5=
+  export REQUEST_GRANT_DATA=
   # shellcheck disable=SC2089
-  echo "curl -s --location 'http://${AUTH_URI}/api/oauth/login' \\">${CMD_FILE}
+  echo "curl -s --location '${AUTH_URI}/oauth/login' \\">${CMD_FILE}
   echo "                        --header 'Content-Type: application/json'  \\">>${CMD_FILE}
   echo "                        --data '{\"clientId\": \"${CLIENT_ID}\", \"secret\": \"${CLIENT_SECRET}\"}'">>${CMD_FILE}
   chmod +x /tmp/req.sh;
@@ -100,7 +103,7 @@ function sessionCheck()
   authByLogin
   clear
   _c_usr=${CLIENT_ID}
-  echo "curl -s --location 'http://${AUTH_URI}/api/oauth/check' \\">${CMD_FILE}
+  echo "curl -s --location '${AUTH_URI}/oauth/check' \\">${CMD_FILE}
   echo "                        --header 'Content-Type: application/json'  \\">>${CMD_FILE}
   echo "                        --header 'Authorization: Bearer ${ACCESS_TOKEN}'">>${CMD_FILE}
   cat /tmp/req.sh
@@ -114,7 +117,7 @@ function userFind()
   authByLogin
   clear
   _c_usr=${CLIENT_ID}
-  echo "curl -s --location 'http://${AUTH_URI}/users/find?userKey=${_c_usr}' \\">${CMD_FILE}
+  echo "curl -s --location '${AUTH_URI}/users/find?userKey=${_c_usr}' \\">${CMD_FILE}
   echo "                        --header 'Content-Type: application/json'  \\">>${CMD_FILE}
   echo "                        --header 'Authorization: Bearer ${ACCESS_TOKEN}'">>${CMD_FILE}
   cat /tmp/req.sh
@@ -126,13 +129,39 @@ function userCreateRecord()
 {
   export _c_usr="${1}"
   export _c_pwd="${2}"
-  export _c_doc="${3}"
-  export _c_ema="${4}"
-  export _c_phn="${5}"
-  echo "curl -s --location 'http://${AUTH_URI}/users/register' \\">${CMD_FILE}
+  export _c_nam="${3}"
+  export _c_doc="${4}"
+  export _c_ema="${5}"
+  export _c_phn="${6}"
+
+  if [[ ${_c_usr} == "" ]]; then
+    echo -e "   ${COLOR_RED}    Invalid username ${COLOR_DEFAULT}"
+    return 0
+  fi
+
+  if [[ ${_c_pwd} == "" ]]; then
+    _c_pwd=$RANDOM
+  fi
+
+  if [[ ${_c_ema} == "" ]]; then
+    _c_ema="${_c_usr}@${STACK_DOMAIN}"
+  fi
+
+  if [[ ${_c_doc} == "" ]]; then
+    _c_doc=$RANDOM
+  fi
+
+  authByLogin
+  if [[ ${ACCESS_TOKEN} == "" ]]; then
+    return 0
+  fi
+
+  echo "curl -s --location '${AUTH_URI}/users/register' \\">${CMD_FILE}
   echo "                        --header 'Content-Type: application/json'  \\">>${CMD_FILE}
-  echo "                        --data '{\"username\": \"${_c_usr}\", \"password\": \"${_c_pwd}\", \"document\": \"${_c_doc}\", \"email\": \"${_c_ema}\", \"phoneNumber\": \"${_c_phn}\"}'">>${CMD_FILE}
+  echo "                        --header 'Authorization: Bearer ${ACCESS_TOKEN}'  \\">>${CMD_FILE}
+  echo "                        --data '{\"username\": \"${_c_usr}\", \"password\": \"${_c_pwd}\", \"name\": \"${_c_nam}\", \"document\": \"${_c_doc}\", \"email\": \"${_c_ema}\", \"phoneNumber\": \"${_c_phn}\"}'">>${CMD_FILE}
   chmod +x /tmp/req.sh;
+  cat /tmp/req.sh
   export JSON=$(/tmp/req.sh)
   echo ${JSON} | jq
 }
@@ -141,36 +170,52 @@ function userCreateTest()
 {
   clear
   authByLogin
-  clear
   export _c_usr="u${RANDOM}"
   export _c_pwd="p${RANDOM}"
+  export _c_nam="u${RANDOM}"
   export _c_doc="${RANDOM}"
   export _c_ema="${_c_usr}@admin.com"
   export _c_phn="5511${RANDOM}${RANDOM}"
-  userCreateRecord "${_c_usr}" "${_c_pwd}" "${_c_doc}" "${XXXX}" "${_c_ema}" "${_c_phn}"
+
+  userCreateRecord "${_c_usr}" "${_c_pwd}" "${_c_nam}" "${_c_doc}" "${_c_ema}" "${_c_phn}"
 }
 
 function userCreateNew()
 {
   clear
-  authByLogin
-  clear
-  export _c_usr="u${RANDOM}"
-  export _c_pwd="p${RANDOM}"
-  export _c_doc="${RANDOM}"
-  export _c_ema="${_c_usr}@admin.com"
-  export _c_phn="5511${RANDOM}${RANDOM}"
-  userCreateRecord "${_c_usr}" "${_c_pwd}" "${_c_doc}" "${XXXX}" "${_c_ema}" "${_c_phn}"
+  echo -e "${COLOR_MAGENTA}New user${COLOR_DEFAULT}"
+  echo -e "   ${COLOR_GREEN}Set a name: ${COLOR_DEFAULT}"
+  read _c_usr
+  echo -e "   ${COLOR_GREEN}Set a password: ${COLOR_DEFAULT}"
+  read _c_pwd
+  echo -e "   ${COLOR_GREEN}Set a e-mail: ${COLOR_DEFAULT}"
+  read _c_ema
+  echo -e "   ${COLOR_GREEN}Set a document: ${COLOR_DEFAULT}"
+  read _c_doc
+  echo -e "   ${COLOR_GREEN}Set a phone number: ${COLOR_DEFAULT}"
+  read _c_phn
+  echo -e "${COLOR_MAGENTA}User detail ${COLOR_DEFAULT}"
+  userCreateRecord "${_c_usr}" "${_c_pwd}" "${_c_nam}" "${_c_doc}" "${_c_ema}" "${_c_phn}"
+  echo -e "   ${COLOR_BLUE_B} username......: ${_c_usr} ${COLOR_DEFAULT}"
+  echo -e "   ${COLOR_BLUE_B} password......: ${_c_pwd} ${COLOR_DEFAULT}"
+  echo -e "   ${COLOR_BLUE_B} name..........: ${_c_nam} ${COLOR_DEFAULT}"
+  echo -e "   ${COLOR_BLUE_B} document......: ${_c_doc} ${COLOR_DEFAULT}"
+  echo -e "   ${COLOR_BLUE_B} e-mail........: ${_c_ema} ${COLOR_DEFAULT}"
+  echo -e "   ${COLOR_BLUE_B} phone.number..: ${_c_phn} ${COLOR_DEFAULT}"
+}
+
+function userCreateDelete()
+{
+  return 1
 }
 
 function userManagmentMenu()
 {
-  loadCredential
-
   while :
   do
     clear;
-    options=(Exit Login GrantCode SessionCheck UserFind UserCreate UserDelete)
+    loadCredential
+    options=(Exit Login GrantCode SessionCheck UserFind UserCreateNew UserFind UserDelete UserCreateTest)
     echo -e "${COLOR_MAGENTA}Select auth mode${COLOR_DEFAULT}"
     PS3=$'\n'"Choose option: "
     select opt in "${options[@]}"
@@ -183,14 +228,16 @@ function userManagmentMenu()
         authByLogin
       elif [[ ${opt} == "SessionCheck" ]]; then
         sessionCheck
-      elif [[ ${opt} == "userCreateNew" ]]; then
+      elif [[ ${opt} == "UserCreateNew" ]]; then
         userCreateNew
-      elif [[ ${opt} == "userCreateList" ]]; then
-        userCreateList
+      elif [[ ${opt} == "UserCreateDelete" ]]; then
+        userCreateDelete
       elif [[ ${opt} == "UserFind" ]]; then
         userFind
       elif [[ ${opt} == "UserDelete" ]]; then
         userDelete
+      elif [[ ${opt} == "UserCreateTest" ]]; then
+        userCreateTest
       fi
       echo ""
       echo ""
