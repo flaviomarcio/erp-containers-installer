@@ -35,7 +35,7 @@ function dockerSRVMain()
     echB
     echR "[FAIL]dockerBuild"
   fi
-  systemETCHostApply
+  systemETCHostApply ${STACK_PREFIX}
   return 0
 }
 
@@ -50,7 +50,7 @@ function dockerADMMain()
     echB
     echR "[FAIL]dockerBuild"
   fi
-  systemETCHostApply
+  systemETCHostApply ${STACK_PREFIX}
   return 0
 }
 
@@ -182,7 +182,7 @@ function dockerMCSMain()
     echR "  =============================  "    
     return 0;
   fi
-  systemETCHostApply
+  systemETCHostApply ${STACK_PREFIX}
   return 1;
 }
 
@@ -250,7 +250,7 @@ function systemDNSOptions()
       selectorWaitSeconds 5 "" "${COLOR_YELLOW_B}"
     fi
     if [[ ${__selector} == "etc-hosts-apply" ]]; then
-      systemETCHostApply
+      systemETCHostApply ${STACK_PREFIX}
     else
       systemETCHostRemove ${STACK_PREFIX}
     fi
