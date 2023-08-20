@@ -22,9 +22,9 @@ export CMD_FILE=/tmp/req.sh
 function loadCredential()
 {
   export AUTH_HOST=${STACK_ENVIRONMENT}-${STACK_TARGET}-srv-auth
-  export AUTH_CONTEXT_PATH="/api"
-  export CLIENT_ID=${STACK_DEFAULT_DB_USERNAME}
-  export CLIENT_SECRET=${STACK_DEFAULT_DB_PASSWORD}
+  export AUTH_CONTEXT_PATH=${STACK_SERVICE_DEFAULT_CONTEXT_PATH}
+  export CLIENT_ID=${STACK_SERVICE_DEFAULT_USER}
+  export CLIENT_SECRET=${STACK_SERVICE_DEFAULT_PASS}
   export GRANT_TYPE=urn:ietf:params:oauth:grant-type:jwt-bearer
   export ACCESS_TOKEN=
 }

@@ -7,6 +7,23 @@
 . ${INSTALLER_LIB}/pvt/lib-auth.sh
 
 
+function __privateEnvsDNSList()
+{
+  export __func_return=
+  if [[ ${STACK_APPLICATIONS_PROJECT_DIR} == "" ]]; then
+    export __func_return="invalid env \${STACK_APPLICATIONS_PROJECT_DIR}"
+    return 0
+  fi
+
+  if ! [[ -d ${STACK_APPLICATIONS_PROJECT_DIR} ]]; then
+    export __func_return="invalid env \${STACK_APPLICATIONS_PROJECT_DIR} : ${STACK_APPLICATIONS_PROJECT_DIR}"
+    return 0
+  fi
+
+  export STACK_DNS_LIST=$(ls ${STACK_APPLICATIONS_PROJECT_DIR})
+  return 1
+}
+
 function __privateEnvsInstallerDir()
 {
   stackEnvsClearByStack
@@ -48,6 +65,13 @@ function utilPrepareInit()
     echR "  fail on calling __privateEnvsInstallerDir"
     return 0
   fi
+
+  __privateEnvsDNSList
+  if ! [ "$?" -eq 1 ]; then
+    echR "  fail on calling __privateEnvsDNSList"
+    return 0
+  fi
+
   return 1
 }
 
