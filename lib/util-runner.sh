@@ -252,7 +252,7 @@ function systemDNSOptions()
     if [[ ${__selector} == "etc-hosts-apply" ]]; then
       systemETCHostApply
     else
-      systemETCHostRemove
+      systemETCHostRemove ${STACK_PREFIX}
     fi
 
   elif [[ ${__selector} == "print" ]]; then
