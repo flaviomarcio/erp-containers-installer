@@ -1,8 +1,6 @@
 #!/bin/bash -e
 
-if [[ ${BASH_BIN} == "" ]]; then
-  BASH_BIN="$(dirname ${PWD})/bash-bin"
-fi
+
 
 . ${BASH_BIN}/lib-strings.sh
 . ${BASH_BIN}/lib-stack.sh
