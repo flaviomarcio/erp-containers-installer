@@ -36,6 +36,7 @@ function __private_runnerMenu()
   options+=(Database-Update)
   options+=(Database-DDL-Maker)
   options+=(Database-PGPass)
+  options+=(Script-execute)
   options+=(User-Management)
   options+=(DNS-Options)
   options+=(Command-Utils)
@@ -58,11 +59,13 @@ function __private_runnerMenu()
     elif [[ ${opt} == "Docker-Build-ADM" ]]; then
       dockerADMMain ${__runner_menu_environment} ${__runner_menu_target}
     elif [[ ${opt} == "Database-Update" ]]; then
-      databaseUpdate ${__runner_menu_environment} ${__runner_menu_target}
+      databaseUpdateMain ${__runner_menu_environment} ${__runner_menu_target}
     elif [[ ${opt} == "Database-DDL-Maker" ]]; then
-      databaseDDLMaker ${__runner_menu_environment} ${__runner_menu_target}
+      databaseDDLMakerMain ${__runner_menu_environment} ${__runner_menu_target}
     elif [[ ${opt} == "Database-PGPass" ]]; then
       selectorPGPass ${__runner_menu_environment} ${__runner_menu_target}
+    elif [[ ${opt} == "Script-execute" ]]; then
+      scriptsExecuteMain ${__runner_menu_environment} ${__runner_menu_target}
     elif [[ ${opt} == "User-Management" ]]; then
       userManagmentMain ${__runner_menu_environment} ${__runner_menu_target}
     elif [[ ${opt} == "DNS-Options" ]]; then
@@ -126,9 +129,15 @@ function runnerMain()
     exit 0
   fi
 
-  databasePrepare ${STACK_ENVIRONMENT} ${STACK_APPLICATIONS_DATA_DB_DIR}
+  databasePrepare ${__public_environment} ${STACK_APPLICATIONS_DATA_DB_DIR}
   if ! [ "$?" -eq 1 ]; then
     echR "  fail on calling databasePrepare"
+    exit 0;
+  fi
+
+  scriptsPrepare ${__public_environment} ${STACK_APPLICATIONS_DATA_SCRIPT_DIR}
+  if ! [ "$?" -eq 1 ]; then
+    echR "  fail on calling scriptsPrepare"
     exit 0;
   fi
 

@@ -1,7 +1,5 @@
 #!/bin/bash -e
 
-
-
 . ${BASH_BIN}/lib-strings.sh
 . ${BASH_BIN}/lib-stack.sh
 . ${INSTALLER_LIB}/pvt/lib-auth.sh
@@ -40,6 +38,7 @@ function __privateEnvsInstallerDir()
   export STACK_APPLICATIONS_DATA_CONF_DIR=${STACK_APPLICATIONS_DATA_DIR}/conf
   export STACK_APPLICATIONS_DATA_SRC_DIR=${STACK_APPLICATIONS_DATA_DIR}/source
   export STACK_APPLICATIONS_DATA_DB_DIR=${STACK_APPLICATIONS_DATA_DIR}/db
+  export STACK_APPLICATIONS_DATA_SCRIPT_DIR=${STACK_APPLICATIONS_DATA_DIR}/scripts
 
   #INSTALLER DIR
   export STACK_INSTALLER_DOCKER_DIR=${INSTALLER_DIR}/docker

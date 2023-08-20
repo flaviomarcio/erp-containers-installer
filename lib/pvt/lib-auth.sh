@@ -21,7 +21,7 @@ export CMD_FILE=/tmp/req.sh
 
 function loadCredential()
 {
-  export AUTH_HOST=${STACK_ENVIRONMENT}-${STACK_TARGET}-srv-auth
+  export AUTH_HOST=${STACK_ENVIRONMENT}-${STACK_TARGET}-srv-auth  
   export AUTH_CONTEXT_PATH=
   export AUTH_URI="http://${AUTH_HOST}${AUTH_CONTEXT_PATH}/api"
   export CLIENT_ID=${STACK_SERVICE_DEFAULT_USER}
@@ -140,7 +140,7 @@ function userCreateRecord()
   fi
 
   if [[ ${_c_pwd} == "" ]]; then
-    _c_pwd=$RANDOM
+    _c_pwd="${_c_usr}_$RANDOM"
   fi
 
   if [[ ${_c_ema} == "" ]]; then

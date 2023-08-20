@@ -5,6 +5,7 @@
 . lib-selector.sh
 . lib-system.sh
 . lib-deploy.sh
+. lib-scripts.sh
 . util-prepare.sh
 
 function dockerBuild()
@@ -186,7 +187,7 @@ function dockerMCSMain()
   return 1;
 }
 
-function databaseUpdate()
+function databaseUpdateMain()
 {
   __environment=${1}
   if [[ ${__environment} != "testing" && ${__environment} != "development"  ]]; then
@@ -221,9 +222,44 @@ function databaseUpdate()
   return 0
 }
 
-function databaseDDLMaker()
+function databaseDDLMakerMain()
 {
   databaseDDLMakerExec
+  return 0
+}
+
+function scriptsExecuteMain()
+{
+  __environment=${1}
+  if [[ ${__environment} != "testing" && ${__environment} != "development"  ]]; then
+    echo ""
+    echR "  =============================  "
+    echR "  ***********CRITICAL**********  "
+    echR "  =============================  "
+    echo ""
+    echY "  =============================  "
+    echY "  *******DATABASE UPDATE*******  "
+    echY "  =============================  "
+    echo ""
+    selectorWaitSeconds 3 "" "${COLOR_YELLOW_B}"
+
+    selectorYesNo "Script execute"
+    if ! [ "$?" -eq 1 ]; then
+      return 0
+    fi
+    echo ""
+    echR "  =============================  "
+    echR "  ***********CRITICAL**********  "
+    echR "  =============================  "
+    echo ""
+    echY "  =============================  "
+    echY "  *******DATABASE UPDATE*******  "
+    echY "  =============================  "
+    echo ""
+    selectorWaitSeconds 10 "" "${COLOR_YELLOW_B}"
+  fi
+
+  scriptsExecute
   return 0
 }
 
