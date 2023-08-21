@@ -24,8 +24,10 @@ function loadCredential()
   export AUTH_HOST=${STACK_ENVIRONMENT}-${STACK_TARGET}-srv-auth
   export AUTH_CONTEXT_PATH=
   export AUTH_URI="http://${AUTH_HOST}${AUTH_CONTEXT_PATH}/api"
-  export CLIENT_ID=${STACK_SERVICE_DEFAULT_USER}
-  export CLIENT_SECRET=${STACK_SERVICE_DEFAULT_PASS}
+  if [[ ${CLIENT_ID} == "" ]]; then
+    export CLIENT_ID=${STACK_SERVICE_DEFAULT_USER}
+    export CLIENT_SECRET=${STACK_SERVICE_DEFAULT_PASS}
+  fi
   export GRANT_TYPE=urn:ietf:params:oauth:grant-type:jwt-bearer
 }
 
@@ -104,6 +106,20 @@ function authByLogin()
     echo ""
     echo -e "    - ${COLOR_CIANO}access-token : ${COLOR_RED}Bearer ${COLOR_GREEN}${REFRESH_TOKEN}${COLOR_DEFAULT}"  
   fi
+}
+
+function authByLoginCheck()
+{
+  clear
+  export CLIENT_ID=
+  export CLIENT_SECRET=
+  echo -e "${COLOR_MAGENTA}New user${COLOR_DEFAULT}"
+  echo -e "   ${COLOR_GREEN}Set a username: ${COLOR_DEFAULT}"
+  read CLIENT_ID
+  echo -e "   ${COLOR_GREEN}Set a password: ${COLOR_DEFAULT}"
+  read CLIENT_SECRET
+
+  authByLogin
 }
 
 function sessionCheck()
@@ -250,9 +266,9 @@ function userManagmentMenu()
       if [[ ${opt} == "Exit" ]]; then
         exit 0
       elif [[ ${opt} == "Login" ]]; then
-        authByLogin
+        authByLoginCheck
       elif [[ ${opt} == "GrantCode" ]]; then
-        authByLogin
+        authByLoginCheck
       elif [[ ${opt} == "SessionCheck" ]]; then
         sessionCheck
       elif [[ ${opt} == "UserCreateNew" ]]; then
