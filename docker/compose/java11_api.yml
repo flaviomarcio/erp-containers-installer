@@ -16,7 +16,7 @@ services:
       - ${APPLICATION_DEPLOY_DATA_DIR}:/storage/data:rw
       - ${APPLICATION_DEPLOY_BACKUP_DIR}:/storage/backup:rw
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://${APPLICATION_DEPLOY_DNS}:${APPLICATION_DEPLOY_PORT}/actuator/health"]
+      test: ["CMD", "curl", "-f", "http://${APPLICATION_DEPLOY_DNS}:${APPLICATION_DEPLOY_PORT}${APPLICATION_CONTEXT_PATH}/actuator/health"]
       interval: ${APPLICATION_DEPLOY_HEALTH_CHECK_INTERVAL}
       timeout: ${APPLICATION_DEPLOY_HEALTH_CHECK_TIMEOUT}
       retries: ${APPLICATION_DEPLOY_HEALTH_CHECK_RETRIES}

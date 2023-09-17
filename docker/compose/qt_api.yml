@@ -18,11 +18,11 @@ services:
       - ${APPLICATION_NAME}.env
     environment:
       QT_DEBUG_PLUGINS: ${QT_DEBUG_PLUGINS}
-    # healthcheck:
-    #   test: ["CMD", "curl", "-f", "http://${APPLICATION_DEPLOY_DNS}:${APPLICATION_DEPLOY_PORT}/actuator/health"]
-    #   interval: ${APPLICATION_DEPLOY_HEALTH_CHECK_INTERVAL}
-    #   timeout: ${APPLICATION_DEPLOY_HEALTH_CHECK_TIMEOUT}
-    #   retries: ${APPLICATION_DEPLOY_HEALTH_CHECK_RETRIES}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://${APPLICATION_DEPLOY_DNS}:${APPLICATION_DEPLOY_PORT}${APPLICATION_CONTEXT_PATH}/actuator/health"]
+      interval: ${APPLICATION_DEPLOY_HEALTH_CHECK_INTERVAL}
+      timeout: ${APPLICATION_DEPLOY_HEALTH_CHECK_TIMEOUT}
+      retries: ${APPLICATION_DEPLOY_HEALTH_CHECK_RETRIES}
     deploy:
       mode: ${APPLICATION_DEPLOY_MODE}
       replicas: ${APPLICATION_DEPLOY_REPLICAS}
