@@ -7,7 +7,6 @@ networks:
 
 services:
   api:
-    #image: openjdk:11
     image: ${APPLICATION_DEPLOY_IMAGE}
     hostname: ${APPLICATION_DEPLOY_HOSTNAME}
     env_file:
@@ -16,6 +15,11 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ${APPLICATION_DEPLOY_DATA_DIR}:/storage/data:rw
       - ${APPLICATION_DEPLOY_BACKUP_DIR}:/storage/backup:rw
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://${APPLICATION_DEPLOY_DNS}:${APPLICATION_DEPLOY_PORT}/actuator/health"]
+      interval: ${APPLICATION_DEPLOY_HEALTH_CHECK_INTERVAL}
+      timeout: ${APPLICATION_DEPLOY_HEALTH_CHECK_TIMEOUT}
+      retries: ${APPLICATION_DEPLOY_HEALTH_CHECK_RETRIES}
     deploy:
       mode: ${APPLICATION_DEPLOY_MODE}
       replicas: ${APPLICATION_DEPLOY_REPLICAS}
@@ -29,6 +33,15 @@ services:
       update_config:
         parallelism: 1
         delay: 10s
+        order: start-first
+        failure_action: rollback
+        monitor: 60s
+        max_failure_ratio: 0.3
+      rollback_config:
+        parallelism: 1
+        delay: 10s
+        order: start-first
+
       restart_policy:
         condition: on-failure
       labels:
@@ -49,25 +62,5 @@ services:
         - traefik.http.routers.${APPLICATION_NAME}_3rdp.entrypoints=http
         - traefik.http.services.${APPLICATION_NAME}_3rdp.loadbalancer.server.port=${APPLICATION_DEPLOY_PORT}
 
-        # - traefik.http.middlewares.redirect.headers.customRequestHeaders.X-Forwarded-Proto=https
-        # - traefik.enable=true
-        # - traefik.docker.network=${APPLICATION_DEPLOY_NETWORK_NAME}
-        # - traefik.http.routers.${APPLICATION_NAME}.rule=Host(`${APPLICATION_DEPLOY_DNS}`)
-        # - traefik.http.routers.${APPLICATION_NAME}.service=${APPLICATION_NAME}
-        # - traefik.http.routers.${APPLICATION_NAME}.entrypoints=http,https
-        # - traefik.http.routers.${APPLICATION_NAME}.tls=true
-        # - traefik.http.services.${APPLICATION_NAME}.loadbalancer.server.port=${APPLICATION_DEPLOY_PORT}
-
-        # - traefik.http.routers.${APPLICATION_NAME}_pub.rule=Host(`${APPLICATION_DEPLOY_DNS_PUBLIC}`)
-        # - traefik.http.routers.${APPLICATION_NAME}_pub.service=${APPLICATION_NAME}_pub
-        # - traefik.http.routers.${APPLICATION_NAME}_pub.entrypoints=http,https
-        # - traefik.http.routers.${APPLICATION_NAME}_pub.tls=true
-        # - traefik.http.services.${APPLICATION_NAME}_pub.loadbalancer.server.port=${APPLICATION_DEPLOY_PORT}
-
-        # - traefik.http.routers.${APPLICATION_NAME}_3rdp.rule=Host(`${APPLICATION_DEPLOY_DNS_3RDPARTY}`)
-        # - traefik.http.routers.${APPLICATION_NAME}_3rdp.service=${APPLICATION_NAME}_3rdp
-        # - traefik.http.routers.${APPLICATION_NAME}_3rdp.entrypoints=http,https
-        # - traefik.http.routers.${APPLICATION_NAME}_3rdp.tls=true
-        # - traefik.http.services.${APPLICATION_NAME}_3rdp.loadbalancer.server.port=${APPLICATION_DEPLOY_PORT}
     networks:
       - stack-inbound

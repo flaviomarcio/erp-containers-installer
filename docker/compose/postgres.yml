@@ -19,6 +19,11 @@ services:
       - ${APPLICATION_NAME}.env
     environment:
       - PGDATA=/postgresql/pg/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-q", "-d", "${POSTGRES_DATABASE}", "-U", "${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     ports:
       - target: 5432
         published: ${APPLICATION_DEPLOY_PORT}
