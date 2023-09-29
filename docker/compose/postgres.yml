@@ -16,7 +16,7 @@ services:
       - ${APPLICATION_DEPLOY_DATA_DIR}:/postgresql/pg/data:rw
       - ${APPLICATION_DEPLOY_BACKUP_DIR}:/storage/backup:rw
     env_file:
-      - ${APPLICATION_NAME}.env
+      - ${APPLICATION_ENV_FILE}
     environment:
       - PGDATA=/postgresql/pg/data
     healthcheck:
@@ -36,8 +36,8 @@ services:
           - ${APPLICATION_DEPLOY_NODE}
       resources:
         limits:
-          cpus: "${STACK_CPU_DEFAULT}"
-          memory: ${STACK_MEMORY_DEFAULT}
+          cpus: "${APPLICATION_DEPLOY_CPU}"
+          memory: "${APPLICATION_DEPLOY_MEMORY}"
       update_config:
         parallelism: 1
         delay: 10s

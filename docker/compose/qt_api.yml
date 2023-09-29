@@ -13,13 +13,12 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ${STACK_LIB_DIR}/qt/${QT_VERSION}:/home/debian/qt
       - ${APPLICATION_DEPLOY_DATA_DIR}:/storage/data:rw
-      - ${APPLICATION_DEPLOY_BACKUP_DIR}:/storage/backup:rw
     env_file:
-      - ${APPLICATION_NAME}.env
+      - ${APPLICATION_ENV_FILE}
     environment:
       QT_DEBUG_PLUGINS: ${QT_DEBUG_PLUGINS}
     # healthcheck:
-    #   test: ["CMD", "curl", "-f", "http://${APPLICATION_DEPLOY_DNS}:${APPLICATION_DEPLOY_PORT}${APPLICATION_CONTEXT_PATH}/actuator/health"]
+    #   test: ["CMD", "curl", "-f", "${APPLICATION_DEPLOY_HEALTH_CHECK_URL}"]
     #   interval: ${APPLICATION_DEPLOY_HEALTH_CHECK_INTERVAL}
     #   timeout: ${APPLICATION_DEPLOY_HEALTH_CHECK_TIMEOUT}
     #   retries: ${APPLICATION_DEPLOY_HEALTH_CHECK_RETRIES}
@@ -31,8 +30,8 @@ services:
           - ${APPLICATION_DEPLOY_NODE}
       resources:
         limits:
-          cpus: "${STACK_CPU_DEFAULT}"
-          memory: ${STACK_MEMORY_DEFAULT}
+          cpus: "${APPLICATION_DEPLOY_CPU}"
+          memory: "${APPLICATION_DEPLOY_MEMORY}"
       update_config:
         parallelism: 1
         delay: 10s
@@ -57,25 +56,5 @@ services:
         - traefik.http.routers.${APPLICATION_NAME}_3rdp.entrypoints=http
         - traefik.http.services.${APPLICATION_NAME}_3rdp.loadbalancer.server.port=${APPLICATION_DEPLOY_PORT}
         
-        # - traefik.enable=true
-        # - traefik.docker.network=${APPLICATION_DEPLOY_NETWORK_NAME}
-        # - traefik.http.middlewares.redirect.headers.customRequestHeaders.X-Forwarded-Proto=https
-        # - traefik.http.routers.${APPLICATION_NAME}.rule=Host(`${APPLICATION_DEPLOY_DNS}`) && PathPrefix(`${APPLICATION_DEPLOY_DNS_PATH}`)
-        # - traefik.http.routers.${APPLICATION_NAME}.service=${APPLICATION_NAME}
-        # - traefik.http.routers.${APPLICATION_NAME}.entrypoints=http,https
-        # - traefik.http.routers.${APPLICATION_NAME}.tls=true
-        # - traefik.http.services.${APPLICATION_NAME}.loadbalancer.server.port=${APPLICATION_DEPLOY_PORT}
-
-        # - traefik.http.routers.${APPLICATION_NAME}_pub.rule=Host(`${APPLICATION_DEPLOY_DNS_PUBLIC}`) && PathPrefix(`${APPLICATION_DEPLOY_DNS_PUBLIC_PATH}`)
-        # - traefik.http.routers.${APPLICATION_NAME}_pub.service=${APPLICATION_NAME}_pub
-        # - traefik.http.routers.${APPLICATION_NAME}_pub.entrypoints=http,https
-        # - traefik.http.routers.${APPLICATION_NAME}_pub.tls=true
-        # - traefik.http.services.${APPLICATION_NAME}_pub.loadbalancer.server.port=${APPLICATION_DEPLOY_PORT}
-
-        # - traefik.http.routers.${APPLICATION_NAME}_3rdp.rule=Host(`${APPLICATION_DEPLOY_DNS_3RDPARTY}`) && PathPrefix(`${APPLICATION_DEPLOY_DNS_3RDPARTY_PATH}`)
-        # - traefik.http.routers.${APPLICATION_NAME}_3rdp.service=${APPLICATION_NAME}_3rdp
-        # - traefik.http.routers.${APPLICATION_NAME}_3rdp.entrypoints=http,https
-        # - traefik.http.routers.${APPLICATION_NAME}_3rdp.tls=true
-        # - traefik.http.services.${APPLICATION_NAME}_3rdp.loadbalancer.server.port=${APPLICATION_DEPLOY_PORT}
     networks:
       - stack-inbound

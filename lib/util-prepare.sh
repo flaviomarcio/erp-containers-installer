@@ -76,7 +76,15 @@ function utilPrepareInit()
 
 function prepareStackForDeploy()
 {
-  __prepareStackForDeploy_project=${1}
+  local __prepareStackForDeploy_project_dir=${1}
+  local __prepareStackForDeploy_project=${2}
+
+  stackEnvsClearByStack
+  
+  local __prepareStackForDeploy_project_env_file=${__prepareStackForDeploy_project_dir}/${__prepareStackForDeploy_project}
+  if [[ -f ${__prepareStackForDeploy_project_env_file} ]]; then
+    source ${__prepareStackForDeploy_project_env_file};
+  fi
 
   stackEnvsLoadByStack "${STACK_ENVIRONMENT}" "${STACK_TARGET}" "${__prepareStackForDeploy_project}"
   if ! [ "$?" -eq 1 ]; then
@@ -99,27 +107,32 @@ function prepareStackForDeploy()
   fi
 
   envsSetIfIsEmpty APPLICATION_NAME ${__prepareStackForDeploy_project}
-  envsSetIfIsEmpty APPLICATION_CONTEXT_PATH ${STACK_DEFAULT_API_CONTEXT_PATH}
-  envsSetIfIsEmpty APPLICATION_DEPLOY_PORT 8080
+  envsSetIfIsEmpty APPLICATION_DEPLOY_PORT ${STACK_SERVICE_DEFAULT_PORT}
   envsSetIfIsEmpty APPLICATION_DEPLOY_DNS ${STACK_SERVICE_HOSTNAME}
-  envsSetIfIsEmpty APPLICATION_DEPLOY_DNS_PATH "/"
+  envsSetIfIsEmpty APPLICATION_DEPLOY_DNS_PATH ${STACK_SERVICE_DEFAULT_CONTEXT_PATH}
   envsSetIfIsEmpty APPLICATION_DEPLOY_DNS_PUBLIC "${STACK_SERVICE_HOSTNAME}.${STACK_DOMAIN}"
   envsSetIfIsEmpty APPLICATION_DEPLOY_DNS_PUBLIC_PATH "${APPLICATION_DEPLOY_DNS_PATH}"
   envsSetIfIsEmpty APPLICATION_DEPLOY_DNS_3RDPARTY "${STACK_SERVICE_HOSTNAME}.${STACK_DOMAIN}"
   envsSetIfIsEmpty APPLICATION_DEPLOY_DNS_3RDPARTY_PATH "${APPLICATION_DEPLOY_DNS_PATH}"
-  envsSetIfIsEmpty APPLICATION_DEPLOY_IMAGE "${STACK_IMAGE_NAME_URL}"
+  envsSetIfIsEmpty APPLICATION_DEPLOY_IMAGE "${STACK_SERVICE_IMAGE_URL}"
   envsSetIfIsEmpty APPLICATION_DEPLOY_HOSTNAME ${STACK_SERVICE_HOSTNAME}
-  envsSetIfIsEmpty APPLICATION_DEPLOY_MODE replicated
-  envsSetIfIsEmpty APPLICATION_DEPLOY_NODE "${STACK_SERVICE_NODE_SERVICES}"
-  envsSetIfIsEmpty APPLICATION_DEPLOY_REPLICAS "1"
+  envsSetIfIsEmpty APPLICATION_DEPLOY_MODE ${STACK_SERVICE_DEFAULT_NODE_MODE}
+  envsSetIfIsEmpty APPLICATION_DEPLOY_NODE "${STACK_SERVICE_DEFAULT_NODE_SERVICES}"
+  envsSetIfIsEmpty APPLICATION_DEPLOY_REPLICAS "${STACK_DEFAULT_DEPLOY_REPLICAS}"
+  envsSetIfIsEmpty APPLICATION_DEPLOY_CPU "${STACK_DEFAULT_DEPLOY_CPU}"
+  envsSetIfIsEmpty APPLICATION_DEPLOY_MEMORY "${STACK_DEFAULT_DEPLOY_MEMORY}"
   envsSetIfIsEmpty APPLICATION_DEPLOY_NETWORK_NAME ${STACK_NETWORK_DEFAULT}
   envsSetIfIsEmpty APPLICATION_DEPLOY_DATA_DIR "${STACK_SERVICE_STORAGE_DATA_DIR}"
   envsSetIfIsEmpty APPLICATION_DEPLOY_BACKUP_DIR "${STACK_SERVICE_STORAGE_BACKUP_DIR}"
-  envsSetIfIsEmpty APPLICATION_DEPLOY_SHELF_LIFE "${STACK_DEPLOY_SHELF_LIFE}"
+  envsSetIfIsEmpty APPLICATION_DEPLOY_SHELF_LIFE "${STACK_SERVICE_SHELF_LIFE}"
   envsSetIfIsEmpty APPLICATION_DEPLOY_HEALTH_CHECK_INTERVAL "${STACK_SERVICE_HEALTH_CHECK_INTERVAL}"
   envsSetIfIsEmpty APPLICATION_DEPLOY_HEALTH_CHECK_TIMEOUT "${STACK_SERVICE_HEALTH_CHECK_TIMEOUT}"
   envsSetIfIsEmpty APPLICATION_DEPLOY_HEALTH_CHECK_RETRIES "${STACK_SERVICE_HEALTH_CHECK_RETRIES}"
-  
+
+  if [[ ${APPLICATION_DEPLOY_MODE} == "global" ]]; then
+    export APPLICATION_DEPLOY_REPLICAS=1
+  fi
+
   stackMkDir 755 "${STACK_SERVICE_STORAGE_DATA_DIR} ${STACK_SERVICE_STORAGE_BACKUP_DIR}"
   if ! [ "$?" -eq 1 ]; then
     export __func_return="fail on calling prepareStackForDeploy::stackMkDir: ${__func_return}"
@@ -129,11 +142,3 @@ function prepareStackForDeploy()
   return 1
 
 }
-
-
-# function __util_prepare_test()
-# {
-#   return 1
-# }
-
-# __util_prepare_test

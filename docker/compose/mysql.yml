@@ -16,7 +16,7 @@ services:
     command:
       - --default-authentication-plugin=mysql_native_password
     env_file:
-      - ${APPLICATION_NAME}.env
+      - ${APPLICATION_ENV_FILE}
     ports:
       - target: ${APPLICATION_DEPLOY_PORT}
         published: ${APPLICATION_DEPLOY_PORT}
@@ -29,8 +29,8 @@ services:
           - ${APPLICATION_DEPLOY_NODE}
       resources:
         limits:
-          cpus: "${STACK_CPU_DEFAULT}"
-          memory: ${STACK_MEMORY_DEFAULT}
+          cpus: "${APPLICATION_DEPLOY_CPU}"
+          memory: "${APPLICATION_DEPLOY_MEMORY}"
       update_config:
         parallelism: 1
         delay: 10s

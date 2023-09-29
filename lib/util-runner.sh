@@ -94,10 +94,8 @@ function dockerMCSMain()
     __dk_mcs_stack_env=${__dk_mcs_project_dir}/${__dk_mcs_project}
 
     echM "  Environment preparing "
-    echY "    - source ${__dk_mcs_stack_env}"
-    source ${__dk_mcs_stack_env};
     echY "    - stack envs"
-    prepareStackForDeploy "${__dk_mcs_project}"
+    prepareStackForDeploy "${__dk_mcs_project_dir}" "${__dk_mcs_project}"
     if ! [ "$?" -eq 1 ]; then
       echY "      fail on calling prepareStackForDeploy, ${__func_return}"
       __dk_mcs_fail_detected=true
