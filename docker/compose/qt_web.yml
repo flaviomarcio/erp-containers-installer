@@ -24,11 +24,11 @@ services:
     #   timeout: ${APPLICATION_DEPLOY_HEALTH_CHECK_TIMEOUT}
     #   retries: ${APPLICATION_DEPLOY_HEALTH_CHECK_RETRIES}
     deploy:
-      mode: ${APPLICATION_DEPLOY_MODE}
+      mode: replicated
       replicas: ${APPLICATION_DEPLOY_REPLICAS}
       placement:
         constraints:
-          - ${APPLICATION_DEPLOY_NODE}
+          - ${STACK_SERVICE_DEFAULT_NODE_SERVICES}
       resources:
         limits:
           cpus: "${APPLICATION_DEPLOY_CPU}"

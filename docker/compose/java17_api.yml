@@ -6,7 +6,7 @@ networks:
     external: true
 
 services:
-  api:
+  app:
     image: ${APPLICATION_DEPLOY_IMAGE}
     hostname: ${APPLICATION_DEPLOY_HOSTNAME}
     env_file:
@@ -20,7 +20,7 @@ services:
     #   timeout: ${APPLICATION_DEPLOY_HEALTH_CHECK_TIMEOUT}
     #   retries: ${APPLICATION_DEPLOY_HEALTH_CHECK_RETRIES}
     deploy:
-      mode: ${APPLICATION_DEPLOY_MODE}
+      mode: replicated
       replicas: ${APPLICATION_DEPLOY_REPLICAS}
       placement:
         constraints:

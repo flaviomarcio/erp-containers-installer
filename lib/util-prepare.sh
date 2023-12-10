@@ -90,19 +90,11 @@ function prepareStackForDeploy()
   if ! [ "$?" -eq 1 ]; then
     export __func_return="fail on calling stackEnvsLoadByStack, ${__func_return}"
     return 0;
-  fi
-
-  if [[ ${STACK_SERVICE_STORAGE_DATA_DIR} == "" ]]; then
-    export __func_return="invalid env \${STACK_SERVICE_STORAGE_DATA_DIR}"
-    return 0
-  elif ! [[ -d ${STACK_SERVICE_STORAGE_DATA_DIR} ]]; then
-    export __func_return="invalid dir, env \${STACK_SERVICE_STORAGE_DATA_DIR}: ${STACK_SERVICE_STORAGE_DATA_DIR}"
+  elif [[ ${STACK_SERVICE_STORAGE_DATA_DIR} == "" ]]; then
+    export __func_return="env is empty \${STACK_SERVICE_STORAGE_DATA_DIR}"
     return 0
   elif [[ ${STACK_SERVICE_STORAGE_BACKUP_DIR} == "" ]]; then
-    export __func_return="invalid env \${STACK_SERVICE_STORAGE_BACKUP_DIR}"
-    return 0
-  elif ! [[ -d ${STACK_SERVICE_STORAGE_BACKUP_DIR} ]]; then
-    export __func_return="invalid env \${STACK_SERVICE_STORAGE_BACKUP_DIR}: ${STACK_SERVICE_STORAGE_BACKUP_DIR}"
+    export __func_return="env is empty, \${STACK_SERVICE_STORAGE_BACKUP_DIR}"
     return 0
   fi
 
@@ -114,8 +106,13 @@ function prepareStackForDeploy()
   if ! [ "$?" -eq 1 ]; then
     export __func_return="fail on calling prepareStackForDeploy::stackMkDir: ${__func_return}"
     return 0;
+  elif ! [[ -d ${STACK_SERVICE_STORAGE_BACKUP_DIR} ]]; then
+    export __func_return="dir no exists \${STACK_SERVICE_STORAGE_BACKUP_DIR}: ${STACK_SERVICE_STORAGE_BACKUP_DIR}"
+    return 0
+  elif ! [[ -d ${STACK_SERVICE_STORAGE_DATA_DIR} ]]; then
+    export __func_return="dir no exists, env \${STACK_SERVICE_STORAGE_DATA_DIR}: ${STACK_SERVICE_STORAGE_DATA_DIR}"
+    return 0
+  else
+    return 1
   fi
-
-  return 1
-
 }

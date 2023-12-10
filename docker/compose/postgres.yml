@@ -33,7 +33,7 @@ services:
       mode: global
       placement:
         constraints:
-          - ${APPLICATION_DEPLOY_NODE}
+          - ${APPLICATION_DEPLOY_NODE_DB}
       resources:
         limits:
           cpus: "${APPLICATION_DEPLOY_CPU}"
