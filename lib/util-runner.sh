@@ -169,6 +169,7 @@ function dockerMCSMain()
           "${__dk_mcs_binary_name}" \
           "${__dk_mcs_dep_dir}"
     if ! [ "$?" -eq 1 ]; then
+      echR "  fail on calling deploy: ${__func_return} "
       __dk_mcs_fail_detected=true
       break
     fi
