@@ -33,6 +33,7 @@ function __private_runnerMenu()
   options+=(Docker-Build-SRV)
   options+=(Docker-Build-MCS)
   options+=(Docker-Build-ADM)
+  options+=(Vault)
   options+=(Database-Update)
   #options+=(Database-DDL-Maker)
   #options+=(Database-PGPass)
@@ -58,6 +59,8 @@ function __private_runnerMenu()
       dockerMCSMain ${__runner_menu_environment} ${__runner_menu_target}
     elif [[ ${opt} == "Docker-Build-ADM" ]]; then
       dockerADMMain ${__runner_menu_environment} ${__runner_menu_target}
+    elif [[ ${opt} == "Vault" ]]; then
+      vaultMain ${__runner_menu_environment} ${__runner_menu_target}
     elif [[ ${opt} == "Database-Update" ]]; then
       databaseUpdateMain ${__runner_menu_environment} ${__runner_menu_target}
     elif [[ ${opt} == "Database-DDL-Maker" ]]; then

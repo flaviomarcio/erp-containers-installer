@@ -39,6 +39,7 @@ function __privateEnvsInstallerDir()
   export STACK_APPLICATIONS_DATA_SRC_DIR=${STACK_APPLICATIONS_DATA_DIR}/source
   export STACK_APPLICATIONS_DATA_DB_DIR=${STACK_APPLICATIONS_DATA_DIR}/db
   export STACK_APPLICATIONS_DATA_SCRIPT_DIR=${STACK_APPLICATIONS_DATA_DIR}/scripts
+  export STACK_APPLICATIONS_DATA_VAULT=${STACK_APPLICATIONS_DATA_DIR}/vault
 
   #INSTALLER DIR
   export STACK_INSTALLER_DOCKER_DIR=${INSTALLER_DIR}/docker
@@ -50,8 +51,8 @@ function __privateEnvsInstallerDir()
 
 function utilPrepareInit()
 {
-  __utilPrepareInit_stack_environment=${1}
-  __utilPrepareInit_stack_target=${2}
+  local __utilPrepareInit_stack_environment=${1}
+  local __utilPrepareInit_stack_target=${2}
   
   stackEnvsLoad "${__utilPrepareInit_stack_environment}" "${__utilPrepareInit_stack_target}"
   if ! [ "$?" -eq 1 ]; then

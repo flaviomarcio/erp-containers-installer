@@ -6,6 +6,7 @@
 . lib-system.sh
 . lib-deploy.sh
 . lib-scripts.sh
+. lib-vault.sh
 . util-prepare.sh
 
 function dockerBuild()
@@ -183,6 +184,52 @@ function dockerMCSMain()
   fi
   systemETCHostApply ${STACK_PREFIX}
   return 1;
+}
+
+function vaultMain()
+{
+  stackVaultLogoff
+  stackVaultLogin
+  if ! [ "$?" -eq 1 ]; then
+    return 0;
+  fi
+
+  while :
+  do
+    clearTerm
+    echM "Information"
+    echG "  -stack"
+    echC "    - target: ${STACK_TARGET}"
+    echC "    - environment: ${STACK_ENVIRONMENT}"
+    echG "  -vault"
+    echC "    - uri: ${STACK_VAULT_URI}"
+    echC "    - method: ${STACK_VAULT_METHOD}"
+    echC "    - token: ${STACK_VAULT_TOKEN}"
+    echC "    - token-deploy: ${STACK_VAULT_TOKEN_DEPLOY}"
+    echC "    - app-role-id: ${STACK_VAULT_APP_ROLE_ID}"
+    echC "    - app-role-secret: ${STACK_VAULT_APP_ROLE_SECRET}"
+    echC "    - import: ${STACK_VAULT_IMPORT}"
+
+    selector "Vault menu" "Quit Pull Push List" false
+    local opt=${__selector}
+    if [[ ${opt} == "Quit" ]]; then
+      break
+    elif [[ ${opt} == "Pull" ]]; then
+      stackVaultPull
+    elif [[ ${opt} == "Push" ]]; then
+      stackVaultPush
+    elif [[ ${opt} == "List" ]]; then
+      stackVaultList
+    else
+      continue;
+    fi
+    if ! [ "$?" -eq 1 ]; then
+      echR "fail on calling option[${opt}]: ${__func_return}"
+      read
+    fi
+  done
+  stackVaultLogoff
+  return 1
 }
 
 function databaseUpdateMain()
