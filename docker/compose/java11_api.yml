@@ -33,7 +33,7 @@ services:
         parallelism: 1
         delay: 10s
         order: start-first
-        failure_action: rollback
+        #failure_action: rollback
         monitor: 60s
         max_failure_ratio: 0.3
       rollback_config:
