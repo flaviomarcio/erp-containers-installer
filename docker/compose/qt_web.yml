@@ -16,8 +16,6 @@ services:
     hostname: ${APPLICATION_DEPLOY_HOSTNAME}
     env_file:
       - ${APPLICATION_ENV_FILE}
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
     # healthcheck:
     #   test: ["CMD", "curl", "-f", "${APPLICATION_DEPLOY_HEALTH_CHECK_URL}"]
     #   interval: ${APPLICATION_DEPLOY_HEALTH_CHECK_INTERVAL}

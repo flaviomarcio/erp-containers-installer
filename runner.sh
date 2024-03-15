@@ -25,6 +25,7 @@ function __private_runnerMenu()
 {
   clearTerm
   __private_print_os_information
+  echC "  - Docker Dir: ${COLOR_BLUE_B}${COLOR_YELLOW}${STACK_INSTALLER_DOCKER_DIR}"
   __runner_menu_environment=${1} 
   __runner_menu_target=${2}
 

@@ -10,7 +10,6 @@ services:
     image: ${APPLICATION_DEPLOY_IMAGE}
     hostname: ${APPLICATION_DEPLOY_HOSTNAME}
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
       - ${APPLICATION_DEPLOY_DATA_DIR}:/var/lib/mysql:rw
       - ${APPLICATION_DEPLOY_BACKUP_DIR}:/storage/backup:rw
     command:
