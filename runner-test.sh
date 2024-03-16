@@ -8,8 +8,8 @@ export PATH=${PATH}:${PWD}/lib
 
 function main()
 {
-  scriptsPrepare production "/mnt/storage/home/person-job/transul/transul-erp-docker-build/applications/data/scripts"
-  scriptsExecute
+  #scriptsPrepare production "/mnt/storage/home/person-job/transul/erp-docker-build/applications/data/scripts"
+  #scriptsExecute
   return 1
 }
 

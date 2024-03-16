@@ -1,5 +1,5 @@
 #!/bin/bash
-source gitGo
+source ./gitGo
 git submodule update --init
 git submodule foreach ./gitInit
 git pull origin $(cat ./git-branch-release.txt)
