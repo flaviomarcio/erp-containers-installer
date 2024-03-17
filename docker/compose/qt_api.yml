@@ -37,10 +37,11 @@ services:
       restart_policy:
         condition: on-failure
       labels:
+        # - traefik.http.routers.${APPLICATION_DEPLOY_NAME}.rule=Host(`${APPLICATION_DEPLOY_DNS}`) || Host(`${APPLICATION_DEPLOY_DNS_PUBLIC}`) || Host(`${APPLICATION_DEPLOY_DNS_3RDPARTY}`)
         - traefik.docker.network=${APPLICATION_DEPLOY_NETWORK_NAME}
         - traefik.http.routers.${APPLICATION_DEPLOY_NAME}.entryPoints=http,https
         - traefik.http.routers.${APPLICATION_DEPLOY_NAME}.tls=${STACK_TRAEFIK_TLS_ENABLED}
-        - traefik.http.routers.${APPLICATION_DEPLOY_NAME}.rule=Host(`${APPLICATION_DEPLOY_DNS}`) || Host(`${APPLICATION_DEPLOY_DNS_PUBLIC}`) || Host(`${APPLICATION_DEPLOY_DNS_3RDPARTY}`)
+        - traefik.http.routers.${APPLICATION_DEPLOY_NAME}.rule=HostRegexp(`{subdomain:${STACK_SERVICE_HOSTNAME}.*}`) || Host(`${APPLICATION_DEPLOY_DNS_3RDPARTY}`)
         - traefik.http.routers.${APPLICATION_DEPLOY_NAME}.service=${APPLICATION_DEPLOY_NAME}
         - traefik.http.services.${APPLICATION_DEPLOY_NAME}.loadbalancer.server.port=${APPLICATION_DEPLOY_PORT}
         
