@@ -204,7 +204,6 @@ function __private_pipeline_runner()
   unset PIPELINE_ENVIRONMENT
   unset PIPELINE_TARGET
   unset PIPELINE_NAME
-  unset PIPELINE_ENV_FILE
 
   unset __pipe_arg_key
   unset __pipe_arg_val
@@ -252,13 +251,6 @@ function __private_pipeline_runner()
   if [[ ${PIPELINE_NAME} == "" ]]; then
     echR "Invalid --pipeline-name"
     return 0
-  fi
-
-  if [[ ${PIPELINE_ENV_FILE} != "" ]]; then
-    if ! [[ -f ${PIPELINE_ENV_FILE} ]]; then
-      echR "File not found: --pipeline-env-file=${PIPELINE_ENV_FILE}"
-      return 0
-    fi
   fi
 
   return 1
