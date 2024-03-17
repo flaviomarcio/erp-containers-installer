@@ -30,7 +30,7 @@ function __applicationVerify()
     fi
   done
 
-  if [[ ${__not_found} == "0" ]]; then
+  if [[ ${__not_found} == 0 ]]; then
     echo ""
     echR "Applications not found"
     echB "  Execute to continue"
