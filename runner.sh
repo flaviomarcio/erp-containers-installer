@@ -202,6 +202,7 @@ function __private_runnerMenu()
 function __private_pipeline_runner()
 {  
   unset PIPELINE_ENVIRONMENT
+  unset PIPELINE_TARGET
   unset PIPELINE_NAME
   unset PIPELINE_ENV_FILE
 
@@ -240,6 +241,11 @@ function __private_pipeline_runner()
 
   if [[ ${PIPELINE_ENVIRONMENT} == "" ]]; then
     echR "Invalid --pipeline-environment"
+    return 0
+  fi
+
+  if [[ ${PIPELINE_TARGET} == "" ]]; then
+    echR "Invalid --pipeline-target"
     return 0
   fi
  
