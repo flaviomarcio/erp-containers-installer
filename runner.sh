@@ -22,12 +22,19 @@ export INSTALLER_LIB=${INSTALLER_DIR}/lib
 
 function __applicationVerify()
 {
-  if [[ $(which jq) == "" || $(which yq) == "" ]]; then
-    echR "Application not found: jq"
-    echB "  install applications to continue"
+  local __apps=(jq yp tar zip)
+  for __app in ${__apps[*]}; do
+    if [[ $(which jq) == "" ]]; then
+      local __not_found=0
+      break
+    fi
+  done
+
+  if [[ ${__not_found} == "0" ]]; then
     echo ""
-    echY "    > sudo apt install -y jq yq"
-    echo ""
+    echR "Applications not found"
+    echB "  Execute to continue"
+    echY "    sudo apt install -y ${__apps[*]}"
     return 0
   fi
 
