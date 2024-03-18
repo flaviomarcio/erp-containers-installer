@@ -7,7 +7,7 @@
 
 function __privateEnvsDNSList()
 {
-  export __func_return=
+  unset __func_return
   if [[ ${STACK_APPLICATIONS_PROJECT_DIR} == "" ]]; then
     export __func_return="invalid env \${STACK_APPLICATIONS_PROJECT_DIR}"
     return 0

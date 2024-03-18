@@ -17,7 +17,7 @@ export COLOR_CIANO="\e[36m"
 #  curl -s --location 'http://localhost:8080/api/oauth/grant-code' --header 'Content-Type: application/json' --data '{"clientId": "c4ca4238-a0b9-2382-0dcc-509a6f75849b"}'
 
 #sensedia steps
-export CMD_FILE=/tmp/req.sh
+CMD_FILE=/tmp/req.sh
 
 function loadCredential()
 {
@@ -33,7 +33,7 @@ function loadCredential()
 
 function authByGrantCode()
 {
-  export REQUEST_GRANT_DATA=""
+  unset REQUEST_GRANT_DATA
   # shellcheck disable=SC2089
   echo "curl -s --location '${AUTH_URI}/oauth/grant-code' \\">${CMD_FILE}
   echo "                        --header 'Content-Type: application/json'  \\">>${CMD_FILE}
@@ -45,10 +45,10 @@ function authByGrantCode()
   echo -e "  - ${COLOR_CIANO}GRANT_TYPE       :${COLOR_GREEN} urn:ietf:params:oauth:grant-type:jwt-bearer"
   echo -e "  - ${COLOR_CIANO}Request          :${COLOR_YELLOW}$(cat ${CMD_FILE})${COLOR_DEFAULT}"
   echo ""
-  export GRANT_CODE=$(echo $(/tmp/req.sh) | jq '.code' | sed 's/\"//g');
+  local GRANT_CODE=$(echo $(/tmp/req.sh) | jq '.code' | sed 's/\"//g');
   echo -e "  - ${COLOR_CIANO}grant-code: ${COLOR_GREEN}${GRANT_CODE}${COLOR_DEFAULT}"
   #make basic autorization
-  export BASIC_AUTH=$(echo -n "${CLIENT_ID}:${CLIENT_SECRET}" | base64 -w 0);
+  local BASIC_AUTH=$(echo -n "${CLIENT_ID}:${CLIENT_SECRET}" | base64 -w 0);
 
   #request token
   echo "curl -s --location \"${AUTH_URI}/oauth/access-token\" \\" >${CMD_FILE}
@@ -62,11 +62,11 @@ function authByGrantCode()
   echo -e "  - ${COLOR_CIANO}Authorization  : ${COLOR_RED}Basic ${COLOR_GREEN}${BASIC_AUTH}${COLOR_DEFAULT}"
   echo -e "  - ${COLOR_CIANO}Request        :${COLOR_DEFAULT} ${COLOR_YELLOW}$(cat ${CMD_FILE})${COLOR_DEFAULT}"
   echo -e "  - ${COLOR_CIANO}Response       :${COLOR_DEFAULT}"
-  export JSON=$(/tmp/req.sh);
-  export ACCESS_TOKEN=$(echo ${JSON} | jq '.token.accessToken' | sed 's/\"//g')
-  export ACCESS_TOKEN_MD5=$(echo ${JSON} | jq '.token.accessTokenMd5' | sed 's/\"//g')
-  export REFRESH_TOKEN=$(echo ${JSON} | jq '.token.refreshToken' | sed 's/\"//g')
-  export REFRESH_TOKEN_MD5=$(echo ${JSON} | jq '.token.refreshTokenMd5' | sed 's/\"//g')
+  local JSON=$(/tmp/req.sh);
+  local ACCESS_TOKEN=$(echo ${JSON} | jq '.token.accessToken' | sed 's/\"//g')
+  local ACCESS_TOKEN_MD5=$(echo ${JSON} | jq '.token.accessTokenMd5' | sed 's/\"//g')
+  local REFRESH_TOKEN=$(echo ${JSON} | jq '.token.refreshToken' | sed 's/\"//g')
+  local REFRESH_TOKEN_MD5=$(echo ${JSON} | jq '.token.refreshTokenMd5' | sed 's/\"//g')
   echo -e "    - ${COLOR_CIANO}access-token : ${COLOR_RED}Bearer ${COLOR_GREEN}${ACCESS_TOKEN}${COLOR_DEFAULT}"
   echo ""
   echo -e "    - ${COLOR_CIANO}access-token : ${COLOR_RED}Bearer ${COLOR_GREEN}${REFRESH_TOKEN}${COLOR_DEFAULT}"
@@ -79,11 +79,11 @@ function authByLogin()
     __authByLogin_shw=true
   fi
   loadCredential
-  export ACCESS_TOKEN=
-  export ACCESS_TOKEN_MD5=
-  export REFRESH_TOKEN=
-  export REFRESH_TOKEN_MD5=
-  export REQUEST_GRANT_DATA=
+  unset ACCESS_TOKEN
+  unset ACCESS_TOKEN_MD5
+  unset REFRESH_TOKEN
+  unset REFRESH_TOKEN_MD5
+  unset REQUEST_GRANT_DATA
   # shellcheck disable=SC2089
   echo "curl -s --location '${AUTH_URI}/oauth/login' \\">${CMD_FILE}
   echo "                        --header 'Content-Type: application/json'  \\">>${CMD_FILE}
@@ -111,8 +111,8 @@ function authByLogin()
 function authByLoginCheck()
 {
   clear
-  export CLIENT_ID=
-  export CLIENT_SECRET=
+  unset CLIENT_ID
+  unset CLIENT_SECRET
   echo -e "${COLOR_MAGENTA}New user${COLOR_DEFAULT}"
   echo -e "   ${COLOR_GREEN}Set a username: ${COLOR_DEFAULT}"
   read CLIENT_ID
@@ -152,13 +152,13 @@ function userFind()
 
 function userCreateRecord()
 {
-  export _c_shw="${1}"
-  export _c_usr="${2}"
-  export _c_pwd="${3}"
-  export _c_nam="${4}"
-  export _c_doc="${5}"
-  export _c_ema="${6}"
-  export _c_phn="${7}"
+  local _c_shw="${1}"
+  local _c_usr="${2}"
+  local _c_pwd="${3}"
+  local _c_nam="${4}"
+  local _c_doc="${5}"
+  local _c_ema="${6}"
+  local _c_phn="${7}"
 
   if [[ ${_c_usr} == "" ]]; then
     echo -e "   ${COLOR_RED}    Invalid username ${COLOR_DEFAULT}"
@@ -166,24 +166,24 @@ function userCreateRecord()
   fi
 
   if [[ ${_c_pwd} == "" ]]; then
-    _c_pwd="${_c_usr}@1234"
+    local _c_pwd="${_c_usr}@1234"
   fi
 
   if [[ ${_c_ema} == "" ]]; then
     #fake mail
-    _c_ema="${_c_usr}@${STACK_DOMAIN}" 
+    local _c_ema="${_c_usr}@${STACK_DOMAIN}" 
   fi
 
   if [[ ${_c_doc} == "" ]]; then
     #fake document
-    _c_doc="$RANDOM$RANDOM$RANDOM"
-    _c_doc=$(expr substr "$_c_doc" 1 11) 
+    local _c_doc="$RANDOM$RANDOM$RANDOM"
+    local _c_doc=$(expr substr "$_c_doc" 1 11) 
   fi
 
   if [[ ${_c_phn} == "" ]]; then
     #fake phone
-    _c_phn="55$RANDOM$RANDOM$RANDOM"
-    _c_phn=$(expr substr "$_c_phn" 1 14)
+    local _c_phn="55$RANDOM$RANDOM$RANDOM"
+    local _c_phn=$(expr substr "$_c_phn" 1 14)
   fi
 
   if [[ ${ACCESS_TOKEN} == "" ]]; then
@@ -211,12 +211,12 @@ function userCreateRecord()
 function userCreateTest()
 {
   clear
-  export _c_usr="u${RANDOM}"
-  export _c_pwd="p${RANDOM}"
-  export _c_nam="u${RANDOM}"
-  export _c_doc="${RANDOM}"
-  export _c_ema="${_c_usr}@admin.com"
-  export _c_phn="5511${RANDOM}${RANDOM}"
+  local _c_usr="u${RANDOM}"
+  local _c_pwd="p${RANDOM}"
+  local _c_nam="u${RANDOM}"
+  local _c_doc="${RANDOM}"
+  local _c_ema="${_c_usr}@admin.com"
+  local _c_phn="5511${RANDOM}${RANDOM}"
 
   userCreateRecord true, "${_c_usr}" "${_c_pwd}" "${_c_nam}" "${_c_doc}" "${_c_ema}" "${_c_phn}"
 }
@@ -258,7 +258,7 @@ function userManagmentMenu()
   do
     clear;
     loadCredential
-    options=(Exit Login GrantCode SessionCheck UserFind UserCreateNew UserFind UserDelete UserCreateTest)
+    local options=(Exit Login GrantCode SessionCheck UserFind UserCreateNew UserFind UserDelete UserCreateTest)
     echo -e "${COLOR_MAGENTA}Select auth mode${COLOR_DEFAULT}"
     PS3=$'\n'"Choose option: "
     select opt in "${options[@]}"
