@@ -73,6 +73,7 @@ function dockerMCSMain()
 
   clearTerm
   echG "Build/deploy options for:"
+  local __dk_mcs_project=
   for __dk_mcs_project in "${__dk_mcs_projects[@]}"
   do
   echC "  - ${__dk_mcs_project}"
@@ -89,7 +90,7 @@ function dockerMCSMain()
   echG "Deploying micro services"
   echC "  - Build option: [${__dk_mcs_build_option}]"
   echC
-  
+  local __dk_mcs_project=
   for __dk_mcs_project in "${__dk_mcs_projects[@]}"
   do
     local __dk_mcs_stack_env=${__dk_mcs_project_dir}/${__dk_mcs_project}
@@ -125,9 +126,11 @@ function dockerMCSMain()
 
     unset __deploy_dck_env_tags
     local __deploy_dck_env_tags_headers=(env docker)
+    local __deploy_dck_env_tags_header=
     for __deploy_dck_env_tags_header in "${__deploy_dck_env_tags_headers[@]}"
     do
       local __deploy_dck_env_tags_defaults=("resource.${__dk_mcs_environment}" "default.${__dk_mcs_environment}" "${APPLICATION_STACK}")
+      local __deploy_dck_env_tags_default=
       for __deploy_dck_env_tags_default in "${__deploy_dck_env_tags_defaults[@]}"
       do
         local __deploy_dck_env_tags_name="${__deploy_dck_env_tags_header}.${__deploy_dck_env_tags_default}"

@@ -23,6 +23,7 @@ export INSTALLER_LIB=${INSTALLER_DIR}/lib
 function __applicationVerify()
 {
   local __apps=(jq yp tar zip)
+  local __app=
   for __app in ${__apps[*]}; do
     if [[ $(which jq) == "" ]]; then
       local __not_found=0
@@ -43,6 +44,7 @@ function __applicationVerify()
 
 function __private_check_is_test()
 {
+  local __arg=
   for __arg in "$@"
   do
     if [[ ${__arg} == "--test" ]]; then
@@ -54,6 +56,7 @@ function __private_check_is_test()
 
 function __private_check_is_pipeline()
 {
+  local __arg=
   for __arg in "$@"
   do
     if [[ ${__arg} == "--pipeline" ]]; then
@@ -209,7 +212,7 @@ function __private_pipeline_runner()
   unset __pipe_arg_val
 
   local __pipe_arg_key_list=()
-
+  local __pipe_arg=
   for __pipe_arg in "$@"
   do
     unset __pipe_arg_key
@@ -233,6 +236,7 @@ function __private_pipeline_runner()
   fi
   echM "Pipelines"
   echB "  Args:"
+  local __key=
   for __key in "${__pipe_arg_key_list[@]}"
   do
     echC "    - ${__key}: ${COLOR_YELLOW_B}${!__key}"
